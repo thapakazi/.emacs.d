@@ -1612,6 +1612,7 @@ This means, between the beginning of line and the point."
               ("d" "CloudFactory Docs " entry (file (concat org-directory "/cloudfactory-docs.org"))
                "* %?")
               ("p" "Hisab Kitab " entry (file+datetree+prompt (concat org-directory "/hisab-kitab.org"))
+              ("x" "What on my plate today ?? " entry (file+datetree+prompt (concat org-directory "/devops.org"))
                "* %?")
               ("g" "awesome tools " entry (file (concat org-directory "/awesome_tools.org"))
                "* %?")
@@ -2566,7 +2567,7 @@ KEYS defines the elements to use for `tabbar-key-binding-keys'."
 ** Gitwatcher
    track changes and push file changes with git
    #+BEGIN_SRC emacs-lisp
-(defvar autocommit-dir-set '()
+(defvar autocomit-dir-set '()
   "Set of directories for which there is a pending timer job")
 
 (defun autocommit-schedule-commit (dn)
