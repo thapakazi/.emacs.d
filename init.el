@@ -30,3 +30,21 @@
 
 ;;; Load the config
 (org-babel-load-file (concat user-emacs-directory "config.org"))
+(org-babel-load-file (concat user-emacs-directory "ror.org"))
+(org-babel-load-file (concat user-emacs-directory "ui.org"))
+(org-babel-load-file (concat user-emacs-directory "org-mode.org"))
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(package-selected-packages
+   (quote
+    (elfeed edit-server magit helm-ag helm-projectile helm c-eldoc ace-jump-mode ido-vertical-mode transpose-frame ox-pandoc solarized-theme use-package cyberpunk-theme))))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
+(put 'set-goal-column 'disabled nil)

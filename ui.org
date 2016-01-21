@@ -1,0 +1,119 @@
+#+TITLE: Emacs Configuration, with org txt: totally awesome ;)
+#+AUTHOR: Daniel Mai
+#+FORKER: Milan Thapa
+#+DESCRIPTION: I customised the for puerly the arch way.
+#+STARTUP: contents
+
+* Theme
+
+** Wombat theme
+   Pleasing theme for eyes
+   #+begin_src emacs-lisp
+     (load-theme 'wombat t)
+     (set-face-attribute `mode-line nil
+                         :box nil)
+     (set-face-attribute `mode-line-inactive nil
+                         :box nil)
+
+   #+end_src
+
+** Solarized theme
+
+   Here's some configuration for [[https://github.com/bbatsov/solarized-emacs/][bbatsov's solarized themes]].
+
+   #+begin_src emacs-lisp
+(use-package solarized-theme
+  :ensure t
+  :init
+  (;; Don't change the font for some headings and titles
+   setq solarized-use-variable-pitch nil)
+  )
+   #+end_src
+** Monokai theme
+
+   #+begin_src emacs-lisp
+(setq monokai-use-variable-pitch nil)
+   #+end_src
+
+** Convenient theme functions
+
+   #+begin_src emacs-lisp
+   (defun switch-theme (theme)
+  "Disables any currently active themes and loads THEME."
+  ;; This interactive call is taken from `load-theme'
+  (interactive
+   (list
+    (intern (completing-read "Load custom theme: "
+                             (mapc 'symbol-name
+                                   (custom-available-themes))))))
+                                   (let ((enabled-themes custom-enabled-themes))
+                                   (mapc #'disable-theme custom-enabled-themes)
+                                   (load-theme theme t)))
+
+    (defun disable-active-themes ()
+    "Disables any currently active themes listed in `custom-enabled-themes'."
+    (interactive)
+    (mapc #'disable-theme custom-enabled-themes))
+
+    (bind-key "s-<f12>" 'switch-theme)
+    (bind-key "s-<f11>" 'disable-active-themes)
+   #+end_src
+
+** Convenient theme functions
+
+   #+begin_src emacs-lisp
+   (defun switch-theme (theme)
+  "Disables any currently active themes and loads THEME."
+  ;; This interactive call is taken from `load-theme'
+  (interactive
+   (list
+    (intern (completing-read "Load custom theme: "
+                             (mapc 'symbol-name
+                                   (custom-available-themes))))))
+                                   (let ((enabled-themes custom-enabled-themes))
+                                   (mapc #'disable-theme custom-enabled-themes)
+                                   (load-theme theme t)))
+
+    (defun disable-active-themes ()
+    "Disables any currently active themes listed in `custom-enabled-themes'."
+    (interactive)
+    (mapc #'disable-theme custom-enabled-themes))
+
+    (bind-key "s-<f12>" 'switch-theme)
+    (bind-key "s-<f11>" 'disable-active-themes)
+   #+end_src
+   
+* Font
+
+  [[http://levien.com/type/myfonts/inconsolata.html][Inconsolata]] is a nice monospaced font.
+
+  Pull it with pacman. 
+  #+begin_src sh :tangle no :results drawer
+yes 'y' | sudo pacman -S ttf-inconsolata
+  #+end_src
+
+  #+RESULTS:
+  :RESULTS:
+  resolving dependencies...
+  looking for conflicting packages...
+
+  Packages (1) ttf-inconsolata-20090215-5
+
+  Total Installed Size:  0.10 MiB
+  Net Upgrade Size:      0.00 MiB
+
+  checking keyring...
+  checking package integrity...
+  loading package files...
+  checking for file conflicts...
+  checking available disk space...
+  reinstalling ttf-inconsolata...
+  Updating font cache... done.
+  :END:
+
+  And here's how we tell Emacs to use the font we want to use.
+
+  #+begin_src emacs-lisp
+(add-to-list 'default-frame-alist
+             '(font . "Inconsolata-20"))
+  #+end_src

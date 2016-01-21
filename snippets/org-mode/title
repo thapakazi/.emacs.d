@@ -1,5 +1,7 @@
-# -*- mode: snippet; require-final-newline: nil -*-
+# -*- mode: snippet -*-
 # name: title
+# contributor: rho
 # key: title
 # --
-#+TITLE: $0
+#+TITLE: ${1:title}
+$0
