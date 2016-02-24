@@ -9,30 +9,46 @@
 (setq inhibit-startup-message t)
 (setq initial-scratch-message "")
 
-;;; Set up package
-(require 'package)
-(add-to-list 'package-archives
-             '("melpa" . "http://melpa.org/packages/") t)
+;;; initialization
+;;; copied_from: https://github.com/steckerhalter/steckemacs.el/blob/fb686004dd542246910b88efe61b2242536ad964/steckemacs.el#L31-L43
+;; disable the GNU ELPA
+(setq package-archives nil)
+;; initialize the package system
 (package-initialize)
+(if (require 'quelpa nil t)
+    (setq quelpa-update-melpa-p nil)
+  (with-temp-buffer
+    (url-insert-file-contents "https://raw.github.com/quelpa/quelpa/master/bootstrap.el")
+    (eval-buffer)))
+
+;;; Bootstrap use-package
+;; install use-package and the quelpa handler
+(quelpa
+ '(quelpa-use-package
+   :fetcher github
+   :repo "quelpa/quelpa-use-package"))
+(require 'quelpa-use-package)
 
 ;;; Bootstrap use-package
 ;; Install use-package if it's not already installed.
 ;; use-package is used to configure the rest of the packages.
-(unless (package-installed-p 'use-package)
-  (package-refresh-contents)
-  (package-install 'use-package))
+;; (unless (package-installed-p 'use-package)
+;;   (package-refresh-contents)
+;;   (package-install 'use-package))
 
 (eval-when-compile
   (require 'use-package))
 (require 'diminish)                ;; if you use :diminish
 (require 'bind-key)
-;(setq use-package-verbose t)
+                                        ;(setq use-package-verbose t)
 
 ;;; Load the config
 (org-babel-load-file (concat user-emacs-directory "config.org"))
 (org-babel-load-file (concat user-emacs-directory "ror.org"))
-(org-babel-load-file (concat user-emacs-directory "ui.org"))
 (org-babel-load-file (concat user-emacs-directory "org-mode.org"))
+(org-babel-load-file (concat user-emacs-directory "ui.org"))
+(org-babel-load-file (concat user-emacs-directory "go_lang.org"))
+
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
