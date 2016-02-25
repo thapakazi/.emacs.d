@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: hisab
+# key: hisab
+# --
+${2:items},${3:price},${4:place},${5:quantity},${6:purpose},${7:remarks}

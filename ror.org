@@ -1,0 +1,13 @@
+#+TITLE: My Ruby on Rails Emacs Config
+#+DATE: Sunday, Oct 18 2015
+#+DESCRIPTION: Customised ruby on rails emacs config
+
+** Projectile Rails
+#+BEGIN_SRC emacs-lisp
+(use-package projectile-rails
+  :ensure t
+  :config
+  (add-hook 'projectile-mode-hook 'projectile-rails-on))
+#+END_SRC
+
+** We need [[https://github.com/krazedkrish][Shalil's configs]] here
