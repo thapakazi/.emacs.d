@@ -1,0 +1,32 @@
+#+TITLE: Let GO, Here we go
+#+DATE: Sunday, Oct 18 2015
+#+DESCRIPTION: Customised ruby on rails emacs config
+
+* Geting go mode
+#+BEGIN_SRC emacs-lisp
+(use-package go-mode
+  :ensure t
+  :config
+  (require 'go-mode-autoloads))
+
+#+END_SRC
+
+* Autocomplete in go with [[https://github.com/nsf/gocode][gcode]]
+Auto-completion is one of best thing empowering us to write more stuffs
+
+#+BEGIN_SRC emacs-lisp
+(use-package auto-complete
+  ;; gocode integration for go autocompletion
+  :quelpa (go-autocomplete 
+           :repo "nsf/gocode"
+           :fetcher github
+           :files ("emacs/go-autocomplete.el"))
+  :config
+  (require 'go-autocomplete)
+  (require 'auto-complete-config)
+  (ac-config-default))
+#+END_SRC
+
+
+
+        

@@ -99,7 +99,7 @@ static char *gnus-pointer[] = {
     ("#CC9393" "#DFAF8F" "#F0DFAF" "#7F9F7F" "#BFEBBF" "#93E0E3" "#94BFF3" "#DC8CC3")))
  '(package-selected-packages
    (quote
-    (smart-mode-line-powerline-theme smart-mode-line rich-minority elfeed edit-server magit helm-ag helm-projectile helm c-eldoc ace-jump-mode ido-vertical-mode transpose-frame ox-pandoc solarized-theme use-package cyberpunk-theme)))
+    (go-autocomplete popup auto-complete elfeed edit-server magit helm-ag helm-projectile helm c-eldoc ace-jump-mode ido-vertical-mode transpose-frame ox-pandoc solarized-theme use-package cyberpunk-theme)))
  '(pos-tip-background-color "#eee8d5")
  '(pos-tip-foreground-color "#586e75")
  '(powerline-color1 "#3d3d68")

@@ -1,6 +1,17 @@
-#+TITLE: Mai Emacs Configuration
-#+AUTHOR: Daniel Mai
+#+TITLE: ~/.emacs.d
+#+AUTHOR: Milan Thapa
+#+DATE: Friday, Feb 26 2016
 
-Here's my Emacs setup that I use on the daily.
 
-The configuration depends on Org mode. [[file:init.el][init.el]] sets up a few initial GUI settings, bootstraps [[https://github.com/jwiegley/use-package][use-package]], and loads [[file:config.org][config.org]], which is where the majority of the configuration magic happens.
+#+BEGIN_QUOTE
+The configuration depends on Org mode. -- Daniel Mai
+#+END_QUOTE
+
+The configuration depends on Org mode. [[file:init.el][init.el]] sets up a few initial
+GUI settings, bootstraps [[https://github.com/jwiegley/use-package][use-package]], and loads [[file:config.org][config.org]], [[file:ror.org][ror.org]],
+[[file:go_lang.org][go_lang.org]], [[file:basics.org][basics.org]], [[file:org-mode.org][org-mode.org]] which is where the majority of
+the configuration magic happens.
+
+#+BEGIN_QUOTE
+P.S. *Please don't try this at home* without backups.
+#+END_QUOTE
