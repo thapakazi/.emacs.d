@@ -43,6 +43,7 @@
                                         ;(setq use-package-verbose t)
 
 ;;; Load the config
+(org-babel-load-file (concat user-emacs-directory "basics.org"))
 (org-babel-load-file (concat user-emacs-directory "config.org"))
 (org-babel-load-file (concat user-emacs-directory "ror.org"))
 (org-babel-load-file (concat user-emacs-directory "org-mode.org"))

@@ -1,0 +1,30 @@
+#+TITLE: Basic modes/configs rest here
+#+DATE: Friday, Feb 26 2016
+#+DESCRIPTION: default shared basic modes/configs goes here
+
+* COMMENT [[https://www.emacswiki.org/emacs/AutoComplete][AutoComplete]]
+  Auto complete whem you type with nice popup menu :D
+#+BEGIN_SRC emacs-lisp
+(use-package auto-complete
+  :ensure t
+  :config
+  (ac-config-default))
+
+#+END_SRC
+
+#+RESULTS:
+: t
+
+* fasd
+#+BEGIN_SRC emacs-lisp
+;;;; fasd
+;; find previous files/dirs quickly (uses `fasd' shell script)
+(use-package fasd
+  :quelpa (fasd :repo "steckerhalter/emacs-fasd" :fetcher github)
+  :bind ("C-h C-f" . fasd-find-file)
+  :config
+  (setq fasd-completing-read-function 'helm--completing-read-default)
+  (global-fasd-mode 1))
+#+END_SRC
+
+        
