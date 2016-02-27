@@ -303,6 +303,7 @@ mouse-3: go to end")
   This is fun 👨
   Really 😍ing with this mode 😂
 
+
   *Dependencies*: [[https://zhm.github.io/symbola/][Symbola]] and adjust the config as below.
   #+BEGIN_SRC bash :results value verbatim
    yes 'y' | sudo pacman -S ttf-symbola 
@@ -348,3 +349,31 @@ mouse-3: go to end")
   ;; see https://www.gnu.org/software/emacs/manual/html_node/elisp/Creating-Frames.html
   (add-hook 'after-make-frame-functions '--set-emoji-font))
 #+END_SRC
+
+* Neotree
+#+BEGIN_QUOTE
+   Nerd Tree like vim
+     Hard to navigate tree, lets steal goodness from vim
+#+END_QUOTE
+#+BEGIN_SRC emacs-lisp
+
+(use-package neotree
+  :ensure t
+  :bind (("<f9>" . neotree-toggle))
+  :config (setq neo-window-width 32
+                neo-create-file-auto-open t
+                neo-banner-message nil
+                neo-show-updir-line nil
+                neo-mode-line-type 'neotree
+                neo-smart-open t
+                neo-dont-be-alone t
+                neo-persist-show nil
+                neo-show-hidden-files t
+                neo-auto-indent-point t))
+#+END_SRC
+
+#+RESULTS:
+
+
+
+

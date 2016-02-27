@@ -645,16 +645,6 @@ emacs --version
 #+END_SRC
 
 
-** Nerd Tree like vim
-   Hard to navigate tree, lets steal goodness from vim
-#+BEGIN_SRC emacs-lisp
-(use-package neotree
-  :ensure t
-  ;;:bind ("s-<f9>" . 'neotree-toggle)
-  )
-#+END_SRC
-
-
 ** Markdown Mode
    Big fan of org-mode, but people also love README.md, #worthtrying
 #+BEGIN_SRC emacs-lisp
