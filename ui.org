@@ -377,3 +377,13 @@ mouse-3: go to end")
 
 
 
+* kill ☠ ring 💍
+  Popup kill ring. Lets try this
+  desc: browse your emacs kill ring in an autocomplete style popup menu
+  #+BEGIN_SRC emacs-lisp
+(use-package popup-kill-ring
+  :ensure t
+  :bind ("M-y" . popup-kill-ring)
+  ;; :config (setq popup-kill-ring-interactive-insert t)
+)
+  #+END_SRC
