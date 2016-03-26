@@ -49,6 +49,7 @@
 (org-babel-load-file (concat user-emacs-directory "org-mode.org"))
 (org-babel-load-file (concat user-emacs-directory "ui.org"))
 (org-babel-load-file (concat user-emacs-directory "go_lang.org"))
+(org-babel-load-file (concat user-emacs-directory "fun.org"))
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.

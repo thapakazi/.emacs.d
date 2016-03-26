@@ -1,0 +1,10 @@
+#+TITLE: Lets have some fun in emacs 😉
+#+DATE: Saturday, Mar 26 2016
+
+* [[https://xkcd.com][XKCD]]
+  A webcomic of romance, sarcasm, math, and language.
+  #+BEGIN_SRC emacs-lisp
+(use-package xkcd
+  :ensure t
+  )
+  #+END_SRC
