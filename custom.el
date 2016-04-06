@@ -94,6 +94,7 @@ static char *gnus-pointer[] = {
  '(hl-fg-colors
    (quote
     ("#fdf6e3" "#fdf6e3" "#fdf6e3" "#fdf6e3" "#fdf6e3" "#fdf6e3" "#fdf6e3" "#fdf6e3")))
+ '(ivy-mode t)
  '(linum-format "%3i")
  '(magit-diff-use-overlays nil)
  '(nrepl-message-colors
@@ -101,7 +102,7 @@ static char *gnus-pointer[] = {
     ("#CC9393" "#DFAF8F" "#F0DFAF" "#7F9F7F" "#BFEBBF" "#93E0E3" "#94BFF3" "#DC8CC3")))
  '(package-selected-packages
    (quote
-    (xkcd elfeed edit-server magit helm-ag helm-projectile helm c-eldoc ace-jump-mode ido-vertical-mode transpose-frame ox-pandoc solarized-theme use-package cyberpunk-theme)))
+    (ivy-mode elfeed edit-server magit helm-ag helm-projectile helm c-eldoc ace-jump-mode ido-vertical-mode transpose-frame ox-pandoc solarized-theme use-package cyberpunk-theme)))
  '(pos-tip-background-color "#eee8d5")
  '(pos-tip-foreground-color "#586e75")
  '(powerline-color1 "#3d3d68")
