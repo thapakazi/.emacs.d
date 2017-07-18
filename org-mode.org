@@ -1,7 +1,8 @@
 #+TITLE: Org file for my org mode config
 #+DATE: Thursday, Jan 21 2016
 #+DESCRIPTION: Since everything is orgified, so I need this seperate file
-#+STARTUP: content
+#+STARTUP: children
+#+SEQ_TODO: TODO(t) COMMENT(c) DOING(x) | DONE(d)
 
 * Org mode 
 
@@ -14,9 +15,9 @@
 
 ** Org activation bindings
 
-  Set up some global key bindings that integrate with Org Mode features.
+   Set up some global key bindings that integrate with Org Mode features.
 
- #+begin_src emacs-lisp
+   #+begin_src emacs-lisp
  (bind-key "C-c l" 'org-store-link)
  (bind-key "C-c c" 'org-capture)
  (bind-key "C-c a" 'org-agenda)
@@ -39,7 +40,6 @@
  (bind-key "C-c c" 'org-capture)
  (setq org-default-notes-file "~/Dropbox/Notes/notes.org")
  #+end_src
-
 ** Org setup
 
  Speed commands are a nice and quick way to perform certain actions
@@ -1404,10 +1404,11 @@ Emacs-lisp table, otherwise return the results as a string."
    (java . t)
    (ruby . t)
    (scheme . t)
-   (sh . t)
    (sqlite . t)
    (go . t)
+   (coffee . t)
    (js . t)))
+
 
 (defun my-org-confirm-babel-evaluate (lang body)
   "Do not confirm evaluation for these languages."
@@ -1419,6 +1420,9 @@ Emacs-lisp table, otherwise return the results as a string."
            (string= lang "sqlite"))))
 (setq org-confirm-babel-evaluate 'my-org-confirm-babel-evaluate)
   #+end_src
+
+  #+RESULTS:
+  : my-org-confirm-babel-evaluate
 
 ** Org babel/source blocks
 
@@ -1441,8 +1445,7 @@ Emacs-lisp table, otherwise return the results as a string."
         org-src-tab-acts-natively t)
   #+end_src
 ** Org exporting
-
-*** COMMENT Pandoc exporter                  :fixme: :future:
+*** Pandoc exporter                  :fixed: :future:
 
  Pandoc converts between a huge number of different file formats. 
 
@@ -1451,7 +1454,9 @@ Emacs-lisp table, otherwise return the results as a string."
    :no-require t
    :ensure t)
  #+end_src
-
+*** COMMENT ORG Publish
+    Copied [[https://youtu.be/ecRYNWtCvbs?list=PLVtKhBrRV_ZkPnBtt_TD1Cs9PJlU0IIdE&t=230][youtube_video]] 
+    look [[./blog.org][blog.org]] for moved stuffs
 ** COMMENT Org yasnipets
    Simple handy org snippets pulled from all of awesome people.
    #+BEGIN_SRC emacs-lisp
@@ -1483,6 +1488,11 @@ Emacs-lisp table, otherwise return the results as a string."
                "* %?")
               ("c" "Coursera Download List" entry (file (concat org-directory "/coursera-dl.org"))
                "* [ ]  %?")
+              ;; many more capture templates
+              ("b" "Bookmarks" entry (file+headline "~/org/bookmarks.org" "Bookmarks")
+               "* %?\n:PROPERTIES:\n:CREATED: %U\n:END:\n\n" :empty-lines 1)
+              ;; many more capture templates
+
               )))
 
 ;; org-caputre goodies
@@ -1515,7 +1525,10 @@ Emacs-lisp table, otherwise return the results as a string."
 
    #+END_SRC
 
+   #+RESULTS:
+   : journal-file-insert
 
+   
 ** Org old config
  Old good configs for org
 
@@ -1603,6 +1616,7 @@ Emacs-lisp table, otherwise return the results as a string."
       '(("TODO" . org-warning)
         ("DOING" . "yellow")
         ("BLOCKED" . "red")
+        ("SOMEDAY". "violet")
         ("REVIEW" . "orange")
         ("DONE" . "green")
         ("ARCHIVED" .  "blue")
@@ -1611,3 +1625,64 @@ Emacs-lisp table, otherwise return the results as a string."
 
 #+END_SRC
 
+** Org Revel 
+  Making awesome presentation with org, #beentherdonethat
+  #iHaveNoIdeahowIdidIt. This [[https://twitter.com/olberger/status/765578698967879680][tweet]] gave me some hope 😄
+  #+BEGIN_SRC emacs-lisp
+  (use-package ox-reveal
+   :ensure ox-reveal)
+
+  (setq org-reveal-root "https://cdn.jsdelivr.net/reveal.js/3.0.0/")
+  (setq org-reveal-mathjax t)
+
+  (use-package htmlize
+  :ensure t)
+  #+END_SRC
+
+** Org Bullets
+   Lets have some fun with org bullets, they look cool
+   #+BEGIN_SRC emacs-lisp
+   (use-package org-bullets
+  :ensure t
+  :config
+  (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
+   #+END_SRC
+
+   #+RESULTS:
+   : t
+
+** Org Twitter bootstrap
+   Lets do more with less again with =twitter-bootstrap= this time.
+   #+BEGIN_SRC emacs-lisp
+(use-package ox-twbs
+  :ensure t
+  ;; :config
+  ;; (setq org-publish-project-alist
+  ;;     '(("org-notes"
+  ;;        :base-directory "~/org/"
+  ;;        :publishing-directory "~/public_html/"
+  ;;        :publishing-function org-twbs-publish-to-html
+  ;;        :with-sub-superscript nil
+  ;;        )))
+  )
+   #+END_SRC
+
+** COMMENT Custom load of ob-js   
+   #+BEGIN_SRC emacs-lisp
+   (load-file "~/.emacs.d/extra/ob-js/ob-js.el")
+   #+END_SRC
+
+   #+RESULTS:
+   : t
+
+** This is awesome :D
+   #+BEGIN_SRC sh
+   echo hi
+   echo "this impatient-mode is awesome"
+   #+END_SRC
+
+
+** rst exporter
+   #+BEGIN_SRC emacs-lisp
+(require 'ox-rst)
+   #+END_SRC

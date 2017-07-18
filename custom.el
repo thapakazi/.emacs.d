@@ -19,7 +19,7 @@
  '(cursor-type (quote bar))
  '(custom-safe-themes
    (quote
-    ("b2399a1b1b4f6a2ed5cde592b6d6820e964eacadfaf17855080ab989de152efd" "f0a99f53cbf7b004ba0c1760aa14fd70f2eabafe4e62a2b3cf5cabae8203113b" default)))
+    ("cdf96318f1671344564ba74ef75cc2a3f4692b2bee77de9ce9ff5f165de60b1f" "06dbcfac3705aaaa79e1a3264c6fd44ef0cf86ef5ed67930e4007e63a8c1e8ee" "a8245b7cc985a0610d71f9852e9f2767ad1b852c2bdea6f4aadc12cce9c4d6d0" "68d36308fc6e7395f7e6355f92c1dd9029c7a672cbecf8048e2933a053cf27e6" "b2399a1b1b4f6a2ed5cde592b6d6820e964eacadfaf17855080ab989de152efd" "f0a99f53cbf7b004ba0c1760aa14fd70f2eabafe4e62a2b3cf5cabae8203113b" default)))
  '(diary-entry-marker (quote font-lock-variable-name-face))
  '(display-battery-mode t)
  '(display-time-mode t)
@@ -94,45 +94,56 @@ static char *gnus-pointer[] = {
  '(hl-fg-colors
    (quote
     ("#fdf6e3" "#fdf6e3" "#fdf6e3" "#fdf6e3" "#fdf6e3" "#fdf6e3" "#fdf6e3" "#fdf6e3")))
- '(ivy-mode t)
  '(linum-format "%3i")
  '(magit-diff-use-overlays nil)
+ '(max-lisp-eval-depth 800)
+ '(max-specpdl-size 1000)
  '(nrepl-message-colors
    (quote
     ("#CC9393" "#DFAF8F" "#F0DFAF" "#7F9F7F" "#BFEBBF" "#93E0E3" "#94BFF3" "#DC8CC3")))
+ '(org-agenda-files
+   (quote
+    ("~/org/cloudfactory/broad.org" "~/org/self/list.org" "~/org/cloudfactory/legworks.org")))
+ '(org-log-into-drawer t)
+ '(org-refile-allow-creating-parent-nodes (quote confirm))
+ '(org-refile-targets (quote ((org-agenda-files :level . 1))))
+ '(org-refile-use-outline-path (quote file))
  '(package-selected-packages
    (quote
-    (ivy-mode elfeed edit-server magit helm-ag helm-projectile helm c-eldoc ace-jump-mode ido-vertical-mode transpose-frame ox-pandoc solarized-theme use-package cyberpunk-theme)))
+    (go-dlv elfeed edit-server magit helm-ag helm-projectile helm c-eldoc ace-jump-mode ido-vertical-mode transpose-frame ox-pandoc use-package cyberpunk-theme)))
  '(pos-tip-background-color "#eee8d5")
  '(pos-tip-foreground-color "#586e75")
  '(powerline-color1 "#3d3d68")
  '(powerline-color2 "#292945")
+ '(send-mail-function (quote smtpmail-send-it))
  '(smartrep-mode-line-active-bg (solarized-color-blend "#859900" "#eee8d5" 0.2))
- '(tabbar-mode t nil (tabbar))
+ '(smtpmail-smtp-server "imap.gmail.com")
+ '(smtpmail-smtp-service 25 t)
+ '(tabbar-mode nil nil (tabbar))
  '(term-default-bg-color "#fdf6e3")
  '(term-default-fg-color "#657b83")
- '(vc-annotate-background "#2B2B2B")
+ '(vc-annotate-background "#181e26")
  '(vc-annotate-color-map
    (quote
-    ((20 . "#BC8383")
-     (40 . "#CC9393")
-     (60 . "#DFAF8F")
-     (80 . "#D0BF8F")
-     (100 . "#E0CF9F")
-     (120 . "#F0DFAF")
-     (140 . "#5F7F5F")
-     (160 . "#7F9F7F")
-     (180 . "#8FB28F")
-     (200 . "#9FC59F")
-     (220 . "#AFD8AF")
-     (240 . "#BFEBBF")
-     (260 . "#93E0E3")
-     (280 . "#6CA0A3")
-     (300 . "#7CB8BB")
-     (320 . "#8CD0D3")
-     (340 . "#94BFF3")
-     (360 . "#DC8CC3"))))
- '(vc-annotate-very-old-color "#DC8CC3")
+    ((20 . "#98be65")
+     (40 . "#b4be6c")
+     (60 . "#d0be73")
+     (80 . "#ECBE7B")
+     (100 . "#e6ab6a")
+     (120 . "#e09859")
+     (140 . "#da8548")
+     (160 . "#d38079")
+     (180 . "#cc7cab")
+     (200 . "#c678dd")
+     (220 . "#d974b7")
+     (240 . "#ec7091")
+     (260 . "#ff6c6b")
+     (280 . "#d6696a")
+     (300 . "#ad6769")
+     (320 . "#836468")
+     (340 . "#5B6268")
+     (360 . "#5B6268"))))
+ '(vc-annotate-very-old-color nil)
  '(weechat-color-list
    (quote
     (unspecified "#fdf6e3" "#eee8d5" "#990A1B" "#dc322f" "#546E00" "#859900" "#7B6000" "#b58900" "#00629D" "#268bd2" "#93115C" "#d33682" "#00736F" "#2aa198" "#657b83" "#839496")))
@@ -145,4 +156,4 @@ static char *gnus-pointer[] = {
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(default ((t (:background nil)))))
+ )

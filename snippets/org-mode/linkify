@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: linkify
+# key: linkify
+# --
+[[$1][$2]]

@@ -58,53 +58,53 @@ emacs --version
 
   Sources for this section include [[https://github.com/magnars/.emacs.d/blob/master/settings/sane-defaults.el][Magnars Sveen]] and [[http://pages.sachachua.com/.emacs.d/Sacha.html][Sacha Chua]].
   #+begin_src emacs-lisp
-    ;; These functions are useful. Activate them.
-    (put 'downcase-region 'disabled nil)
-    (put 'upcase-region 'disabled nil)
-    (put 'narrow-to-region 'disabled nil)
-    (put 'dired-find-alternate-file 'disabled nil)
+  ;; These functions are useful. Activate them.
+  (put 'downcase-region 'disabled nil)
+  (put 'upcase-region 'disabled nil)
+  (put 'narrow-to-region 'disabled nil)
+  (put 'dired-find-alternate-file 'disabled nil)
 
-    ;; Answering just 'y' or 'n' will do
-    (defalias 'yes-or-no-p 'y-or-n-p)
+  ;; Answering just 'y' or 'n' will do
+  (defalias 'yes-or-no-p 'y-or-n-p)
 
-    ;; Keep all backup and auto-save files in one directory
-    (setq backup-directory-alist '(("." . "~/.emacs.d/backups")))
-    (setq auto-save-file-name-transforms '((".*" "~/.emacs.d/auto-save-list/" t)))
+  ;; Keep all backup and auto-save files in one directory
+  (setq backup-directory-alist '(("." . "~/.emacs.d/backups")))
+  (setq auto-save-file-name-transforms '((".*" "~/.emacs.d/auto-save-list/" t)))
 
-    ;; UTF-8 please
-    (setq locale-coding-system 'utf-8) ; pretty
-    (set-terminal-coding-system 'utf-8) ; pretty
-    (set-keyboard-coding-system 'utf-8) ; pretty
-    (set-selection-coding-system 'utf-8) ; please
-    (prefer-coding-system 'utf-8) ; with sugar on top
-    (setq-default indent-tabs-mode nil)
+  ;; UTF-8 please
+  (setq locale-coding-system 'utf-8) ; pretty
+  (set-terminal-coding-system 'utf-8) ; pretty
+  (set-keyboard-coding-system 'utf-8) ; pretty
+  (set-selection-coding-system 'utf-8) ; please
+  (prefer-coding-system 'utf-8) ; with sugar on top
+  (setq-default indent-tabs-mode nil)
 
-    ;; Turn off the blinking cursor
-    (blink-cursor-mode -1)
+  ;; Turn off the blinking cursor
+  (blink-cursor-mode -1)
 
-     (setq-default indent-tabs-mode nil)
-     (setq-default indicate-empty-lines t)
+   (setq-default indent-tabs-mode nil)
+   (setq-default indicate-empty-lines t)
 
-     ;; Don't count two spaces after a period as the end of a sentence.
-     ;; Just one space is needed.
-     (setq sentence-end-double-space nil)
+   ;; Don't count two spaces after a period as the end of a sentence.
+   ;; Just one space is needed.
+   (setq sentence-end-double-space nil)
 
-     ;; delete the region when typing, just like as we expect nowadays.
-     (delete-selection-mode t)
+   ;; delete the region when typing, just like as we expect nowadays.
+   (delete-selection-mode t)
 
-     (show-paren-mode t)
+   (show-paren-mode t)
 
-     (column-number-mode t)
+   (column-number-mode t)
 
-     (global-visual-line-mode)
-     (diminish 'visual-line-mode)
+   (global-visual-line-mode)
+   (diminish 'visual-line-mode)
 
-     (setq uniquify-buffer-name-style 'forward)
-     ;; -i gets alias definitions from .bash_profile
-     (setq shell-command-switch "-ic")
+   (setq uniquify-buffer-name-style 'forward)
+   ;; -i gets alias definitions from .bash_profile
+   ;; (setq shell-command-switch "-ic")
 
-     ;; Don't beep at me
-     (setq visible-bell t)
+   ;; Don't beep at me
+   (setq visible-bell t)
  #+end_src
 
  The following function for ~occur-dwim~ is taken from [[https://github.com/abo-abo][Oleh Krehel]] from
@@ -155,8 +155,8 @@ emacs --version
   :init
   (progn
     (recentf-mode t)
-    (setq recentf-max-saved-items 200)
-
+    (setq recentf-max-saved-items 50)
+    (setq ido-use-virtual-buffers t)
     (defun ido-recentf-open ()
       "Use `ido-completing-read' to \\[find-file] a recent file"
       (interactive)
@@ -166,6 +166,9 @@ emacs --version
   :config
     (bind-key "C-x ," 'ido-recentf-open))
  #+end_src
+
+ #+RESULTS:
+ : t
 
  
 * Tramp
@@ -246,6 +249,9 @@ emacs --version
        :init (ido-vertical-mode 1)
        (setq ido-vertical-define-keys 'C-n-and-C-p-only))))
        #+end_src
+
+ #+RESULTS:
+
        
 * Whitespace mode
 
@@ -258,7 +264,7 @@ emacs --version
 
  Using OS X Spotlight within Emacs by modifying the ~locate~ function.
 
- I usually use [[*Helm][~helm-locate~]], which does live updates the spotlight
+ I usually use [[https://www.google.com][~helm-locate~]], which does live updates the spotlight
  search list as you type a query.
 
  #+begin_src emacs-lisp
@@ -324,7 +330,7 @@ emacs --version
    :init (add-hook 'c-mode-hook #'c-turn-on-eldoc-mode))
  #+end_src
 
-** Helm
+** COMMENT Helm
    Mother of changes. Need to learn to configure it better :D
  #+begin_src emacs-lisp
 (use-package helm
@@ -346,6 +352,30 @@ emacs --version
          ("C-`" . helm-resume)
          ("M-x" . helm-M-x)
          ("C-x C-f" . helm-find-files))) 
+ #+end_src
+
+** flx ido                                   :GITHUB:
+   :LOGBOOK:
+   - Note taken on [2016-06-25 Sat 22:00] \\
+     you need to install it from github --shalil
+   :END:
+   
+ #+begin_src emacs-lisp
+(use-package flx
+  :ensure t
+  ;; :config
+  ;; (
+  ;;  (require 'flx-ido)
+  ;;  (ido-mode 1)
+  ;;  (ido-everywhere 1)
+  ;;  (flx-ido-mode 1)
+  ;;  ;; disable ido faces to see flx highlights.
+  ;;  (setq ido-enable-flex-matching t)
+  ;;  (setq ido-use-faces nil)
+  ;; )
+)
+
+
  #+end_src
 
 ** Magit
@@ -552,7 +582,6 @@ emacs --version
 ;; ** Smex
 
 ;; Smex integrates ido with ~M-x~. I used to use this before moving on to
-;; [[*Helm][helm]].
 
 ;; #+begin_src emacs-lisp
 ;; (use-package smex
@@ -802,7 +831,7 @@ emacs --version
  #+end_src
 
 * COMMENT Languages
-** C/Java
+** COMMENT C/Java
 
  I don't like the default way that Emacs handles indentation. For instance,
  #+begin_src C
@@ -896,7 +925,7 @@ emacs --version
    #+END_SRC
 
 * Custom function
-** Gitwatcher
+** COMMENT Gitwatcher
    track changes and push file changes with git
    #+BEGIN_SRC emacs-lisp
 (defvar autocomit-dir-set '()

@@ -2,7 +2,9 @@
 #+DATE: Friday, Mar 10 2017 
 #+DESCRIPTION: simple functions to do magical things
 
-* Copy buffer file name to kill ring xb
+
+
+* Copy buffer file name to kill ring 
   src: [[https://github.com/baron42bba/.emacs.d/blob/master/bba.org#copy-buffer-file-name-to-kill-ring][g:baron42bba]], handy one mate 🙇
 #+BEGIN_SRC emacs-lisp
 (defun bba-copy-buffer-name ()
@@ -83,3 +85,4 @@ Visit the file after creation."
 
    #+RESULTS:
    : wh/start-scratch-html-file
+

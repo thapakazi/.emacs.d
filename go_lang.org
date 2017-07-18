@@ -2,7 +2,7 @@
 #+DATE: Sunday, Oct 18 2015
 #+DESCRIPTION: Customised ruby on rails emacs config
 
-* Geting go mode
+* COMMENT Geting go mode
 #+BEGIN_SRC emacs-lisp
 (use-package go-mode
   :ensure t
@@ -10,6 +10,9 @@
   (require 'go-mode-autoloads))
 
 #+END_SRC
+
+#+RESULTS:
+: t
 
 * Autocomplete in go with [[https://github.com/nsf/gocode][gcode]]
 Auto-completion is one of best thing empowering us to write more stuffs
@@ -27,6 +30,24 @@ Auto-completion is one of best thing empowering us to write more stuffs
   (ac-config-default))
 #+END_SRC
 
+#+RESULTS:
+: t
+
+* Go eldoc
+  #+BEGIN_SRC emacs-lisp
+(use-package go-eldoc
+  ;; gocode integration for go autocompletion
+  :config
+  (require 'go-eldoc) ;; Don't need to require, if you install by package.el
+  (add-hook 'go-mode-hook 'go-eldoc-setup)
+  (set-face-attribute 'eldoc-highlight-function-argument nil
+                      :underline t :foreground "green"
+                      :weight 'bold))
+
+#+END_SRC
+
+  #+RESULTS:
+  : t
 
 
         

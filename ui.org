@@ -6,7 +6,8 @@
 * Theme
   Out of numerous themes availabe, I find *wombat* best fit most of
   the times.
-** Wombat theme
+
+** COMMENT Wombat theme
    Pleasing theme for eyes
    #+begin_src emacs-lisp
      (load-theme 'wombat t)
@@ -54,7 +55,19 @@
     (bind-key "s-<f11>" 'disable-active-themes)
     #+end_src
 
-
+** Doom Theme
+   Found in Mr. X's config in gopher slack, where X=> I forgot his name.
+   #+BEGIN_SRC emacs-lisp
+(use-package doom-themes
+  :ensure t
+  :init
+     (load-theme 'doom-one t)
+     (set-face-attribute `mode-line nil
+                         :box nil)
+     (set-face-attribute `mode-line-inactive nil
+                         :box nil)
+)
+   #+END_SRC
 
 * Font
 
@@ -374,11 +387,15 @@ mouse-3: go to end")
 
 #+RESULTS:
 
+* Show line numbers
+  #+BEGIN_SRC emacs-lisp
+ (require 'hlinum)
+    (hlinum-activate)
+  #+END_SRC
 
 
-
-* kill ☠ ring 💍
-  Popup kill ring. Lets try this
+* [[https://github.com/waymondo/popup-kill-ring][kill ☠ ring 💍]]
+  Popup kill ring. Lets try this...
   desc: browse your emacs kill ring in an autocomplete style popup menu
   #+BEGIN_SRC emacs-lisp
 (use-package popup-kill-ring

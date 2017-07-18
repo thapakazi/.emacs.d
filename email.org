@@ -1,0 +1,17 @@
+* Email
+  though invented as 
+  #+BEGIN_QUOTE
+  our job is to convert that into an electronic format. Nobody's done
+  that before. --Michelson
+  #+END_QUOTE
+
+  lots of email, and I can't cope with with my team/managers. So its
+  time to invest on [[https://www.emacswiki.org/emacs/CategoryGnus][gnus]] or [[https://github.com/emacs-tw/awesome-emacs?utm_medium=referral&utm_campaign=ZEEF&utm_source=https%253A%252F%252Fawesome-awesomeness.zeef.com%252Falexander.bayandin#mail][alternatives]]
+
+** gnus
+
+#+BEGIN_SRC emacs-lisp
+(setq user-mail-address	"oemilan@gmail.com"
+	  user-full-name	"Milan Thapa")
+#+END_SRC
+

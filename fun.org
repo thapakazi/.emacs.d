@@ -6,5 +6,34 @@
   #+BEGIN_SRC emacs-lisp
 (use-package xkcd
   :ensure t
-  )
+  ) 
+ #+END_SRC
+
+* Impatient Mode 
+  Best of best mode available
+  #+BEGIN_SRC emacs-lisp
+(use-package impatient-mode
+  :ensure t)
   #+END_SRC
+
+* COMMENT org-ehtml
+[[https://github.com/eschulte/org-ehtml][Org-ehtml]]
+             export Org-mode files as editable web pages
+#+BEGIN_QUOTE
+Org-ehtml allows for interactively viewing and editing Org-mode
+    files through a web browser.  The Emacs web server [1] serves
+    Org-mode files as editable HTML exported with a special ox-ehtml
+    backend which extends the standard Org-mode HTML export.
+#+END_QUOTE
+#+BEGIN_SRC emacs-lisp
+(use-package org-ehtml
+  :ensure t
+  :config
+  ((setq org-ehtml-docroot (expand-file-name "/home/thapakazi/public_org"))
+   (setq org-ehtml-everything-editable t)   ))
+
+#+END_SRC
+
+#+RESULTS:
+: t
+

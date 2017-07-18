@@ -1,0 +1,221 @@
+#+TITLE: My blog configs
+#+DATE: Sunday, Oct 09 2016
+#+DESCRIPTION: seperate file for blog rellated tinkering
+
+* Partial publish
+  :PROPERTIES:
+  :TITLE:    Partial publish blog
+  :HUGO_TAGS: emacs, blog, hugo, test
+  :HUGO_TOPICS: emacs
+  :HUGO_FILE: partial_publish.md
+  :HUGO_DATE: [2016-10-10 Mon 18:23]
+  :END:
+  Before ~hugo~ i was like:
+  - days spent saying "I will blog soon"
+  - since org mode is soo adivtive, I need to find sth that floats
+    with it
+  - [[http://rhoit.com][@rhoit]] dai started making [[https://github.com/rhoit/bekar-static-gen][bekar-static-gen]], but i no nothing about
+    html/css stuffs, so i stay in shadow
+  - again after month, I started publishing org to html, it was ok,
+    but I guessed I couldn't scale, so again stopped
+  - again, found a [[http://yagnesh.org/2015/02/19/elisp_wrapper_for_tinkerer.html][emacs guy]] using [[http://www.tinkerer.me/][tikerer]] to publish his blog; got
+    exicited 😃 and started tinkerering myself. It was
+    like :feelsgoodman: feeling. But static stuffs broke, and I felt
+    😞 again... still was pushing some orgs... reached upto 3 posts
+    and kinda stopped.
+  - then ~HUGO~ happened... Not sure, but its what I was looking
+    for... I was having +ve intutions. [[https://github.com/gilesp/vurtcouk/issues/1][#few stories]] 
+    
+    After few hrs, i tried this [[http://www.holgerschurig.de/en/emacs-blog-from-org-to-hugo/][blog]]. And here I am, semi-ready to
+    publish this post 😥.
+
+  - few helps from hugo, making the [[https://gohugo.io/tutorials/github-pages-blog/#hosting-personal-organization-pages][org2blog2github]] workflow easier.
+    
+    #+BEGIN_QUOTE
+    Thanks to all for sharing your knowledge on this thing called
+    internet and obviously the makers of HUGO. 🤗
+    #+END_QUOTE
+      
+    Rest of story on how to make emacs, a blog generator. Everything
+    is copied blindly from [[http://www.holgerschurig.de/en/emacs-blog-from-org-to-hugo/][Holger Schurig's Blog]]. ☕ for him.
+*** Define content dir
+    #+BEGIN_SRC emacs-lisp
+;; This is GPLv2. If you still don't know the details, read
+;; http://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html
+
+(defvar hugo-content-dir "~/github/zerOnepal/blog/org2blog/content/posts/"
+  "Path to Hugo's content directory")
+    #+END_SRC
+*** The next two functions care that all needed property drawers exist
+    #+BEGIN_SRC emacs-lisp
+
+;; This is GPLv2. If you still don't know the details, read
+;; http://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html
+
+(defun hugo-ensure-property (property)
+  "Make sure that a property exists. If not, it will be created.
+
+Returns the property name if the property has been created,
+otherwise nil."
+  (if (org-entry-get nil property)
+      nil
+    (progn (org-entry-put nil property "")
+           property)))
+
+(defun hugo-ensure-properties ()
+  "This ensures that several properties exists. If not, these
+properties will be created in an empty form. In this case, the
+drawer will also be opened and the cursor will be positioned
+at the first element that needs to be filled.
+
+Returns list of properties that still must be filled in"
+  (require 'dash)
+  (let ((current-time (format-time-string (org-time-stamp-format t t) (org-current-time)))
+        first)
+    (save-excursion
+      (unless (org-entry-get nil "TITLE")
+        (org-entry-put nil "TITLE" (nth 4 (org-heading-components))))
+      (setq first (--first it (mapcar #'hugo-ensure-property '("HUGO_TAGS" "HUGO_TOPICS" "HUGO_FILE"))))
+      (unless (org-entry-get nil "HUGO_DATE")
+        (org-entry-put nil "HUGO_DATE" current-time)))
+    (when first
+      (goto-char (org-entry-beginning-position))
+      ;; The following opens the drawer
+      (forward-line 1)
+      (beginning-of-line 1)
+      (when (looking-at org-drawer-regexp)
+        (org-flag-drawer nil))
+      ;; And now move to the drawer property
+      (search-forward (concat ":" first ":"))
+      (end-of-line))
+    first))
+    #+END_SRC
+*** Github flavoured markdown
+ #+BEGIN_SRC emacs-lisp
+(use-package ox-gfm
+  :config
+  (require 'ox-gfm))
+ #+END_SRC
+
+*** Hugo function to blog all the things 
+    #+BEGIN_SRC emacs-lisp
+;; This is GPLv2. If you still don't know the details, read
+;; http://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html
+
+(defun hugo ()
+  (interactive)
+  (unless (hugo-ensure-properties)
+    (let* ((title    (concat "title = \"" (org-entry-get nil "TITLE") "\"\n"))
+           (date     (concat "date = \"" (format-time-string "%Y-%m-%d" (apply 'encode-time (org-parse-time-string (org-entry-get nil "HUGO_DATE"))) t) "\"\n"))
+           (topics   (concat "topics = [ \"" (mapconcat 'identity (split-string (org-entry-get nil "HUGO_TOPICS") "\\( *, *\\)" t) "\", \"") "\" ]\n"))
+           (tags     (concat "tags = [ \"" (mapconcat 'identity (split-string (org-entry-get nil "HUGO_TAGS") "\\( *, *\\)" t) "\", \"") "\" ]\n"))
+           (fm (concat "+++\n"
+                       title
+                       date
+                       tags
+                       topics
+                       "+++\n\n"))
+           (file     (org-entry-get nil "HUGO_FILE"))
+           (coding-system-for-write buffer-file-coding-system)
+           (backend  'md)
+           (blog))
+      ;; try to load org-mode/contrib/lisp/ox-gfm.el and use it as backend
+      (if (require 'ox-gfm nil t)
+          (setq backend 'gfm)
+        (require 'ox-md))
+      (setq blog (org-export-as backend t))
+      ;; Normalize save file path
+      (unless (string-match "^[/~]" file)
+        (setq file (concat hugo-content-dir file))
+        (unless (string-match "\\.md$" file)
+          (setq file (concat file ".md")))
+        ;; save markdown
+        (with-temp-buffer
+          (insert fm)
+          (insert blog)
+          (untabify (point-min) (point-max))
+          (write-file file)
+          (message "Exported to %s" file))
+        ))))
+    #+END_SRC
+
+*** Binding the key
+    :PROPERTIES:
+    :TITLE:    Binding the key
+    :HUGO_TAGS: test, hugo, custom_function, blog, emacs
+    :HUGO_TOPICS: Emacs
+    :HUGO_FILE: bloging with hugo
+    :HUGO_DATE: [2016-10-10 Mon 18:18]
+    :END:
+    #+BEGIN_SRC emacs-lisp
+   (bind-key "M-g h" #'hugo)
+    #+END_SRC
+* COMMENT Blogging in org with hugo
+Everything's borrowd from the [[https://github.com/gilesp/emacs.d/blob/master/lisp/init-hugo-blogging.el][gilesp emacs.d config]] 
+** Hugo Stuffs
+ #+BEGIN_SRC emacs-lisp
+
+;;; init-hugo-blogging --- Setup orgmode to publish markdown for my blog
+
+;;; Commentary:
+;; Functionality to support blogging with org mode and hugo
+
+;;; Code:
+(use-package toml-mode
+  :mode "\\.toml\\'")
+
+;; function to insert ISO8601 timestamp
+(defun insert-timestamp ()
+  "Insert the current time at point, as an ISO8601 timestamp."
+  (interactive)
+  (insert (format-time-string "%Y-%m-%dT%TZ")))
+ #+END_SRC
+
+ #+RESULTS:
+ : insert-timestamp
+
+** Github flavoured markdown
+#+BEGIN_SRC emacs-lisp
+(use-package ox-gfm
+  :config
+  (require 'ox-gfm))
+#+END_SRC
+** Publishing 
+#+BEGIN_QUOTE
+;; org publish method that will use github flavoured markdown (prodived by ox-gfm)
+;; rather than plain markdown
+#+END_QUOTE
+
+#+BEGIN_SRC emacs-lisp
+;;;###autoload
+(defun gp-org-gfm-publish-to-md (plist filename pub-dir)
+  "Publish an org file to Github Flavoured Markdown.
+
+PLIST is the property list for the given project.
+FILENAME is the filename of the Org file to be published.
+PUB-DIR is the publishing directory.
+
+Return output file name."
+  (org-publish-org-to 'gfm filename ".md" plist pub-dir))
+#+END_SRC
+** Real exporting starts from here
+#+BEGIN_SRC emacs-lisp
+;; configure markdown export
+(setq org-publish-project-alist
+      '(
+        ("my-blog"
+         ;; Path to org files
+         :base-directory "~/org/blog/"
+         :base-extension "org"
+
+         ;; Path to hugo project
+         :publishing-directory "~/github/zerOnepal/blog/org2blog/content/posts/"
+         :recursive t
+         :publishing-function gp-org-gfm-publish-to-md
+         :headline-levels 3
+         :body-only t
+         :with-footnotes t
+         )
+        ;; ("gp-blog" :components ("org-gilesp-blog"))
+        ))
+#+END_SRC

@@ -3,6 +3,7 @@
 
 (setq mc/cmds-to-run-for-all
       '(
+        beginning-of-line-dwim
         beginning-of-visual-line
         c-electric-colon
         c-electric-delete-forward
@@ -13,8 +14,11 @@
         delete-horizontal-space
         electric-newline-and-maybe-indent
         end-of-visual-line
+        helm-M-x
         helm-confirm-and-exit-minibuffer
+        ido-switch-buffer
         indent-for-tab-command
+        kill-region
         kill-visual-line
         mark-whole-buffer
         markdown-insert-bold
@@ -23,13 +27,22 @@
         org-ctrl-c-ctrl-c
         org-delete-char
         org-end-of-line
+        org-kill-line
         org-metaright
+        org-mouse-down-mouse
         org-self-insert-command
         org-shiftmetaright
+        org-yank
         other-frame
         sgml-close-tag
         sgml-slash
+        swiper
+        text-scale-adjust
         transpose-words
+        undo-tree-visualize
+        yaml-electric-backspace
+        yaml-electric-bar-and-angle
+        yaml-electric-dash-and-dot
         yas-expand
         ))
 
