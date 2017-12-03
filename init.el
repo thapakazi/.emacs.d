@@ -34,6 +34,8 @@
 (use-package try
   :ensure t)
 
+;;; Load the config
+(org-babel-load-file (concat user-emacs-directory "basics.org"))
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
