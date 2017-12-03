@@ -2,6 +2,46 @@
 #+DATE: Friday, Feb 26 2016
 #+DESCRIPTION: default shared basic modes/configs goes here
 
+* Magit
+ I <3 magit.
+ A great interface for git projects. It's much more pleasant to use
+ than the git interface on the command line. Use an easy keybinding to
+ access magit.
+
+ #+begin_src emacs-lisp
+(use-package magit
+  :ensure t
+  :bind ("C-c m" . magit-status)
+  :config
+  (define-key magit-status-mode-map (kbd "q") 'magit-quit-session))
+ #+end_src
+
+ #+RESULTS:
+
+*** Fullscreen magit
+
+ #+BEGIN_QUOTE
+ The following code makes magit-status run alone in the frame, and then
+ restores the old window configuration when you quit out of magit.
+
+ No more juggling windows after commiting. It's magit bliss.
+ #+END_QUOTE
+ [[http://whattheemacsd.com/setup-magit.el-01.html][Source: Magnar Sveen]]
+
+ #+begin_src emacs-lisp
+ ;;full screen magit-status
+ (defadvice magit-status (around magit-fullscreen activate)
+   (window-configuration-to-register :magit-fullscreen)
+   ad-do-it
+   (delete-other-windows))
+
+ (defun magit-quit-session ()
+   "Restores the previous window configuration and kills the magit buffer"
+   (interactive)
+   (kill-buffer)
+   (jump-to-register :magit-fullscreen))
+ #+end_src
+
 * [[https://www.emacswiki.org/emacs/AutoComplete][AutoComplete]]
   Auto complete whem you type with nice popup menu :D
 #+BEGIN_SRC emacs-lisp
@@ -15,18 +55,6 @@
 #+RESULTS:
 : t
 
-* fasd
-#+BEGIN_SRC emacs-lisp
-;;;; fasd
-;; find previous files/dirs quickly (uses `fasd' shell script)
-(use-package fasd
-  :bind ("C-h C-f" . fasd-find-file)
-  :config
-  (setq fasd-completing-read-function 'helm--completing-read-default)
-  (global-fasd-mode 1))
-#+END_SRC
-
-        
 * [[http://batsov.com/projectile/][Projectile]]
   Working with multiple projects, and typing everything yourself to
   switch really sucks.. 🤕
@@ -55,78 +83,6 @@ projectile-switch-project ; C-c p p
 projectile-find-file; C-c p f
 #+END_EXAMPLE
 
-* Multiple cursors
-  yes, everyones fan of this video: [[http://emacsrocks.com/e13.html][on youtube]]
-
-  #+BEGIN_SRC emacs-lisp
-  (use-package multiple-curosrs)
-
-  #+END_SRC
-
-  #+RESULTS:
-
-* [[https://github.com/abo-abo/hydra][COMMENT Hydra]] [[https://www.youtube.com/watch?v=_qZliI1BKzI][youtube]]
-  Tie up rellated commands into a family of short bindings wtih a
-  common prefix; from [[https://github.com/abo-abo/hydra/blob/master/README.md][Readme.md]] 🤖
-  
-  #+BEGIN_SRC emacs-lisp
-  (use-package hydra
-  :ensure t
-  :config
-  (hydra-add-font-lock))
-  #+END_SRC
-
-  Some hydra in action. 😏
-  #+BEGIN_SRC emacs-lisp
-(require 'windmove)
-
-(defun hydra-move-splitter-left (arg)
-  "Move window splitter left."
-  (interactive "p")
-  (if (let ((windmove-wrap-around))
-        (windmove-find-other-window 'right))
-      (shrink-window-horizontally arg)
-    (enlarge-window-horizontally arg)))
-
-(defun hydra-move-splitter-right (arg)
-  "Move window splitter right."
-  (interactive "p")
-  (if (let ((windmove-wrap-around))
-        (windmove-find-other-window 'right))
-      (enlarge-window-horizontally arg)
-    (shrink-window-horizontally arg)))
-
-(defun hydra-move-splitter-up (arg)
-  "Move window splitter up."
-  (interactive "p")
-  (if (let ((windmove-wrap-around))
-        (windmove-find-other-window 'up))
-      (enlarge-window arg)
-    (shrink-window arg)))
-
-(defun hydra-move-splitter-down (arg)
-  "Move window splitter down."
-  (interactive "p")
-  (if (let ((windmove-wrap-around))
-        (windmove-find-other-window 'up))
-      (shrink-window arg)
-    (enlarge-window arg)))
-
-(defhydra hydra-splitter (global-map "<f9>")
-  "splitter"
-  ("<left>" hydra-move-splitter-left)
-  ("<down>" hydra-move-splitter-down)
-  ("<up>" hydra-move-splitter-up)
-  ("<right>" hydra-move-splitter-right))
-  #+END_SRC
-
-  Yet another useful stuff
-#+BEGIN_SRC emacs-lisp
-(defhydra hydra-zoom (global-map "<f5>")
-  "zoom"
-  ("g" text-scale-increase "in")
-  ("l" text-scale-decrease "out"))
-#+END_SRC
 * [[https://github.com/abo-abo/swiper][Swiper]] [[https://www.youtube.com/watch?v=VvnJQpTFVDc][youtube]]
   ~isearch~ && ~ido-mode~ made better, fast and interactive with
   ~ivy-mode~
@@ -147,23 +103,56 @@ projectile-find-file; C-c p f
   #+RESULTS:
   : t
 
-* [[https://github.com/baron42bba/.emacs.d/blob/master/bba.org#copy-buffer-file-name-to-kill-ringhttps://github.com/baron42bba/.emacs.d/blob/master/bba.org#copy-buffer-file-name-to-kill-ring][copy buffer file name to kill ring]]
-  kudos: [[https://github.com/baron42bba][@baron42bba]]
-  #+BEGIN_SRC emacs-lisp
-    (defun bba-copy-buffer-name ()
-      "copy buffer name to kill-ring. if `universal-argument` is called first, copy only filename to kill-ring."
-      (interactive)
-      (let* ((bba-buffer-name (if current-prefix-arg (file-name-nondirectory (buffer-file-name))
-				(buffer-file-name)
-				)))
-	(kill-new bba-buffer-name)
-	(message ( format "stored '%s' in kill-ring" bba-buffer-name))
-	))
-  #+END_SRC
-
-  #+RESULTS:
-  : bba-copy-buffer-name
 * Winner Mode
   #+BEGIN_SRC emacs-lisp
   (winner-mode 1)
   #+END_SRC
+* Highlight Symbol 
+#+BEGIN_SRC emacs-lisp
+  (use-package highlight-symbol
+    :ensure t
+    :config 
+    (global-set-key [(control f3)] 'highlight-symbol-at-point)
+    (global-set-key [(shift f3)] 'highlight-symbol-next)
+    (global-set-key [(shift f2)] 'highlight-symbol-prev)
+  
+    (global-unset-key (kbd "<C-S-mouse-1>"))
+    (global-set-key (kbd "<C-S-mouse-1>")
+                    (lambda (event)
+                      (interactive "e")
+                      (save-excursion
+                        (goto-char (posn-point (event-start event)))
+                        (highlight-symbol-at-point))))
+)
+    ;; :init 
+    ;; (defun highlight-with-mouse ()
+    ;;   (lambda (event)
+    ;;     (interactive "e")
+    ;;     (save-excursion
+    ;;       (goto-char (posn-point (event-start event)))
+    ;;       (highlight-symbol-at-point))))
+    ;; :bind ("<C-mouse-1>" . highlight-with-mouse))
+#+END_SRC
+* Recentf
+ quick navigate to recent files
+
+ #+begin_src emacs-lisp
+(use-package recentf
+  :commands ido-recentf-open
+  :init
+  (progn
+    (recentf-mode t)
+    (setq recentf-max-saved-items 200)
+
+    (defun ido-recentf-open ()
+      "Use `ido-completing-read' to \\[find-file] a recent file"
+      (interactive)
+      (if (find-file (ido-completing-read "Find recent file: " recentf-list))
+          (message "Opening file...")
+        (message "Aborting"))))
+  :config
+    (bind-key "C-x ," 'ido-recentf-open))
+ #+end_src
+
+ #+RESULTS:
+ : t
