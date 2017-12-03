@@ -1,0 +1,11 @@
+/basics.el
+/utils.el
+
+# everything that could/would be re-generated
+/*.*~
+/recentf
+/projectile.cache
+/projectile-bookmarks.eld
+/elpa/*
+/ac-comphist.dat
+/auto-save-list/
