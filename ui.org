@@ -1,0 +1,240 @@
+#+TITLE: EyeCandy, UI/UX configs
+#+AUTHOR: Milan Thapa
+#+DESCRIPTION: Lets beautify emacs a bit
+#+STARTUP: contents
+
+* Theme
+  Out of numerous themes availabe, I find *wombat* best fit most of
+  the times.
+** COMMENT Wombat theme
+   Pleasing theme for eyes
+   #+begin_src emacs-lisp
+     (load-theme 'wombat t)
+     (set-face-attribute `mode-line nil
+                         :box nil)
+     (set-face-attribute `mode-line-inactive nil
+                         :box nil)
+
+   #+end_src
+** doom theme
+
+   Here's some configuration for [[https://github.com/bbatsov/solarized-emacs/][bbatsov's solarized themes]].
+
+   #+begin_src emacs-lisp
+     (use-package doom-themes
+       :ensure t
+       :config
+  
+       ;; Global settings (defaults)
+       (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
+             doom-themes-enable-italic t) ; if nil, italics is universally disabled
+
+       ;; Load the theme (doom-one, doom-molokai, etc); keep in mind that each theme
+       ;; may have their own settings.
+       (load-theme 'doom-one t)
+
+       ;; Enable flashing mode-line on errors
+       (doom-themes-visual-bell-config)
+
+       ;; Enable custom neotree theme
+       (doom-themes-neotree-config)  ; all-the-icons fonts must be installed!
+       )
+   #+end_src
+
+** Solarized theme
+
+   Here's some configuration for [[https://github.com/bbatsov/solarized-emacs/][bbatsov's solarized themes]].
+
+   #+begin_src emacs-lisp
+(use-package solarized-theme
+  :ensure t
+  :init
+  (;; Don't change the font for some headings and titles
+   setq solarized-use-variable-pitch nil)
+  )
+   #+end_src
+
+*** Convenient theme functions
+
+    #+begin_src emacs-lisp
+   (defun switch-theme (theme)
+  "Disables any currently active themes and loads THEME."
+  ;; This interactive call is taken from `load-theme'
+  (interactive
+   (list
+    (intern (completing-read "Load custom theme: "
+                             (mapc 'symbol-name
+                                   (custom-available-themes))))))
+                                   (let ((enabled-themes custom-enabled-themes))
+                                   (mapc #'disable-theme custom-enabled-themes)
+                                   (load-theme theme t)))
+
+    (defun disable-active-themes ()
+    "Disables any currently active themes listed in `custom-enabled-themes'."
+    (interactive)
+    (mapc #'disable-theme custom-enabled-themes))
+
+    (bind-key "s-<f12>" 'switch-theme)
+    (bind-key "s-<f11>" 'disable-active-themes)
+    #+end_src
+
+* Font
+
+  [[http://levien.com/type/myfonts/inconsolata.html][Inconsolata]] is a nice monospaced font.
+
+  Pull it with pacman. 
+  #+begin_src sh :tangle no :results drawery
+  yes 'y' | sudo pacman -S ttf-inconsolata
+  #+end_src
+
+  #+RESULTS:
+  :RESULTS:
+  resolving dependencies...
+  looking for conflicting packages...
+
+  Packages (1) ttf-inconsolata-20151221.480630d-1
+
+  Total Installed Size:  0.18 MiB
+  Net Upgrade Size:      0.00 MiB
+
+  checking keyring...
+  checking package integrity...
+  loading package files...
+  checking for file conflicts...
+  checking available disk space...
+  :: Processing package changes...
+  reinstalling ttf-inconsolata...
+  Updating font cache... done.
+  :END:
+
+  
+  And here's how we tell Emacs to use the font we want to use.
+
+  #+begin_src emacs-lisp
+(add-to-list 'default-frame-alist
+             '(font . "Inconsolata-18"))
+  #+end_src
+
+  #+RESULTS:
+  : ((font . Inconsolata-18) (vertical-scroll-bars))
+   
+* Mode Icons
+   Show icons instead of mode names in emacs.
+#+BEGIN_SRC emacs-lisp
+(use-package mode-icons
+  :ensure t
+  :config
+  (mode-icons-mode)
+  )
+
+#+END_SRC
+
+#+RESULTS:
+: t
+   Everything is copied from [[https://github.com/rhoit/dot-emacs/blob/master/config/tabbar.cfg.el][rhoit dai's config]]
+
+* [[https://github.com/dunn/company-emoji][📦 Emoji]] ruling the world
+  This is fun 👨
+  Really 😍ing with this mode 😂
+
+
+  *Dependencies*: [[https://zhm.github.io/symbola/][Symbola]] and adjust the config as below.
+  #+BEGIN_SRC bash :results value verbatim
+   yes 'y' | sudo pacman -S ttf-symbola 
+  #+END_SRC
+
+  #+RESULTS:
+  #+begin_example
+  resolving dependencies...
+  looking for conflicting packages...
+
+  Packages (1) ttf-symbola-8.00-1
+
+  Total Installed Size:  2.09 MiB
+  Net Upgrade Size:      0.00 MiB
+
+  checking keyring...
+  checking package integrity...
+  loading package files...
+  checking for file conflicts...
+  checking available disk space...
+  :: Processing package changes...
+  reinstalling ttf-symbola...
+#+end_example
+
+#+BEGIN_SRC emacs-lisp
+(use-package company-emoji              ; Emojis completion like Github/Slack
+  :ensure t
+  :defer t
+  :init (with-eval-after-load 'company
+          (add-to-list 'company-backends 'company-emoji))
+  :config
+  (defun --set-emoji-font (frame)
+    "Adjust the font settings of FRAME so Emacs can display emoji properly."
+    (if (eq system-type 'darwin)
+        ;; For NS/Cocoa
+        (set-fontset-font t 'symbol (font-spec :family "Apple Color Emoji") frame 'prepend)
+      ;; For Linux
+      (set-fontset-font t 'symbol (font-spec :family "Symbola") frame 'prepend)))
+
+  ;; For when Emacs is started in GUI mode:
+  (--set-emoji-font nil)
+  ;; Hook for when a frame is created with emacsclient
+  ;; see https://www.gnu.org/software/emacs/manual/html_node/elisp/Creating-Frames.html
+  (add-hook 'after-make-frame-functions '--set-emoji-font))
+#+END_SRC
+
+* Neotree
+#+BEGIN_QUOTE
+   Nerd Tree like vim
+     Hard to navigate tree, lets steal goodness from vim
+#+END_QUOTE
+#+BEGIN_SRC emacs-lisp
+
+(use-package neotree
+  :ensure t
+  :bind (("<f9>" . neotree-toggle))
+  :config (setq neo-window-width 32
+                neo-create-file-auto-open t
+                neo-banner-message nil
+                neo-show-updir-line nil
+                neo-mode-line-type 'neotree
+                neo-smart-open t
+                neo-dont-be-alone t
+                neo-persist-show nil
+                neo-show-hidden-files t
+                neo-auto-indent-point t))
+#+END_SRC
+
+#+RESULTS:
+
+
+
+* COMMENT beacon mode
+  #+BEGIN_SRC emacs-lisp
+    (use-package beacon
+      :ensure t
+      :config
+      (beacon-mode 1)
+      )
+  #+END_SRC
+
+  #+RESULTS:
+  : t
+* Global hl line mode
+  #+BEGIN_SRC emacs-lisp
+  (global-hl-line-mode 1)
+  #+END_SRC
+
+  #+RESULTS:
+  : t
+* Expand regions
+  #+BEGIN_SRC emacs-lisp
+  (use-package expand-region
+    :ensure t
+    :config
+    (global-set-key (kbd "C-=") 'er/expand-region))
+  #+END_SRC
+
+  #+RESULTS:
+  : t

@@ -9,3 +9,6 @@
 /elpa/*
 /ac-comphist.dat
 /auto-save-list/
+/orgmode.el
+/recentf~
+/ui.el
