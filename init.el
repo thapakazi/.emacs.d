@@ -39,6 +39,7 @@
 (org-babel-load-file (concat user-emacs-directory "utils.org"))
 (org-babel-load-file (concat user-emacs-directory "orgmode.org"))
 (org-babel-load-file (concat user-emacs-directory "ui.org"))
+(org-babel-load-file (concat user-emacs-directory "blog.org"))
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
@@ -47,7 +48,7 @@
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
    (quote
-    (expand-region neotree company-emoji mode-icons solarized-theme doom-themes ag try use-package))))
+    (ox-gfm expand-region neotree company-emoji mode-icons solarized-theme doom-themes ag try use-package))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
