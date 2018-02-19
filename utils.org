@@ -2,7 +2,7 @@
 #+DATE: Sunday, Dec 03 2017
 #+DESCRIPTION: my common utility helpers
 
-* Hungry Delete
+* COMMENT Hungry Delete
   hungry i am, I would eat all your empty lines. Minor Mode
   #+BEGIN_SRC emacs-lisp
   (use-package hungry-delete
@@ -12,15 +12,6 @@
   )
   #+END_SRC
 * Testing from Rhoit
-* Multiple cursors
-  yes, everyones fan of this video: [[http://emacsrocks.com/e13.html][on youtube]]
-
-  #+BEGIN_SRC emacs-lisp
-  (use-package multiple-curosrs)
-
-  #+END_SRC
-
-  #+RESULTS:
 
 * Ace Jump
 ** Ace Jump Mode
@@ -56,8 +47,8 @@
 
  #+RESULTS:
 
-* [[https://github.com/baron42bba/.emacs.d/blob/master/bba.org#copy-buffer-file-name-to-kill-ringhttps://github.com/baron42bba/.emacs.d/blob/master/bba.org#copy-buffer-file-name-to-kill-ring][copy buffer file name to kill ring]]
-  kudos: [[https://github.com/baron42bba][@baron42bba]]
+* Easy Copy Filename
+  [[https://github.com/baron42bba/.emacs.d/blob/master/bba.org#copy-buffer-file-name-to-kill-ringhttps://github.com/baron42bba/.emacs.d/blob/master/bba.org#copy-buffer-file-name-to-kill-ring][copy buffer file name to kill ring]]; kudos: [[https://github.com/baron42bba][@baron42bba]]
   #+BEGIN_SRC emacs-lisp
     (defun bba-copy-buffer-name ()
       "copy buffer name to kill-ring. if `universal-argument` is called first, copy only filename to kill-ring."
