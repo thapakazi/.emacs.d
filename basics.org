@@ -15,12 +15,11 @@
 #+RESULTS:
 : t
 
-* fasd
+* COMMENT fasd
 #+BEGIN_SRC emacs-lisp
 ;;;; fasd
 ;; find previous files/dirs quickly (uses `fasd' shell script)
 (use-package fasd
-  :quelpa (fasd :repo "steckerhalter/emacs-fasd" :fetcher github)
   :bind ("C-h C-f" . fasd-find-file)
   :config
   (setq fasd-completing-read-function 'helm--completing-read-default)
@@ -60,11 +59,22 @@ projectile-find-file; C-c p f
   yes, everyones fan of this video: [[http://emacsrocks.com/e13.html][on youtube]]
 
   #+BEGIN_SRC emacs-lisp
-  (use-package multiple-curosrs)
+    (use-package multiple-cursors
+      :ensure t
+      :bind  (
+	     ("C-S-c C-S-c" . mc/edit-lines)
+	     ("C->" . mc/mark-next-like-this)
+	     ("C-S-<mouse-5>" . mc/mark-next-like-this)
+	     ("C-<" . mc/mark-previous-like-this)
+	     ("C-S-<mouse-4>" . mc/mark-next-like-this)
+	     ("C-c C-<" . mc/mark-all-like-this)
+	     ("s-<mouse-1>" . mc/add-cursor-on-click)))
 
   #+END_SRC
 
   #+RESULTS:
+  : mc/add-cursor-on-click
+
 
 * [[https://github.com/abo-abo/hydra][Hydra]] [[https://www.youtube.com/watch?v=_qZliI1BKzI][youtube]]
   Tie up rellated commands into a family of short bindings wtih a
