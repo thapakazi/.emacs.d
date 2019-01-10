@@ -9,3 +9,15 @@
 /helm-doc.org
 /url/
 /tramp
+
+# my org config files
+org-mode.el
+basics.el
+ror.el
+ui.el
+utils.el
+
+# auto generated files
+projectile.cache
+rake.cache
+ac-comphist.dat
