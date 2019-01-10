@@ -46,7 +46,7 @@
 (org-babel-load-file (concat user-emacs-directory "ui.org"))
 
 
-;; (org-babel-load-file (concat user-emacs-directory "go_lang.org"))
+(org-babel-load-file (concat user-emacs-directory "go-lang.org"))
 
 ;;(org-babel-load-file (concat user-emacs-directory "fun.org"))
 

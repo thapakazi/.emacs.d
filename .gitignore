@@ -11,6 +11,7 @@
 /tramp
 
 # my org config files
+go-lang.el
 org-mode.el
 basics.el
 ror.el
