@@ -266,17 +266,7 @@ emacs --version
  (setq locate-command "mdfind")
  #+end_src
 
-* Emacs Setting
-  Tired of rebooting the emacs. Closing and opening as ~emacs --debug-init /home/ceasors/.emacs.d/config.org -fs~.
-  I have a solution
-#+BEGIN_SRC emacs-lisp
-(defun restart-emacs ()
-  (interactive)
-   (load-file "~/.emacs.d/init.el"))
-(bind-key "s-<f5>" 'restart-emacs)
 
-#+END_SRC
-  
 * ELPA packages
 
   These are the packages that are not built into Emacs.

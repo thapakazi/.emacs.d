@@ -4,19 +4,19 @@
 
 * [[https://www.emacswiki.org/emacs/AutoComplete][AutoComplete]]
   Auto complete whem you type with nice popup menu :D
-#+BEGIN_SRC emacs-lisp
+  #+BEGIN_SRC emacs-lisp
 (use-package auto-complete
   :ensure t
   :config
   (ac-config-default))
 
-#+END_SRC
+  #+END_SRC
 
-#+RESULTS:
-: t
+  #+RESULTS:
+  : t
 
 * COMMENT fasd
-#+BEGIN_SRC emacs-lisp
+  #+BEGIN_SRC emacs-lisp
 ;;;; fasd
 ;; find previous files/dirs quickly (uses `fasd' shell script)
 (use-package fasd
@@ -24,18 +24,18 @@
   :config
   (setq fasd-completing-read-function 'helm--completing-read-default)
   (global-fasd-mode 1))
-#+END_SRC
+  #+END_SRC
 
         
 * [[http://batsov.com/projectile/][Projectile]]
   Working with multiple projects, and typing everything yourself to
   switch really sucks.. 🤕
 
- #+BEGIN_QUOTE
- Project navigation and management library for Emacs.
- #+END_QUOTE
+  #+BEGIN_QUOTE
+  Project navigation and management library for Emacs.
+  #+END_QUOTE
 
-#+begin_src emacs-lisp
+  #+begin_src emacs-lisp
 (use-package projectile
   :ensure t
   :diminish projectile-mode
@@ -47,13 +47,13 @@
     (use-package ag
       :commands ag
       :ensure t)))
-#+end_src
+  #+end_src
 
   My personal favourites:
-#+BEGIN_EXAMPLE
-projectile-switch-project ; C-c p p
-projectile-find-file; C-c p f
-#+END_EXAMPLE
+  #+BEGIN_EXAMPLE
+  projectile-switch-project ; C-c p p
+  projectile-find-file; C-c p f
+  #+END_EXAMPLE
 
 * Multiple cursors
   yes, everyones fan of this video: [[http://emacsrocks.com/e13.html][on youtube]]
@@ -69,7 +69,6 @@ projectile-find-file; C-c p f
 	     ("C-S-<mouse-4>" . mc/mark-next-like-this)
 	     ("C-c C-<" . mc/mark-all-like-this)
 	     ("s-<mouse-1>" . mc/add-cursor-on-click)))
-
   #+END_SRC
 
   #+RESULTS:
@@ -132,17 +131,36 @@ projectile-find-file; C-c p f
   #+END_SRC
 
   Yet another useful stuff
-#+BEGIN_SRC emacs-lisp
+  #+BEGIN_SRC emacs-lisp
 (defhydra hydra-zoom (global-map "<f5>")
   "zoom"
   ("g" text-scale-increase "in")
   ("l" text-scale-decrease "out"))
-#+END_SRC
+  #+END_SRC
 * [[https://github.com/abo-abo/swiper][Swiper]] [[https://www.youtube.com/watch?v=VvnJQpTFVDc][youtube]]
   ~isearch~ && ~ido-mode~ made better, fast and interactive with
   ~ivy-mode~
 
   #+BEGIN_SRC emacs-lisp
+(use-package ivy :ensure t
+  :diminish (ivy-mode . "")
+  :bind
+  (:map ivy-mode-map
+   ("C-'" . ivy-avy))
+  :config
+  (ivy-mode 1)
+  ;; add ‘recentf-mode’ and bookmarks to ‘ivy-switch-buffer’.
+  (setq ivy-use-virtual-buffers t)
+  ;; number of result lines to display
+  (setq ivy-height 10)
+  ;; does not count candidates
+  (setq ivy-count-format "")
+  ;; no regexp by default
+  (setq ivy-initial-inputs-alist nil)
+  ;; configure regexp engine.
+  (setq ivy-re-builders-alist
+	;; allow input not in order
+        '((t   . ivy--regex-ignore-order))))
 (use-package swiper
   :ensure t
   :config
@@ -158,3 +176,18 @@ projectile-find-file; C-c p f
   #+RESULTS:
   : t
 
+
+* Counsel Mode
+#+BEGIN_SRC emacs-lisp
+
+(use-package counsel-projectile
+  :ensure t
+  :config
+  (counsel-projectile-mode 1)
+  :bind 
+  ("C-c p" . 'projectile-command-map)
+  )
+#+END_SRC
+
+#+RESULTS:
+: projectile-command-map

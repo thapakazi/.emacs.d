@@ -1,0 +1,257 @@
+* Highlight Symbol 
+#+BEGIN_SRC emacs-lisp
+  (use-package highlight-symbol
+    :ensure t
+    :config 
+    (global-set-key [(control f3)] 'highlight-symbol-at-point)
+    (global-set-key [(shift f3)] 'highlight-symbol-next)
+    (global-set-key [(shift f2)] 'highlight-symbol-prev)
+  
+    (global-unset-key (kbd "<C-S-mouse-1>"))
+    (global-set-key (kbd "<C-S-mouse-1>")
+                    (lambda (event)
+                      (interactive "e")
+                      (save-excursion
+                        (goto-char (posn-point (event-start event)))
+                        (highlight-symbol-at-point))))
+)
+    ;; :init 
+    ;; (defun highlight-with-mouse ()
+    ;;   (lambda (event)
+    ;;     (interactive "e")
+    ;;     (save-excursion
+    ;;       (goto-char (posn-point (event-start event)))
+    ;;       (highlight-symbol-at-point))))
+    ;; :bind ("<C-mouse-1>" . highlight-with-mouse))
+#+END_SRC
+* Recentf
+ quick navigate to recent files
+
+ #+begin_src emacs-lisp
+(use-package recentf
+  :init
+  (progn
+    (recentf-mode t)
+    (setq recentf-max-saved-items 200)
+	:config
+	(bind-key "C-x ," 'counsel-recentf)
+	)
+  )
+ #+end_src
+
+ #+RESULTS:
+
+* Magit
+ I <3 magit.
+ A great interface for git projects. It's much more pleasant to use
+ than the git interface on the command line. Use an easy keybinding to
+ access magit.
+
+ #+begin_src emacs-lisp
+(use-package magit
+  :ensure t
+  :bind ("C-c m" . magit-status)
+  :config
+  (define-key magit-status-mode-map (kbd "q") 'magit-quit-session))
+ #+end_src
+
+ #+RESULTS:
+
+*** Fullscreen magit
+
+ #+BEGIN_QUOTE
+ The following code makes magit-status run alone in the frame, and then
+ restores the old window configuration when you quit out of magit.
+
+ No more juggling windows after commiting. It's magit bliss.
+ #+END_QUOTE
+ [[http://whattheemacsd.com/setup-magit.el-01.html][Source: Magnar Sveen]]
+
+ #+begin_src emacs-lisp
+ ;;full screen magit-status
+ (defadvice magit-status (around magit-fullscreen activate)
+   (window-configuration-to-register :magit-fullscreen)
+   ad-do-it
+   (delete-other-windows))
+
+ (defun magit-quit-session ()
+   "Restores the previous window configuration and kills the magit buffer"
+   (interactive)
+   (kill-buffer)
+   (jump-to-register :magit-fullscreen))
+ #+end_src
+
+* Hungry Delete
+  hungry i am, I would eat all your empty lines. Minor Mode
+  #+BEGIN_SRC emacs-lisp
+  (use-package hungry-delete
+    :ensure t
+    :config
+    (global-hungry-delete-mode)
+  )
+  #+END_SRC
+* Testing from Rhoit
+
+* Ace Jump
+** Ace Jump Mode
+
+ A quick way to jump around text in buffers.
+
+ [[http://emacsrocks.com/e10.html][See Emacs Rocks Episode 10 for a screencast.]]
+ #+begin_src emacs-lisp
+ (use-package ace-jump-mode
+   :ensure t
+   :diminish ace-jump-mode
+   :commands ace-jump-mode
+   :bind ("C-S-s" . ace-jump-mode))
+ #+end_src
+
+ #+RESULTS:
+
+** Ace Window
+
+ [[https://github.com/abo-abo/ace-window][ace-window]] is a package that uses the same idea from ace-jump-mode for
+ buffer navigation, but applies it to windows. The default keys are
+ 1-9, but it's faster to access the keys on the home row, so that's
+ what I have them set to (with respect to Dvorak, of course).
+
+ #+begin_src emacs-lisp
+ (use-package ace-window
+   :ensure t
+   :config
+   (setq aw-keys '(?a ?s ?d ?f ?j ?k ?k ?l))
+   (ace-window-display-mode)
+   :bind ("C-S-o" . ace-window))
+ #+end_src
+
+ #+RESULTS:
+
+
+* Yasnippet 
+
+ Yeah, snippets! I start with snippets from [[https://github.com/AndreaCrotti/yasnippet-snippets][Andrea Crotti's collection]]
+ and have also modified them and added my own.
+
+ It takes a few seconds to load and I don't need them immediately when
+ Emacs starts up, so we can defer loading yasnippet until there's some
+ idle time.
+
+ #+begin_src emacs-lisp
+   (use-package yasnippet
+    :ensure t
+    :diminish yas-minor-mode
+    )
+
+ #+end_src
+
+ #+RESULTS:
+
+
+* Run buffer
+  src: http://ergoemacs.org/emacs/elisp_run_current_file.html
+  
+  #+BEGIN_SRC emacs-lisp
+  (defun xah-run-current-file ()
+  "Execute the current file.
+For example, if the current buffer is x.py, then it'll call 「python x.py」 in a shell. Output is printed to message buffer.
+
+The file can be Emacs Lisp, PHP, Perl, Python, Ruby, JavaScript, TypeScript, golang, Bash, Ocaml, Visual Basic, TeX, Java, Clojure.
+File suffix is used to determine what program to run.
+
+If the file is modified or not saved, save it automatically before run.
+
+URL `http://ergoemacs.org/emacs/elisp_run_current_file.html'
+Version 2017-07-31"
+  (interactive)
+  (let (
+        ($suffix-map
+         ;; (‹extension› . ‹shell program name›)
+         `(
+           ("yml" . "ansible-playbook -vvvv")
+           ("php" . "php")
+           ("pl" . "perl")
+           ("py" . "python")
+           ("py3" . ,(if (string-equal system-type "windows-nt") "c:/Python32/python.exe" "python3"))
+           ("rb" . "ruby")
+           ("go" . "go run")
+           ("hs" . "runhaskell")
+           ("js" . "node") ; node.js
+           ("ts" . "tsc --alwaysStrict --lib DOM,ES2015,DOM.Iterable,ScriptHost --target ES5") ; TypeScript
+           ("sh" . "bash")
+           ("clj" . "java -cp /home/xah/apps/clojure-1.6.0/clojure-1.6.0.jar clojure.main")
+           ("rkt" . "racket")
+           ("ml" . "ocaml")
+           ("vbs" . "cscript")
+           ("tex" . "pdflatex")
+           ("latex" . "pdflatex")
+           ("java" . "javac")
+           ;; ("pov" . "/usr/local/bin/povray +R2 +A0.1 +J1.2 +Am2 +Q9 +H480 +W640")
+           ))
+        $fname
+        $fSuffix
+        $prog-name
+        $cmd-str)
+    (when (not (buffer-file-name)) (save-buffer))
+    (when (buffer-modified-p) (save-buffer))
+    (setq $fname (buffer-file-name))
+    (setq $fSuffix (file-name-extension $fname))
+    (setq $prog-name (cdr (assoc $fSuffix $suffix-map)))
+    (setq $cmd-str (concat $prog-name " \""   $fname "\""))
+    (cond
+     ((string-equal $fSuffix "el") (load $fname))
+     ((string-equal $fSuffix "go")
+      (when (fboundp 'gofmt)
+        (gofmt)
+        (shell-command $cmd-str "*xah-run-current-file output*" )))
+     ((string-equal $fSuffix "java")
+      (progn
+        (shell-command $cmd-str "*xah-run-current-file output*" )
+        (shell-command
+         (format "java %s" (file-name-sans-extension (file-name-nondirectory $fname))))))
+     (t (if $prog-name
+            (progn
+              (message "Running…")
+              (shell-command $cmd-str "*xah-run-current-file output*" ))
+          (message "No recognized program file suffix for this file."))))))
+   (global-set-key (kbd "<f8>") 'xah-run-current-file)
+  #+END_SRC
+
+  #+RESULTS:
+  : xah-run-current-file
+
+
+* Emacs Setting
+  Tired of rebooting the emacs. Closing and opening as ~emacs --debug-init /home/thapakazi/.emacs.d/config.org -fs~.
+  I have a solution
+#+BEGIN_SRC emacs-lisp
+(defun restart-emacs ()
+  (interactive)
+   (load-file "~/.emacs.d/init.el"))
+(bind-key "s-<f5>" 'restart-emacs)
+
+#+END_SRC
+  
+* [[https://github.com/jacktasia/dumb-jump][Dumb Jump]]
+  My brother [[https://github.com/neymarsabin][@neymarsabin]] suggested this via telegram. I needed sth similar, lets see the drill.
+  #+BEGIN_SRC emacs-lisp
+    (use-package dumb-jump
+    :ensure t
+    :config
+    (dumb-jump-mode))
+
+  #+END_SRC
+  
+
+* Bookmark with [[https://github.com/joodland/bm][bm]]
+
+  Stealing configs from [[https://github.com/rhoit/dot-emacs#414-bookmark][rho]] 
+  #+BEGIN_SRC emacs-lisp
+  (use-package bm
+	:ensure t
+	:config 
+	(setq bm-marker 'bm-marker-left)
+	(global-set-key (kbd "<left-fringe> S-<mouse-1>") 'bm-toggle-mouse)
+	(global-set-key (kbd "S-<mouse-5>") 'bm-next-mouse)
+	(global-set-key (kbd "S-<mouse-4>") 'bm-previous-mouse)
+	)
+  #+END_SRC

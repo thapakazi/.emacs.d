@@ -1185,7 +1185,7 @@ This means, between the beginning of line and the point."
 (require 'org-mouse)
  #+end_src
 
-** Org babel for go language
+** COMMENT Org babel for go language
  [[https://raw.githubusercontent.com/pope/ob-go/master/ob-go.el][ob-go.el]] --- org-babel functions for go evaluation
 #+BEGIN_SRC emacs-lisp
 ;;; ob-go.el --- org-babel functions for go evaluation
@@ -1395,29 +1395,26 @@ Emacs-lisp table, otherwise return the results as a string."
 ** Org babel languages
 
   #+begin_src emacs-lisp
-(org-babel-do-load-languages
- 'org-babel-load-languages
- '((python . t)
-   (C . t)
-   (calc . t)
-   (latex . t)
-   (java . t)
-   (ruby . t)
-   (scheme . t)
-   (sh . t)
-   (sqlite . t)
-   (go . t)
-   (js . t)))
+    (org-babel-do-load-languages
+     'org-babel-load-languages
+     '((python . t)
+       (C . t)
+       (calc . t)
+       (latex . t)
+       (java . t)
+       (ruby . t)
+       (scheme . t)
+       (shell . t)
+       (sqlite . t)
+       (js . t)))
 
-(defun my-org-confirm-babel-evaluate (lang body)
-  "Do not confirm evaluation for these languages."
-  (not (or (string= lang "C")
-           (string= lang "java")
-           (string= lang "python")
-           (string= lang "emacs-lisp")
-           (string= lang "sh")
-           (string= lang "sqlite"))))
-(setq org-confirm-babel-evaluate 'my-org-confirm-babel-evaluate)
+    ;; (defun my-org-confirm-babel-evaluate (lang body)
+    ;;   "Do not confirm evaluation for these languages."
+    ;;   (not (or (string= lang "C")
+    ;; 	   (string= lang "java")
+    ;; 	   (string= lang "python")
+    ;; 	   (string= lang "sqlite"))))
+    ;; (setq org-confirm-babel-evaluate 'my-org-confirm-babel-evaluate)
   #+end_src
 
 ** Org babel/source blocks
