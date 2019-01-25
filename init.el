@@ -32,12 +32,19 @@
 ;; (require 'diminish)                ;; if you use :diminish
 (require 'bind-key)
 
+;; packages updated automatically
+;; (use-package auto-package-update
+;;   :config
+;;   (setq auto-package-update-delete-old-versions t)
+;;   (setq auto-package-update-hide-results t)
+;;   (auto-package-update-maybe))
+
 ;; Add a directory to the load path so we can put extra files there
 (add-to-list 'load-path "~/.emacs.d/custom-load-list/")
 
 ;;; Load the config
 (org-babel-load-file (concat user-emacs-directory "basics.org"))
-(org-babel-load-file (concat user-emacs-directory "config.org"))
+(org-babel-load-file (concat user-emacs-directory "defaults.org"))
 (org-babel-load-file (concat user-emacs-directory "utils.org"))
 
 ;; (org-babel-load-file (concat user-emacs-directory "settings.org"))
