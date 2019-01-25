@@ -17,6 +17,7 @@ basics.el
 ror.el
 ui.el
 utils.el
+defaults.el
 
 # auto generated files
 projectile.cache
