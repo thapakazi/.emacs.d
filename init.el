@@ -37,7 +37,7 @@
 
 ;;; Load the config
 (org-babel-load-file (concat user-emacs-directory "basics.org"))
-;; (org-babel-load-file (concat user-emacs-directory "config.org"))
+(org-babel-load-file (concat user-emacs-directory "config.org"))
 (org-babel-load-file (concat user-emacs-directory "utils.org"))
 
 ;; (org-babel-load-file (concat user-emacs-directory "settings.org"))
