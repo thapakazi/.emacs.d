@@ -241,7 +241,24 @@ Version 2017-07-31"
 
   #+END_SRC
   
+* Mark Ring
+  read more on [[http://ergoemacs.org/emacs/emacs_jump_to_previous_position.html][ergoemacs]]
+ #+begin_src emacs-lisp
+(setq mark-ring-max 6)
+(setq global-mark-ring-max 10)
 
+(defun xah-pop-local-mark-ring ()
+  "Move cursor to last mark position of current buffer.
+Call this repeatedly will cycle all positions in `mark-ring'.
+URL `http://ergoemacs.org/emacs/emacs_jump_to_previous_position.html'
+Version 2016-04-04"
+  (interactive)
+  (set-mark-command t))
+
+
+(global-set-key (kbd "<f6>") 'pop-global-mark)
+(global-set-key (kbd "<S-f6>") 'xah-pop-local-mark-ring)
+ #+end_src
 * Bookmark with [[https://github.com/joodland/bm][bm]]
 
   Stealing configs from [[https://github.com/rhoit/dot-emacs#414-bookmark][rho]] 
