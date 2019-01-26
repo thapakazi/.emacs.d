@@ -188,6 +188,3 @@
   ("C-c p" . 'projectile-command-map)
   )
 #+END_SRC
-
-#+RESULTS:
-: projectile-command-map

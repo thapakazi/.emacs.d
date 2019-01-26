@@ -126,26 +126,14 @@
 
  #+RESULTS:
 
-
-* Yasnippet 
-
- Yeah, snippets! I start with snippets from [[https://github.com/AndreaCrotti/yasnippet-snippets][Andrea Crotti's collection]]
- and have also modified them and added my own.
-
- It takes a few seconds to load and I don't need them immediately when
- Emacs starts up, so we can defer loading yasnippet until there's some
- idle time.
-
+* Yasnippet
  #+begin_src emacs-lisp
-   (use-package yasnippet
-    :ensure t
-    :diminish yas-minor-mode
-    )
-
+(use-package yasnippet
+  :ensure t
+  :config
+  (setq yas-snippet-dirs '("~/.emacs.d/snippets"))
+  (yas-global-mode))
  #+end_src
-
- #+RESULTS:
-
 
 * Run buffer
   src: http://ergoemacs.org/emacs/elisp_run_current_file.html

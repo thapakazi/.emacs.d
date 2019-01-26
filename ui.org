@@ -208,12 +208,13 @@
                 neo-persist-show nil
                 neo-show-hidden-files t
                 neo-auto-indent-point t
-		;;projectile-switch-project-action 'neotree-projectile-action
-		neo-theme (if (display-graphic-p) 'icons 'arrow)
-		))
+		        ;;projectile-switch-project-action 'neotree-projectile-action
+		        neo-theme (if (display-graphic-p) 'icons 'arrow))
+  )
 #+END_SRC
 
 #+RESULTS:
+: neotree-toggle
 * kill ☠ ring 💍
   Popup kill ring. Lets try this
   desc: browse your emacs kill ring in an autocomplete style popup menu
