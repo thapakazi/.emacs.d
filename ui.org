@@ -76,6 +76,17 @@
     (bind-key "s-<f12>" 'switch-theme)
     (bind-key "s-<f11>" 'disable-active-themes)
     #+end_src
+** Jazz Theme for nights
+   #+begin_src emacs-lisp
+(use-package jazz-theme
+  :ensure t
+  :config
+  ;; (load-theme 'spacemacs-light t)
+  )
+   #+end_src
+
+   #+RESULTS:
+
 * Font
 
   [[http://levien.com/type/myfonts/inconsolata.html][Inconsolata]] is a nice monospaced font.

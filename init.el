@@ -54,6 +54,8 @@
 
 
 (org-babel-load-file (concat user-emacs-directory "go-lang.org"))
+(org-babel-load-file (concat user-emacs-directory "devops.org"))
+(org-babel-load-file (concat user-emacs-directory "reactjs.org"))
 
 ;;(org-babel-load-file (concat user-emacs-directory "fun.org"))
 
@@ -99,6 +101,24 @@
    (quote
     ("#002b36" "#002b36" "#002b36" "#002b36" "#002b36" "#002b36" "#002b36" "#002b36")))
  '(hl-paren-colors (quote ("#2aa198" "#b58900" "#268bd2" "#6c71c4" "#859900")))
+ '(hl-todo-keyword-faces
+   (quote
+    (("TODO" . "#dc752f")
+     ("NEXT" . "#dc752f")
+     ("THEM" . "#2d9574")
+     ("PROG" . "#3a81c3")
+     ("OKAY" . "#3a81c3")
+     ("DONT" . "#f2241f")
+     ("FAIL" . "#f2241f")
+     ("DONE" . "#42ae2c")
+     ("NOTE" . "#b1951d")
+     ("KLUDGE" . "#b1951d")
+     ("HACK" . "#b1951d")
+     ("TEMP" . "#b1951d")
+     ("FIXME" . "#dc752f")
+     ("XXX" . "#dc752f")
+     ("XXXX" . "#dc752f")
+     ("???" . "#dc752f"))))
  '(jdee-db-active-breakpoint-face-colors (cons "#1B2229" "#51afef"))
  '(jdee-db-requested-breakpoint-face-colors (cons "#1B2229" "#98be65"))
  '(jdee-db-spec-breakpoint-face-colors (cons "#1B2229" "#3f444a"))
@@ -114,7 +134,7 @@
  '(org-fontify-whole-heading-line t)
  '(package-selected-packages
    (quote
-    (ox-gfm solidity-mode nginx-mode edit-indirect which-key counsel-projectile dumb-jump multiple-cursors markdown-mode+ popup-kill-ring beacon htmlize ox-reveal ag swiper hydra yaml-mode smooth-scrolling smooth-scroll org-link-minor-mode elfeed projectile-rails pandoc ox-pandoc try expand-region hungry-delete org-bullets go-eldoc use-package)))
+    (tide rjsx-mode dockerfile-mode terraform-mode evil-magit jazz-theme ox-gfm solidity-mode nginx-mode edit-indirect which-key counsel-projectile dumb-jump multiple-cursors markdown-mode+ popup-kill-ring beacon htmlize ox-reveal ag swiper hydra yaml-mode smooth-scrolling smooth-scroll org-link-minor-mode elfeed projectile-rails pandoc ox-pandoc try expand-region hungry-delete org-bullets go-eldoc use-package)))
  '(pdf-view-midnight-colors (quote ("#969896" . "#f8eec7")))
  '(pos-tip-background-color "#073642")
  '(pos-tip-foreground-color "#93a1a1")

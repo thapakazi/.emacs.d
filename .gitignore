@@ -18,8 +18,11 @@ ror.el
 ui.el
 utils.el
 defaults.el
+reactjs.el
+devops.el
 
 # auto generated files
 projectile.cache
 rake.cache
 ac-comphist.dat
+

@@ -1,0 +1,14 @@
+#+TITLE: devops tools are grown up with emacs
+#+DATE: Sunday, Oct 18 2015
+#+DESCRIPTION: curated list of modes for devops tools
+
+* Dockerfile
+  docker-docker-docker, its everywhere
+#+BEGIN_SRC emacs-lisp
+(use-package dockerfile-mode
+  :ensure t
+  :config
+  (add-to-list 'auto-mode-alist '("Dockerfile\\'" . dockerfile-mode)
+))
+#+END_SRC
+
