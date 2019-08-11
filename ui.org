@@ -86,6 +86,17 @@
    #+end_src
 
    #+RESULTS:
+** github themes
+   #+begin_src emacs-lisp
+(use-package github-theme
+  :ensure t
+  :config
+  ;; (load-theme 'github t)
+  )
+   #+end_src
+
+   #+RESULTS:
+
 
 * Font
 
@@ -127,7 +138,6 @@
   #+RESULTS:
   : ((font . Inconsolata-18) (vertical-scroll-bars))
    
-
 * Mode Icons
    Show icons instead of mode names in emacs.
 #+BEGIN_SRC emacs-lisp

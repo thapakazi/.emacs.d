@@ -21,6 +21,8 @@ defaults.el
 reactjs.el
 devops.el
 
+# ya-snippets
+snippets/*
 # auto generated files
 projectile.cache
 rake.cache
