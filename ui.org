@@ -220,6 +220,7 @@
   :ensure t
   :bind (("<f9>" . neotree-toggle))
   :config (setq neo-window-width 20
+                neo-window-fixed-size nil
                 neo-create-file-auto-open t
                 neo-banner-message nil
                 neo-show-updir-line nil
@@ -274,3 +275,10 @@
 
   #+RESULTS:
   : t
+* Toggle Truncate line
+  #+begin_src emacs-lisp
+  (toggle-truncate-lines)
+  #+end_src
+
+  #+RESULTS:
+  : Truncate long lines enabled
