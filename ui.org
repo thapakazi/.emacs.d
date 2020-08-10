@@ -49,7 +49,7 @@
   :ensure t
   :no-require t
   :config
-  (load-theme 'spacemacs-light t)
+  (load-theme 'spacemacs-dark t)
   )
    #+end_src
 
@@ -76,7 +76,7 @@
     (bind-key "s-<f12>" 'switch-theme)
     (bind-key "s-<f11>" 'disable-active-themes)
     #+end_src
-** Jazz Theme for nights
+** COMMENT Jazz Theme for nights
    #+begin_src emacs-lisp
 (use-package jazz-theme
   :ensure t
@@ -86,7 +86,7 @@
    #+end_src
 
    #+RESULTS:
-** github themes
+** COMMENT github themes
    #+begin_src emacs-lisp
 (use-package github-theme
   :ensure t
@@ -261,6 +261,7 @@
 * Global hl line mode
   #+BEGIN_SRC emacs-lisp
   (global-hl-line-mode 1)
+  ;; (set-face-background hl-line-face "#222133" )
   #+END_SRC
 
   #+RESULTS:
@@ -282,3 +283,38 @@
 
   #+RESULTS:
   : Truncate long lines enabled
+* COMMENT My Own
+  #+begin_src elisp
+  (require 'hl-line)
+  (set-face-background hl-line-face "#222133" )
+  #+end_src
+* Electric Pair Mode
+  #+begin_src emacs-lisp
+  (electric-pair-mode 1)
+  #+end_src
+
+  #+RESULTS:
+  : t
+* modeline | [[https://github.com/seagle0128/doom-modeline][doom-modeline]]
+  #+begin_src emacs-lisp
+(use-package doom-modeline
+  :ensure t
+  :init (doom-modeline-mode 1)
+  :config (custom-set-faces
+           '(mode-line ((t (:family "Noto Sans" :height 0.8))))
+           '(mode-line-inactive ((t (:family "Noto Sans" :height 0.8))))
+           )
+)
+  #+end_src
+
+* zoom window | [[https://github.com/emacsorphanage/zoom-window][zoom-window]]
+  miss the zoom like feature on tmux ;)
+  #+begin_src emacs-lisp
+(use-package zoom-window
+  :ensure t
+  :bind (("C-z" . zoom-window-zoom)
+         ("C-S-z" . zoom-window-next))
+  :config(custom-set-variables
+          '(zoom-window-mode-line-color "WHITESMOKE"))
+  )
+  #+end_src

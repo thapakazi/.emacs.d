@@ -188,3 +188,8 @@
   ("C-c p" . 'projectile-command-map)
   )
 #+END_SRC
+* Set default envs
+  #+begin_src emacs-lisp
+  (setenv "VISUAL" "emacsclient")
+  (setenv "EDITOR" (getenv "VISUAL"))
+  #+end_src
