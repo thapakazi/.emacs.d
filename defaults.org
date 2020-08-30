@@ -16,6 +16,7 @@
 ;; Keep all backup and auto-save files in one directory
 (setq backup-directory-alist '(("." . "~/.emacs.d/backups")))
 (setq auto-save-file-name-transforms '((".*" "~/.emacs.d/auto-save-list/" t)))
+(setq create-lockfiles nil)
 
 ;; UTF-8 please
 (setq locale-coding-system 'utf-8) ; pretty

@@ -260,3 +260,17 @@ Version 2016-04-04"
 	(global-set-key (kbd "S-<mouse-4>") 'bm-previous-mouse)
 	)
   #+END_SRC
+* Custom Split Window
+  credits: https://stackoverflow.com/a/6465415/2636474
+  #+begin_src emacs-lisp
+  (global-set-key "\C-x2" (lambda () (interactive)(split-window-vertically) (other-window 1)))
+  (global-set-key "\C-x3" (lambda () (interactive)(split-window-horizontally) (other-window 1)))
+  #+end_src
+* flyspell
+  I think I would need help from flyspell to improve my typo.
+  #+begin_src emacs-lisp
+(dolist (hook '(text-mode-hook))
+  (add-hook hook (lambda () (flyspell-mode 1))))
+(dolist (hook '(change-log-mode-hook log-edit-mode-hook))
+  (add-hook hook (lambda () (flyspell-mode -1))))
+  #+end_src

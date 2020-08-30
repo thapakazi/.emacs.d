@@ -97,24 +97,21 @@
 
    #+RESULTS:
 
-
 * Font
 
-  [[http://levien.com/type/myfonts/inconsolata.html][Inconsolata]] is a nice monospaced font.
-
-  Pull it with pacman. 
-  #+begin_src sh :tangle no :results drawery
-  yes 'y' | sudo pacman -S ttf-inconsolata
+  *Change:* Switching to [[https://adobe-fonts.github.io/source-code-pro/][SourceCodePro]] font, Pull it from aur.
+  #+begin_src sh :tangle no :results drawer
+  yes 'y' | sudo yaourt -S adobe-source-code-pro-fonts
   #+end_src
 
   #+RESULTS:
-  :RESULTS:
+  :results:
   resolving dependencies...
   looking for conflicting packages...
 
-  Packages (1) ttf-inconsolata-20151221.480630d-1
+  Packages (1) adobe-source-code-pro-fonts-2.030ro+1.050it-6
 
-  Total Installed Size:  0.18 MiB
+  Total Installed Size:  2.14 MiB
   Net Upgrade Size:      0.00 MiB
 
   checking keyring...
@@ -123,20 +120,33 @@
   checking for file conflicts...
   checking available disk space...
   :: Processing package changes...
-  reinstalling ttf-inconsolata...
-  Updating font cache... done.
-  :END:
+  reinstalling adobe-source-code-pro-fonts...
+  :: Running post-transaction hooks...
+  (1/4) Arming ConditionNeedsUpdate...
+  (2/4) Updating fontconfig cache...
+  (3/4) Updating 32-bit fontconfig cache...
+  (4/4) Updating X fontdir indices...
+  No database errors have been found!
+  :end:
 
   
   And here's how we tell Emacs to use the font we want to use.
 
   #+begin_src emacs-lisp
 (add-to-list 'default-frame-alist
-             '(font . "Inconsolata-18"))
+             '(font . "Inconsolata-18")
+)
+(add-to-list 'default-frame-alist
+             '(font . "SourceCodeProMedium-18")
+)
+(set-face-attribute 'default nil
+                    :family "Source Code Pro"
+                    :height 160
+                    :weight 'medium
+                    :width 'normal)
   #+end_src
 
   #+RESULTS:
-  : ((font . Inconsolata-18) (vertical-scroll-bars))
    
 * Mode Icons
    Show icons instead of mode names in emacs.
