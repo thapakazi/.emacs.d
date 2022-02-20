@@ -421,3 +421,36 @@ Returns list of properties that still must be filled in"
    #+begin_src emacs-lisp
 (bind-key "M-g h" #'hugo)
    #+end_src
+
+
+* Org Roam to rescue
+  Org roam to rescue
+
+  #+begin_src emacs-lisp
+(use-package org-roam
+  :ensure t
+  :init
+  (setq org-roam-v2-ack t)
+  :custom
+  (org-roam-directory (file-truename "~/repos/thapakazi/orgr"))
+  (org-roam-completion-everywhere t)
+  :bind (("C-c n l" . org-roam-buffer-toggle)
+         ("C-c n f" . org-roam-node-find)
+         ("C-c n g" . org-roam-graph)
+         ("C-c n i" . org-roam-node-insert)
+         ("C-c n c" . org-roam-capture)
+         :map org-mode-map
+         ("C-M-i" . completion-at-point)
+         ;; Dailies
+         ("C-c n j" . org-roam-dailies-capture-today))
+  ("C-c n d" . org-roam-dailies-map)
+  :config
+  (org-roam-db-autosync-mode)
+  ;; If using org-roam-protocol
+  (require 'org-roam-protocol)
+  (org-roam-setup)
+  )
+  #+end_src
+
+  #+RESULTS:
+  : t

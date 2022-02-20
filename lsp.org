@@ -1,0 +1,75 @@
+#+TITLE: LSP LSP LSP !!!
+#+DATE: Thursday, Sep 17 2020
+#+DESCRIPTION: lsp all the things
+
+* get lsp
+  #+begin_src emacs-lisp
+;; set prefix for lsp-command-keymap (few alternatives - "C-l", "C-c l")
+(setq lsp-keymap-prefix "M-.")
+
+(use-package lsp-mode
+  :defer t
+  :diminish lsp-mode
+  :hook (((js2-mode rjsx-mode) . lsp))
+  :commands lsp
+  :config
+  (setq lsp-auto-configure t
+        lsp-auto-guess-root t
+        ;; don't set flymake or lsp-ui so the default linter doesn't get trampled
+        lsp-diagnostic-package :none)
+  ;; keybinds after load
+  ;; (evil-leader/set-key
+  ;;   "jd"  #'lsp-goto-type-definition ; (j)ump to (d)efinition
+  ;;   "jb"  #'xref-pop-marker-stack))  ; (j)ump (b)ack to marker
+)
+
+;; (use-package lsp-mode
+;;   :defer t
+;;   :diminish lsp-mode
+;;   :hook (((js2-mode rjsx-mode) . lsp)))
+;;   :commands lsp
+;;   :config
+;;   (setq lsp-auto-configure t
+;;         lsp-auto-guess-root t
+;;         ;; don't set flymake or lsp-ui so the default linter doesn't get trampled
+;;         lsp-diagnostic-package :none)
+;; )
+
+(use-package company-lsp
+  :defer t
+  :config
+  (setq company-lsp-cache-candidates 'auto
+        company-lsp-async t
+        company-lsp-enable-snippet nil
+        company-lsp-enable-recompletion t))
+
+(use-package lsp-ui
+  :defer t
+  :config
+  (setq lsp-ui-sideline-enable t
+        ;; disable flycheck setup so default linter isn't trampled
+        lsp-ui-flycheck-enable nil
+        lsp-ui-sideline-show-symbol nil
+        lsp-ui-sideline-show-hover nil
+        lsp-ui-sideline-show-code-actions nil
+        lsp-ui-peek-enable nil
+        lsp-ui-imenu-enable nil
+        lsp-ui-doc-enable nil))
+
+;; if you are helm user
+;; (use-package helm-lsp :commands helm-lsp-workspace-symbol)
+;; if you are ivy user
+;; (use-package lsp-ivy :commands lsp-ivy-workspace-symbol)
+;; (use-package lsp-treemacs :commands lsp-treemacs-errors-list)
+
+;; ;; optionally if you want to use debugger
+;; (use-package dap-mode
+;;   :ensure t)
+;; ;; (use-package dap-LANGUAGE) to load the dap adapter for your language
+
+;; optional if you want which-key integration
+(use-package which-key
+  :config
+  (which-key-mode))
+  #+end_src
+

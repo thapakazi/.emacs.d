@@ -11,12 +11,15 @@
         ("\\.jsx\\'" . rjsx-mode))
   :init
   (add-hook 'rjsx-mode-hook 'prettier-js-mode)
-  (add-hook 'rjsx-mode-hook 'tide-mode))
+  :config
+  (setq js2-mode-show-parse-errors nil
+        js2-mode-show-strict-warnings nil
+        js2-basic-offset 2
+        js-indent-level 2)
+  )
 #+END_SRC
 
-
-
-* Tide
+* COMMENT Tide
   #+begin_src emacs-lisp
 (use-package tide
   :ensure t
@@ -33,4 +36,32 @@
   (company-mode +1))
   #+end_src
 
+* React Snippets
+  #+begin_src emacs-lisp
+(use-package react-snippets
+  :ensure t
+  :config
+  (require 'react-snippets)
+)
+  #+end_src
 
+* Node modules
+  #+begin_src emacs-lisp
+(use-package add-node-modules-path
+  :defer t
+  :hook (((js2-mode rjsx-mode) . add-node-modules-path)))
+  #+end_src
+* Prettier
+  #+begin_src emacs-lisp
+(use-package prettier-js
+  :defer t
+  :diminish prettier-js-mode
+  :hook (((js2-mode rjsx-mode) . prettier-js-mode))
+  ;; :init
+  ;; (evil-leader/set-key-for-mode 'rjsx-mode
+  ;;   "fp" 'prettier-js-mode)) ; (f)ormat (p)rettier
+  )
+  #+end_src
+
+  #+RESULTS:
+  | lsp | add-node-modules-path | prettier-js-mode |

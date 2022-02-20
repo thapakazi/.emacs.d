@@ -3,38 +3,108 @@
 
 (setq mc/cmds-to-run-for-all
       '(
+        beginning-of-buffer
         beginning-of-visual-line
         c-electric-colon
         c-electric-delete-forward
         c-electric-paren
         c-electric-semi&comma
         c-electric-slash
+        counsel-recentf
         dabbrev-expand
         delete-horizontal-space
         electric-newline-and-maybe-indent
+        end-of-buffer
         end-of-visual-line
+        eval-print-last-sexp
+        evil-append
+        evil-backward-char
+        evil-copy-from-below
+        evil-delete
+        evil-delete-char
+        evil-emacs-state
+        evil-end-of-line
+        evil-exit-visual-state
+        evil-find-char
+        evil-first-non-blank
+        evil-force-normal-state
+        evil-forward-char
+        evil-forward-word-begin
+        evil-insert
+        evil-insert-line
+        evil-next-line
+        evil-normal-state
+        evil-paste-after
+        evil-scroll-down
+        evil-scroll-line-down
+        evil-scroll-line-up
+        evil-shift-left-line
+        evil-use-register
+        evil-visual-block
+        evil-visual-char
+        evil-yank
+        goto-line
         helm-confirm-and-exit-minibuffer
+        hungry-delete-forward
         indent-for-tab-command
+        ivy-switch-buffer
+        kill-region
         kill-visual-line
+        magit-status
         mark-whole-buffer
         markdown-insert-bold
+        markdown-outdent-or-delete
         mc/mark-next-line-like-this
         org-beginning-of-line
         org-ctrl-c-ctrl-c
+        org-cycle
         org-delete-char
         org-end-of-line
+        org-export-dispatch
+        org-force-self-insert
         org-metaright
+        org-return-indent
         org-self-insert-command
         org-shiftmetaright
+        org-yank
         other-frame
+        popup-kill-ring
+        rjsx-delete-creates-full-tag
         sgml-close-tag
         sgml-slash
+        text-scale-adjust
+        tide-jump-to-definition
         transpose-words
+        yaml-electric-backspace
         yas-expand
         ))
 
 (setq mc/cmds-to-run-once
       '(
+        ace-jump-mode
+        bm-toggle-mouse
+        dap-tooltip-mouse-motion
         dired-unmark-backward
+        evil-backward-word-begin
+        evil-delete-backward-char-and-join
+        evil-exit-emacs-state
+        evil-mouse-drag-region
+        handle-switch-frame
+        hungry-delete-backward
+        ignore
         markdown-exdent-or-delete
+        mouse-appearance-menu
+        mouse-buffer-menu
+        mouse-drag-mode-line
+        mouse-drag-secondary
+        mouse-set-region
+        org-edit-special
+        org-mouse-down-mouse
+        org-return
+        query-replace
+        rjsx-electric-gt
+        swiper
+        switch-theme
+        winner-undo
+        yaml-electric-dash-and-dot
         ))

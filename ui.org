@@ -101,7 +101,7 @@
 
   *Change:* Switching to [[https://adobe-fonts.github.io/source-code-pro/][SourceCodePro]] font, Pull it from aur.
   #+begin_src sh :tangle no :results drawer
-  yes 'y' | sudo yaourt -S adobe-source-code-pro-fonts
+  yes 'y' | sudo yaourt -S ttf-jetbrains-mono
   #+end_src
 
   #+RESULTS:
@@ -109,9 +109,9 @@
   resolving dependencies...
   looking for conflicting packages...
 
-  Packages (1) adobe-source-code-pro-fonts-2.030ro+1.050it-6
+  Packages (1) ttf-jetbrains-mono-1.0.6-2
 
-  Total Installed Size:  2.14 MiB
+  Total Installed Size:  2.40 MiB
   Net Upgrade Size:      0.00 MiB
 
   checking keyring...
@@ -120,7 +120,7 @@
   checking for file conflicts...
   checking available disk space...
   :: Processing package changes...
-  reinstalling adobe-source-code-pro-fonts...
+  reinstalling ttf-jetbrains-mono...
   :: Running post-transaction hooks...
   (1/4) Arming ConditionNeedsUpdate...
   (2/4) Updating fontconfig cache...
@@ -137,11 +137,11 @@
              '(font . "Inconsolata-18")
 )
 (add-to-list 'default-frame-alist
-             '(font . "SourceCodeProMedium-18")
+             '(font . "JetBrainsMono-18")
 )
 (set-face-attribute 'default nil
-                    :family "Source Code Pro"
-                    :height 160
+                    :family "Source Brains Mono"
+                    :height 130
                     :weight 'medium
                     :width 'normal)
   #+end_src
@@ -311,11 +311,14 @@
   :ensure t
   :init (doom-modeline-mode 1)
   :config (custom-set-faces
-           '(mode-line ((t (:family "Noto Sans" :height 0.8))))
-           '(mode-line-inactive ((t (:family "Noto Sans" :height 0.8))))
+           ;; '(mode-line ((t (:family "Noto Sans" :height 0.7))))
+           ;; '(mode-line-inactive ((t (:family "Noto Sans" :height 0.7))))
            )
 )
   #+end_src
+
+  #+RESULTS:
+  : t
 
 * zoom window | [[https://github.com/emacsorphanage/zoom-window][zoom-window]]
   miss the zoom like feature on tmux ;)
