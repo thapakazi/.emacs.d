@@ -346,3 +346,18 @@ Version 2016-04-04"
 
   #+RESULTS:
   : t
+
+* [[https://github.com/rejeep/drag-stuff.el][drag-stuffs]]
+move things up and down easily
+
+#+begin_src emacs-lisp
+(use-package drag-stuff
+ :ensure t
+ :config
+ (drag-stuff-global-mode t)
+ (drag-stuff-define-keys)
+)
+#+end_src
+
+#+RESULTS:
+: t
