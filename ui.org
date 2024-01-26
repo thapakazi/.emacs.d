@@ -97,6 +97,23 @@
 
    #+RESULTS:
 
+* Time based theme switch
+  Theme switch based on time, written with assist from ChatGPT 4.0
+  #+begin_src emacs-lisp
+(defun set-theme-based-on-time ()
+  "Set the Emacs theme based on the current time."
+  (let ((hour (string-to-number (format-time-string "%H"))))
+    (if (and (>= hour 7) (< hour 18))
+        (load-theme 'spacemacs-light t)  ; Use your preferred light theme
+      (load-theme 'spacemacs-dark t)))) ; Use your preferred dark theme
+
+;; Run the function once when Emacs starts
+(set-theme-based-on-time)
+
+;; Optionally, re-check every hour
+(run-at-tie "20 minutes" 3600 'set-theme-based-on-time)
+  #+end_src
+
 * Font
 
   *Change:* Switching to [[https://adobe-fonts.github.io/source-code-pro/][SourceCodePro]] font, Pull it from aur.
@@ -134,14 +151,11 @@
 
   #+begin_src emacs-lisp
 (add-to-list 'default-frame-alist
-             '(font . "Inconsolata-18")
-)
-(add-to-list 'default-frame-alist
-             '(font . "JetBrainsMono-18")
+             '(font . "JetBrains Mono 20")
 )
 (set-face-attribute 'default nil
-                    :family "Source Brains Mono"
-                    :height 130
+                    :family "JetBrains Mono"
+                    :height  130 
                     :weight 'medium
                     :width 'normal)
   #+end_src
