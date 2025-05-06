@@ -17,21 +17,22 @@
   Set up some global key bindings that integrate with Org Mode features.
 
  #+begin_src emacs-lisp
- (bind-key "C-c l" 'org-store-link)
- (bind-key "C-c c" 'org-capture)
  (bind-key "C-c a" 'org-agenda)
  #+end_src
 
-*** COMMENT Org agenda
+*** Org agenda
 
- Learned about [[https://github.com/sachac/.emacs.d/blob/83d21e473368adb1f63e582a6595450fcd0e787c/Sacha.org#org-agenda][this =delq= and =mapcar= trick from Sacha Chua's config]].
+  #+begin_src emacs-lisp
+(setq org-directory "~/repos/thapakazi/repos/orgr")
+(setq org-agenda-files '("Tasks.org" "Birthdays.org" "Habits.org"))
 
- #+begin_src emacs-lisp
- (setq org-agenda-files
-       (delq nil
-             (mapcar (lambda (x) (and (file-exists-p x) x))
-                     '("~/Dropbox/Agenda"))))
- #+end_src
+;; If you only want to see the agenda for today
+;; (setq org-agenda-span 'day)
+
+(setq org-agenda-start-with-log-mode t)
+(setq org-log-done 'time)
+(setq org-log-into-drawer t)
+  #+end_src
 
  *** Org capture
 
@@ -245,7 +246,7 @@
    #+begin_src emacs-lisp
    (require 'org-tempo)
    #+end_src
-** Org mouse
+** COMMENT Org mouse
    Better mouse support for org-mode: [[http://orgmode.org/w/?p=org-mode.git;a=blob_plain;f=lisp/org-mouse.el;hb=HEAD][org-mouse]]
    Its loaded from [[./custom-load-list/org-mouse.el][custom-load-list-dir]]
 
@@ -427,30 +428,178 @@ Returns list of properties that still must be filled in"
   Org roam to rescue
 
   #+begin_src emacs-lisp
-(use-package org-roam
-  :ensure t
-  :init
-  (setq org-roam-v2-ack t)
-  :custom
-  (org-roam-directory (file-truename "~/repos/thapakazi/orgr"))
-  (org-roam-completion-everywhere t)
-  :bind (("C-c n l" . org-roam-buffer-toggle)
-         ("C-c n f" . org-roam-node-find)
-         ("C-c n g" . org-roam-graph)
-         ("C-c n i" . org-roam-node-insert)
-         ("C-c n c" . org-roam-capture)
-         :map org-mode-map
-         ("C-M-i" . completion-at-point)
-         ;; Dailies
-         ("C-c n j" . org-roam-dailies-capture-today))
-  ("C-c n d" . org-roam-dailies-map)
-  :config
-  (org-roam-db-autosync-mode)
-  ;; If using org-roam-protocol
-  (require 'org-roam-protocol)
-  (org-roam-setup)
-  )
+    (use-package org-roam
+      :ensure t
+      :init
+      (setq org-roam-v2-ack t)
+      :custom
+      (org-roam-directory (file-truename "~/repos/thapakazi/orgr"))
+      (org-roam-completion-everywhere t)
+      :bind (("C-c n l" . org-roam-buffer-toggle)
+             ("C-c n f" . org-roam-node-find)
+             ("C-c n g" . org-roam-graph)
+             ("C-c n i" . org-roam-node-insert)
+             ("C-c n c" . org-roam-capture)
+             :map org-mode-map
+             ("C-M-i" . completion-at-point)
+             ;; Dailies
+             ("C-c n j" . org-roam-dailies-capture-today))
+      ("C-c n d" . org-roam-dailies-map)
+      :config
+      (org-roam-db-autosync-mode)
+      ;; If using org-roam-protocol
+      (require 'org-roam-protocol)
+      (org-roam-setup)
+      (setq org-roam-dailies-directory "daily/")
+
+      (setq org-roam-dailies-capture-templates
+            '(("d" "default" entry
+               "* %?"
+               :target (file+head "%<%Y-%m-%d>.org"
+                                  "#+title: dailies:%<%Y-%m-%d>\n"))))
+    )
   #+end_src
 
   #+RESULTS:
-  : t
+  : org-roam-dailies-map
+
+
+* Org customs 
+
+src: https://systemcrafters.net/emacs-tips/presentations-with-org-present/
+#+begin_src emacs-lisp
+;;; Org Mode Appearance ------------------------------------
+
+;; Set reusable font name variables
+(defvar my/fixed-width-font "JetBrains Mono"
+  "The font to use for monospaced (fixed width) text.")
+
+(defvar my/variable-width-font "Iosevka Aile"
+  "The font to use for variable-pitch (document) text.")
+
+;; Load org-faces to make sure we can set appropriate faces
+(require 'org-faces)
+
+;; Hide emphasis markers on formatted text
+(setq org-hide-emphasis-markers t)
+
+;; Resize Org headings
+(dolist (face '((org-level-1 . 1.5)
+                (org-level-2 . 1.25)
+                (org-level-3 . 1.5)
+                (org-level-4 . 1.2)
+                (org-level-5 . 1.1)
+                (org-level-6 . 1.1)
+                (org-level-7 . 1.1)
+                (org-level-8 . 1.1)))
+  (set-face-attribute (car face) nil :font my/variable-width-font :weight 'medium :height (cdr face)))
+
+;; Make the document title a bit bigger
+(set-face-attribute 'org-document-title nil :font my/variable-width-font :weight 'bold :height 1.3)
+
+;; Make sure certain org faces use the fixed-pitch face when variable-pitch-mode is on
+(set-face-attribute 'org-block nil :foreground nil :inherit 'fixed-pitch)
+(set-face-attribute 'org-table nil :inherit 'fixed-pitch)
+(set-face-attribute 'org-formula nil :inherit 'fixed-pitch)
+(set-face-attribute 'org-code nil :inherit '(shadow fixed-pitch))
+(set-face-attribute 'org-verbatim nil :inherit '(shadow fixed-pitch))
+(set-face-attribute 'org-special-keyword nil :inherit '(font-lock-comment-face fixed-pitch))
+(set-face-attribute 'org-meta-line nil :inherit '(font-lock-comment-face fixed-pitch))
+(set-face-attribute 'org-checkbox nil :inherit 'fixed-pitch)
+#+end_src
+
+
+
+* Org Present
+** configuration
+#+begin_src emacs-lisp
+(use-package org-present 
+  :ensure t)
+
+(defun my/org-present-prepare-slide (buffer-name heading)
+  ;; Show only top-level headlines
+  (org-overview)
+
+  ;; Unfold the current entry
+  (org-show-entry)
+
+  ;; Show only direct subheadings of the slide but don't expand them
+  (org-show-children))
+
+(defun my/org-present-start ()
+  ;; Tweak font sizes
+  (setq-local face-remapping-alist '((default (:height 1.5) variable-pitch)
+                                     (header-line (:height 5.0) variable-pitch)
+                                     (org-document-title (:height 1.75) org-document-title)
+                                     (org-code (:height 1.25) org-code)
+                                     (org-verbatim (:height 1.55) org-verbatim)
+                                     (org-block (:height 1.05) org-block)
+                                     (org-block-begin-line (:height 0.7) org-block)))
+
+  ;; Set a blank header line string to create blank space at the top
+  (setq header-line-format " ")
+
+  ;; Display inline images automatically
+  (org-display-inline-images)
+
+  ;; hide cursor
+  (org-present-show-cursor)
+
+  ;; no line numbers 
+  (display-line-numbers-mode 0)
+
+  ;; no beacon flash
+  (beacon-mode 0)
+
+  ;; no flyspell check
+  (flyspell-mode-off)
+  
+  ;; hide modeline
+  (hide-mode-line-mode 1)
+  
+  ;; Center the presentation and wrap lines
+  (visual-fill-column-mode 1)
+  (visual-line-mode 1))
+
+(defun my/org-present-end ()
+  ;; Reset font customizations
+  (setq-local face-remapping-alist '((default variable-pitch default)))
+
+  ;; Clear the header line string so that it isn't displayed
+  (setq header-line-format nil)
+
+  ;; Stop displaying inline images
+  (org-remove-inline-images)
+
+  ;; no line numbers 
+  (display-line-numbers-mode 1)
+
+  ;; no beacon flash
+  (beacon-mode 1)
+
+ ;; no flyspell check
+  (flyspell-mode-on)
+
+  ;; unhide modeline
+  (hide-mode-line-mode 0)
+  
+  ;; Stop centering the document
+  (visual-fill-column-mode 0)
+  (visual-line-mode 0))
+
+;; Turn on variable pitch fonts in Org Mode buffers
+(add-hook 'org-mode-hook 'variable-pitch-mode)
+
+;; Register hooks with org-present
+(add-hook 'org-present-mode-hook 'my/org-present-start)
+(add-hook 'org-present-mode-quit-hook 'my/org-present-end)
+(add-hook 'org-present-after-navigate-functions 'my/org-present-prepare-slide)
+#+end_src
+
+** COMMENT org remoting
+#+begin_src emacs-lisp
+(use-package org-remoteimg
+  :straight (org-remoteimg :type git :host github :repo "gaoDean/org-remoteimg"))
+#+end_src
+
+#+RESULTS:

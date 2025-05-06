@@ -72,6 +72,7 @@
 
  (bind-key "M-s o" 'occur-dwim)
  #+end_src
+
 * line numbers
   Its built in to emacs 26, linum is obsolute now.
   rellated issue: https://github.com/rhoit/dot-emacs/issues/4

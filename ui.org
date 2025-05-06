@@ -111,7 +111,7 @@
 (set-theme-based-on-time)
 
 ;; Optionally, re-check every hour
-(run-at-tie "20 minutes" 3600 'set-theme-based-on-time)
+(run-at-time "20 minutes" 3600 'set-theme-based-on-time)
   #+end_src
 
 * Font
@@ -345,3 +345,88 @@
           '(zoom-window-mode-line-color "WHITESMOKE"))
   )
   #+end_src
+
+*  transparent bg
+  #+begin_src emacs-lisp
+;; Function to toggle transparency
+(defun kazi/toggle-transparency ()
+  "Toggle transparency of the current Emacs frame."
+  (interactive)
+  (let ((alpha (frame-parameter nil 'alpha)))
+    (if (or (not alpha) (eql (cdr alpha) 90))  ;; Check for the default transparency or no transparency set
+        (set-frame-parameter nil 'alpha '(100 . 100))  ;; Set to fully opaque
+      (set-frame-parameter nil 'alpha '(90 . 90)))))   ;; Set to default transparency
+
+;; Set transparency for all new frames
+(add-to-list 'default-frame-alist '(alpha . (90 . 90)))
+
+;;Key bindins
+(global-set-key (kbd "<f6>") 'kazi/toggle-transparency)
+ #+end_src
+ 
+
+* visual fill column to make it prettier
+#+begin_src emacs-lisp
+(use-package visual-fill-column
+  :ensure t
+  :config
+  ;; Configure fill width
+  (setq visual-fill-column-width 110)
+  (setq visual-fill-column-center-text t))
+#+end_src
+
+** visual line customization
+#+begin_src emacs-lisp
+(defun my-set-visual-fill-column-width (width)
+  "Set the value of visual-fill-column-width."
+  (interactive "nEnter new value for visual-fill-column-width: ")
+  (setq visual-fill-column-width width)
+  (visual-fill-column-mode 0)
+  (visual-fill-column-mode 1)
+  (message "visual-fill-column-width set to %d" visual-fill-column-width))
+
+(defun my-increase-visual-fill-column-width (inc)
+  "Increase visual-fill-column-width"
+  (interactive "p")
+  (let* ((current-value visual-fill-column-width)
+	 (new-value (+ current-value inc)))
+    (if (< new-value 5) (setq visual-fill-column-width 5)
+      (setq visual-fill-column-width new-value)))
+  (visual-fill-column-mode 0)
+  (visual-fill-column-mode 1)
+  )
+
+(defun my-adjust-visual-fill-column-width (inc)
+  (interactive "p")
+  (when (not (boundp 'visual-fill-column-width)) (setq visual-fill-column-width 100))
+  (let ((ev last-command-event)
+	(echo-keystrokes nil))
+    (let* ((base (event-basic-type ev))
+	   (step
+	    (pcase base
+	      ((or ?+ ?=) inc)
+	      (?- (- inc))
+	      (_ inc))))
+      (my-increase-visual-fill-column-width step))
+    (message "visual-fill-column-width is %d, adjust with + or -" visual-fill-column-width)
+    
+      (set-transient-map
+       (let ((map (make-sparse-keymap)))
+	 (dolist (mods '(() (control)))
+	   (dolist (key '(?- ?+ ?=))
+	     (define-key map (vector (append mods (list key)))
+	       `(lambda () (interactive) (my-adjust-visual-fill-column-width ,inc)))))
+	 map))))
+
+(global-set-key (kbd "C-c v w") 'my-set-visual-fill-column-width)
+(global-set-key (kbd "C-c v +") 'my-adjust-visual-fill-column-width)
+(global-set-key (kbd "C-c v =") 'my-adjust-visual-fill-column-width)
+(global-set-key (kbd "C-c v -") 'my-adjust-visual-fill-column-width)
+#+end_src
+
+* writeroom mode
+#+begin_src emacs-lisp
+(use-package writeroom-mode
+  :ensure t
+  )
+#+end_src

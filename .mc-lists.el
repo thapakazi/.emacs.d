@@ -30,15 +30,20 @@
         evil-force-normal-state
         evil-forward-char
         evil-forward-word-begin
+        evil-goto-first-line
         evil-insert
         evil-insert-line
+        evil-insert-resume
+        evil-jump-forward
         evil-next-line
         evil-normal-state
         evil-paste-after
+        evil-previous-line
         evil-scroll-down
         evil-scroll-line-down
         evil-scroll-line-up
         evil-shift-left-line
+        evil-undo
         evil-use-register
         evil-visual-block
         evil-visual-char
@@ -89,6 +94,8 @@
         evil-delete-backward-char-and-join
         evil-exit-emacs-state
         evil-mouse-drag-region
+        evil-search-forward
+        evil-search-next
         handle-switch-frame
         hungry-delete-backward
         ignore

@@ -6,118 +6,19 @@
 #+BEGIN_SRC emacs-lisp
 (use-package go-mode
   :ensure t
-  :config)
+)
 #+END_SRC
-* [[https://github.com/syohex/emacs-go-eldoc][Goeldoc]] - eldoc for go language
-#+BEGIN_SRC emacs-lisp
-(use-package go-eldoc
-  :ensure t
-  :config
-  (add-hook 'go-mode-hook 'go-eldoc-setup)
-  (set-face-attribute 'eldoc-highlight-function-argument nil
-                      :underline t :foreground "green"
-                      :weight 'bold)
-  )
-#+END_SRC  
-
-#+RESULTS:
-: t
-
-* COMMENT Autocomplete in go with [[https://github.com/nsf/gocode][gcode]]
-Auto-completion is one of best thing empowering us to write more stuffs
-
-#+BEGIN_SRC emacs-lisp
-  (use-package auto-complete
-    ;; gocode integration for go autocompletion
-    ;; :quelpa (go-autocomplete 
-    ;;          :repo "nsf/gocode"
-    ;;          :fetcher github
-    ;;          :files ("emacs/go-autocomplete.el"))
-    :config
-    ;; (require 'go-autocomplete)
-    ;; (require 'auto-complete-config)
-    (ac-config-default))
-#+END_SRC
-
-#+BEGIN_SRC emacs-lisp
-(when (memq window-system '(mac ns))
-  (exec-path-from-shell-initialize)
-  (exec-path-from-shell-copy-env "GOPATH"))
-
-;; Define function to call when go-mode loads
-(defun my-go-mode-hook ()
-  (add-hook 'before-save-hook 'gofmt-before-save) ; gofmt before every save
-  (setq gofmt-command "goimports")                ; gofmt uses invokes goimports
-  (if (not (string-match "go" compile-command))   ; set compile command default
-      (set (make-local-variable 'compile-command)
-           "go build -v && go test -v && go vet"))
-
-  ;; guru settings
-  (go-guru-hl-identifier-mode)                    ; highlight identifiers
-  
-  ;; Key bindings specific to go-mode
-  (local-set-key (kbd "M-.") 'godef-jump)         ; Go to definition
-  (local-set-key (kbd "M-*") 'pop-tag-mark)       ; Return from whence you came
-  (local-set-key (kbd "M-p") 'compile)            ; Invoke compiler
-  (local-set-key (kbd "M-P") 'recompile)          ; Redo most recent compile cmd
-  (local-set-key (kbd "M-]") 'next-error)         ; Go to next error (or msg)
-  (local-set-key (kbd "M-[") 'previous-error)     ; Go to previous error or msg
-
-  ;; Misc go stuff
-  (auto-complete-mode 1))                         ; Enable auto-complete mode
-
-;; Connect go-mode-hook with the function we just defined
-(add-hook 'go-mode-hook 'my-go-mode-hook)
-
-;; Ensure the go specific autocomplete is active in go-mode.
-;; (with-eval-after-load 'go-mode
-;;   (require 'go-autocomplete))
-
-;; If the go-guru.el file is in the load path, this will load it.
-(require 'go-guru)
-#+END_SRC
-
         
-* Using LSP
+* COMMENT Using LSP
   #+begin_src emacs-lisp
-  (use-package lsp-mode
-  :ensure t
-  :commands (lsp lsp-deferred)
-  :hook (go-mode . lsp-deferred))
-
 ;; Set up before-save hooks to format buffer and add/delete imports.
 ;; Make sure you don't have other gofmt/goimports hooks enabled.
+(require 'lsp-mode)
+(add-hook 'go-mode-hook #'lsp-deferred)
+
 (defun lsp-go-install-save-hooks ()
   (add-hook 'before-save-hook #'lsp-format-buffer t t)
   (add-hook 'before-save-hook #'lsp-organize-imports t t))
 (add-hook 'go-mode-hook #'lsp-go-install-save-hooks)
-
-;; Optional - provides fancier overlays.
-(use-package lsp-ui
-  :ensure t
-  :commands lsp-ui-mode)
-
-;; Company mode is a standard completion package that works well with lsp-mode.
-(use-package company
-  :ensure t
-  :config
-  ;; Optionally enable completion-as-you-type behavior.
-  (setq company-idle-delay 0)
-  (setq company-minimum-prefix-length 1))
-
-;; Optional - provides snippet support.
-(use-package yasnippet
-  :ensure t
-  :commands yas-minor-mode
-  :hook (go-mode . yas-minor-mode))
-
-(setq lsp-ui-doc-enable nil
-      lsp-ui-peek-enable t
-      lsp-ui-sideline-enable t
-      lsp-ui-imenu-enable t
-      lsp-ui-flycheck-enable t)
-
   #+end_src
 
-  #+RESULTS:
-  : t

@@ -9,7 +9,27 @@
     :config
     (add-hook 'projectile-mode-hook 'projectile-rails-on)
     (projectile-rails-global-mode)
+    (define-key projectile-rails-mode-map (kbd "C-c r") 'projectile-rails-command-map)
     )
 #+END_SRC
 
-** We need [[https://github.com/krazedkrish][Shalil's configs]] here
+** Ruby lsp
+#+begin_src emacs-lisp
+;; Configure Ruby environment with chruby
+(use-package chruby
+  :ensure t
+  :config
+  (chruby "ruby-3.3.0")) ;; Replace with your Ruby version
+
+;; Set up the path to ruby-lsp
+;; (setq lsp-ruby-server-command '("ruby-lsp"))
+;; (setq lsp-clients-ruby-server-command '("ruby-lsp"))
+
+;; Ensure the LSP server is used with ruby-mode
+;; (add-hook 'ruby-mode-hook #'lsp-deferred)
+;; (add-hook 'ruby-mode-hook #'lsp)
+;; Add hook to format buffer before saving
+;; (add-hook 'ruby-mode-hook
+;;           (lambda ()
+;;             (add-hook 'before-save-hook #'lsp-format-buffer nil t)))
+#+end_src

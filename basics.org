@@ -53,7 +53,7 @@
       :ensure t)))
   #+end_src
 
-  My personal favourites:
+  My personal favorites:
   #+BEGIN_EXAMPLE
   projectile-switch-project ; C-c p p
   projectile-find-file; C-c p f

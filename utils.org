@@ -1,30 +1,30 @@
 * Highlight Symbol
 #+BEGIN_SRC emacs-lisp
-  (use-package highlight-symbol
-    :ensure t
-    :config
-    (global-set-key [(control f3)] 'highlight-symbol-at-point)
-    (global-set-key [(shift f3)] 'highlight-symbol-next)
-    (global-set-key [(shift f2)] 'highlight-symbol-prev)
-	(global-set-key (kbd "s-<mouse-5>") 'highlight-symbol-next)
-	(global-set-key (kbd "s-<mouse-4>") 'highlight-symbol-prev)
+    (use-package highlight-symbol
+      :ensure t
+      :config
+      (global-set-key [(control f3)] 'highlight-symbol-at-point)
+      (global-set-key [(shift f3)] 'highlight-symbol-next)
+      (global-set-key [(shift f2)] 'highlight-symbol-prev)
+          (global-set-key (kbd "s-<mouse-5>") 'highlight-symbol-next)
+          (global-set-key (kbd "s-<mouse-4>") 'highlight-symbol-prev)
 
-    (global-unset-key (kbd "<C-S-mouse-1>"))
-    (global-set-key (kbd "<C-S-mouse-1>")
-                    (lambda (event)
-                      (interactive "e")
-                      (save-excursion
-                        (goto-char (posn-point (event-start event)))
-                        (highlight-symbol-at-point))))
-)
-    ;; :init
-    ;; (defun highlight-with-mouse ()
-    ;;   (lambda (event)
-    ;;     (interactive "e")
-    ;;     (save-excursion
-    ;;       (goto-char (posn-point (event-start event)))
-    ;;       (highlight-symbol-at-point))))
-    ;; :bind ("<C-mouse-1>" . highlight-with-mouse))
+      (global-unset-key (kbd "<C-S-mouse-1>"))
+      (global-set-key (kbd "<C-S-mouse-1>")
+                      (lambda (event)
+                        (interactive "e")
+                        (save-excursion
+                          (goto-char (posn-point (event-start event)))
+                          (highlight-symbol-at-point))))
+  )
+      ;; :init
+      ;; (defun highlight-with-mouse ()
+      ;;   (lambda (event)
+      ;;     (interactive "e")
+      ;;     (save-excursion
+      ;;       (goto-char (posn-point (event-start event)))
+      ;;       (highlight-symbol-at-point))))
+      ;; :bind ("<C-mouse-1>" . highlight-with-mouse))
 #+END_SRC
 * Recentf
  quick navigate to recent files
@@ -34,7 +34,7 @@
   :init
   (progn
     (recentf-mode t)
-    (setq recentf-max-saved-items 200)
+    (setq recentf-max-saved-items 500)
 	:config
 	(bind-key "C-x ," 'counsel-recentf)
 	)
@@ -83,6 +83,13 @@
    (jump-to-register :magit-fullscreen))
  #+end_src
 
+** COMMENT Forge
+  TODO, check github access in magit style
+  #+begin_src emacs-lisp
+  (use-package forge
+   :after magit)
+  #+end_src
+
 * Hungry Delete
   hungry i am, I would eat all your empty lines. Minor Mode
   #+BEGIN_SRC emacs-lisp
@@ -92,7 +99,6 @@
     (global-hungry-delete-mode)
   )
   #+END_SRC
-* Testing from Rhoit
 
 * Ace Jump
 ** Ace Jump Mode
@@ -203,13 +209,13 @@ Version 2017-07-31"
               (message "Running…")
               (shell-command $cmd-str "*xah-run-current-file output*" ))
           (message "No recognized program file suffix for this file."))))))
-   (global-set-key (kbd "<f8>") 'xah-run-current-file)
+   (global-set-key (kbd "<f7>") 'xah-run-current-file)
   #+END_SRC
 
   #+RESULTS:
   : xah-run-current-file
 
-
+  
 * Emacs Setting
   Tired of rebooting the emacs. Closing and opening as ~emacs --debug-init /home/thapakazi/.emacs.d/config.org -fs~.
   I have a solution
@@ -237,17 +243,17 @@ Version 2017-07-31"
 (setq mark-ring-max 6)
 (setq global-mark-ring-max 10)
 
-(defun xah-pop-local-mark-ring ()
-  "Move cursor to last mark position of current buffer.
-Call this repeatedly will cycle all positions in `mark-ring'.
-URL `http://ergoemacs.org/emacs/emacs_jump_to_previous_position.html'
-Version 2016-04-04"
-  (interactive)
-  (set-mark-command t))
+;; (defun xah-pop-local-mark-ring ()
+;;   "Move cursor to last mark position of current buffer.
+;; Call this repeatedly will cycle all positions in `mark-ring'.
+;; URL `http://ergoemacs.org/emacs/emacs_jump_to_previous_position.html'
+;; Version 2016-04-04"
+;;   (interactive)
+;;   (set-mark-command t))
 
 
-(global-set-key (kbd "<f6>") 'pop-global-mark)
-(global-set-key (kbd "<S-f6>") 'xah-pop-local-mark-ring)
+;; (global-set-key (kbd "<f6>") 'pop-global-mark)
+;; (global-set-key (kbd "<S-f6>") 'xah-pop-local-mark-ring)
  #+end_src
 * Bookmark with [[https://github.com/joodland/bm][bm]]
 
@@ -283,7 +289,7 @@ Version 2016-04-04"
   (add-hook hook (lambda () (flyspell-mode -1))))
   #+end_src
 
-* Activity Monitor
+* COMMENT Activity Monitor
 
   #+BEGIN_SRC emacs-lisp
   (use-package activity-watch-mode
@@ -314,8 +320,16 @@ Version 2016-04-04"
     (evil-mode 1)
     )
   #+END_SRC
+** Evil collection
+    #+begin_src emacs-lisp
+(use-package evil-collection
+  :after evil
+  :ensure t
+  :config
+  (evil-collection-init))
+    #+end_src
 
-* mail with mu4e
+* COMMENT mail with mu4e
   #+begin_src emacs-lisp
   (use-package mu4e
   :ensure nil
@@ -359,5 +373,103 @@ move things up and down easily
 )
 #+end_src
 
+* COMMENT Open file on split
+  ref: https://stackoverflow.com/a/75036430
+  #+begin_src emacs-lisp
+(defun find-file-other-window-vertically nil
+  "Edit a file in another window, split vertically."
+  (interactive)
+  (let ((split-width-threshold 0)
+        (split-height-threshold nil))
+    (call-interactively 'find-file-other-window)))
+
+;(global-set-key (kbd "C-x 3") 'find-file-other-window-vertically)
+  #+end_src
+
+* htmlz
+  src: https://github.com/0xekez/htmlz-mode
+  #+begin_src emacs-lisp
+(add-to-list 'load-path "~/.emacs.d/manual/")
+(load "htmlz.el")
+  #+end_src
+
+  #+RESULTS:
+  : t
+
+* COMMENT Org Tree Slide Mode
+#+begin_src emacs-lisp
+  (use-package org-tree-slide
+    :ensure t
+    :custom
+    (org-image-actual-width nil))
+
+  (defun efs/presentation-setup ()
+    ;; Hide the mode line
+    (display-line-numbers-mode 0)
+    (beacon-mode 0)
+
+    ;; Display images inline
+    (org-display-inline-images) ;; Can also use org-startup-with-inline-images
+
+    ;; Scale the text.  The next line is for basic scaling:
+    ;;(setq text-scale-mode-amount 3)
+    ;;(text-scale-mode 1))
+
+  ;; This option is more advanced, allows you to scale other faces too
+  ;; (setq-local face-remapping-alist '((default (:height 2.0) variable-pitch)
+  ;;                                    (org-verbatim (:height 1.75) org-verbatim)
+  ;;                                    (org-block (:height 1.25) org-block))))
+  )
+  (defun efs/presentation-end ()
+    ;; Show the mode line again
+    (display-line-numbers-mode 1)
+    (beacon-mode 1)
+
+    ;; Turn off text scale mode (or use the next line if you didn't use text-scale-mode)
+    ;;(text-scale-mode 0))
+
+    ;; If you use face-remapping-alist, this clears the scaling:
+    ;;(setq-local face-remapping-alist '((default variable-pitch default))))
+  )
+  (use-package org-tree-slide
+    :hook ((org-tree-slide-play . efs/presentation-setup)
+           (org-tree-slide-stop . efs/presentation-end))
+    :custom
+    (org-tree-slide-slide-in-effect t)
+    (org-tree-slide-activate-message "Greetings Everyone !!")
+    (org-tree-slide-deactivate-message "We are at the end, Q/A ??")
+    (org-tree-slide-header t)
+    (org-tree-slide-breadcrumbs " > ")
+    (org-image-actual-width nil))
+#+end_src
+
 #+RESULTS:
-: t
+| efs/presentation-end |
+
+
+* Asdf
+#+begin_src emacs-lisp
+(add-to-list 'load-path "~/.emacs.d/manual/asdf.el/")
+(require 'asdf)
+(asdf-enable) ;; This ensures Emacs has the correct paths to asdf shims and bin
+#+end_src
+
+* Blog
+#+begin_src emacs-lisp
+(use-package easy-hugo
+:ensure t
+  :bind("C-c C-0" . easy-hugo-menu)
+  :init
+(setq easy-hugo-basedir "~/repos/thapakazi/blog/")
+(setq easy-hugo-url "https://thapakazi.com")
+(setq easy-hugo-root "~/repos/thapakazi/blog/")
+(setq easy-hugo-previewtime "300")
+:config
+(easy-hugo-enable-menu)
+)
+
+#+end_src
+
+#+RESULTS:
+: easy-hugo-menu
+
