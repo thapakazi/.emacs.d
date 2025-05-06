@@ -199,4 +199,18 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(package-selected-packages nil))
+ '(package-selected-packages
+   '(ace-jump-mode ace-window activity-watch-mode ag all-the-icons
+                   auto-complete beacon bm chruby company-emoji
+                   counsel-projectile dockerfile-mode doom-modeline
+                   drag-stuff dumb-jump easy-hugo edit-indirect eglot
+                   emacsql-sqlite emacsql-sqlite-module
+                   evil-collection expand-region general git-commit
+                   go-eldoc gptel hide-mode-line highlight-symbol ht
+                   hungry-delete hydra magit markdown-mode mode-icons
+                   multiple-cursors neotree ob-go org-bullets
+                   org-present org-roam-ui org-tree-slide ox-gfm
+                   popup-kill-ring projectile-rails react-snippets
+                   rjsx-mode rust-mode spacemacs-theme spinner
+                   terraform-mode try typescript-mode which-key
+                   writeroom-mode yaml-mode zoom-window)))
