@@ -7,4 +7,8 @@
  eglot comes by default in emacs latest versions, also having weird issues with lsp-modes, so letting go of lsp-modes
 #+begin_src emacs-lisp
 ;; switched to eglot 
+;; (setq eglot-log-level 'debug)
 #+end_src
+
+#+RESULTS:
+: debug

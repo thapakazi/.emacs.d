@@ -1,4 +1,11 @@
-; Begin initialization
+;; Print startup time
+(defun display-startup-time ()
+  (message "Emacs loaded in %s with %d garbage collections."
+           (format "%.2f seconds" (float-time (time-subtract after-init-time before-init-time)))
+           gcs-done))
+(add-hook 'emacs-startup-hook #'display-startup-time)
+
+;;Begin initialization
 ;; Turn off mouse interface early in startup to avoid momentary display
 (when window-system
   (tool-bar-mode -1)
@@ -46,16 +53,16 @@
 (org-babel-load-file (concat user-emacs-directory "basics.org"))
 (org-babel-load-file (concat user-emacs-directory "defaults.org"))
 (org-babel-load-file (concat user-emacs-directory "utils.org"))
-
-;; (org-babel-load-file (concat user-emacs-directory "settings.org"))
-(org-babel-load-file (concat user-emacs-directory "ror.org"))
-(org-babel-load-file (concat user-emacs-directory "org-mode.org"))
 (org-babel-load-file (concat user-emacs-directory "ui.org"))
 
-
-(org-babel-load-file (concat user-emacs-directory "go-lang.org"))
-(org-babel-load-file (concat user-emacs-directory "rust-lang.org"))
+(org-babel-load-file (concat user-emacs-directory "org-mode.org"))
 (org-babel-load-file (concat user-emacs-directory "devops.org"))
+
+(org-babel-load-file (concat user-emacs-directory "lsp.org"))
+(org-babel-load-file (concat user-emacs-directory "langs.org"))
+(org-babel-load-file (concat user-emacs-directory "go.org"))
+(org-babel-load-file (concat user-emacs-directory "rust-lang.org"))
+(org-babel-load-file (concat user-emacs-directory "ror.org"))
 (org-babel-load-file (concat user-emacs-directory "js.org"))
 
 ;;(org-babel-load-file (concat user-emacs-directory "fun.custom-set-variables
@@ -199,18 +206,4 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(package-selected-packages
-   '(ace-jump-mode ace-window activity-watch-mode ag all-the-icons
-                   auto-complete beacon bm chruby company-emoji
-                   counsel-projectile dockerfile-mode doom-modeline
-                   drag-stuff dumb-jump easy-hugo edit-indirect eglot
-                   emacsql-sqlite emacsql-sqlite-module
-                   evil-collection expand-region general git-commit
-                   go-eldoc gptel hide-mode-line highlight-symbol ht
-                   hungry-delete hydra magit markdown-mode mode-icons
-                   multiple-cursors neotree ob-go org-bullets
-                   org-present org-roam-ui org-tree-slide ox-gfm
-                   popup-kill-ring projectile-rails react-snippets
-                   rjsx-mode rust-mode spacemacs-theme spinner
-                   terraform-mode try typescript-mode which-key
-                   writeroom-mode yaml-mode zoom-window)))
+ '(package-selected-packages nil))

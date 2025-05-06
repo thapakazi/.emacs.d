@@ -313,12 +313,13 @@ Version 2017-07-31"
 * Evil mode
 
   #+BEGIN_SRC emacs-lisp
-  (use-package evil
-	:ensure t
-	:config
-    (require 'evil)
-    (evil-mode 1)
-    )
+(use-package evil
+  :ensure t
+  :init
+  (setq evil-want-integration t)
+  (setq evil-want-keybinding nil)
+  :config
+  (evil-mode 1))
   #+END_SRC
 ** Evil collection
     #+begin_src emacs-lisp
@@ -447,7 +448,8 @@ move things up and down easily
 | efs/presentation-end |
 
 
-* Asdf
+* [[https://github.com/tabfugnic/asdf.el][asdf mode]]
+
 #+begin_src emacs-lisp
 (add-to-list 'load-path "~/.emacs.d/manual/asdf.el/")
 (require 'asdf)

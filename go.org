@@ -1,0 +1,92 @@
+#+TITLE: Let GO, Here we go
+#+DATE: Sunday, Oct 18 2015
+#+DESCRIPTION: Customised ruby on rails emacs config
+
+* If you use asdf
+** Get the deps
+#+begin_src bash
+go install golang.org/x/tools/gopls@latest
+go install golang.org/x/tools/cmd/goimports@latest
+go install github.com/rogpeppe/godef@latest
+go install github.com/go-delve/delve/cmd/dlv@latest
+go install golang.org/x/lint/golint@latest
+go install honnef.co/go/tools/cmd/staticcheck@latest
+#+end_src
+
+#+RESULTS:
+
+** reshim your stuffs
+#+begin_src bash
+asdf reshim golang
+#+end_src
+
+
+
+** Reformatter Configuration
+
+Configure `reformatter` for Go code formatting with `goimports`.
+
+#+BEGIN_SRC emacs-lisp
+(use-package reformatter
+  :ensure t
+  :config
+  (reformatter-define go-format
+    :program "goimports"
+    :args '("/dev/stdin")
+    :group 'go))
+#+END_SRC
+
+** Go Tree-sitter Support
+Use `go-ts-mode` for modern Go syntax highlighting and Tree-sitter integration.
+
+Configure `go-ts-mode` for Go development with Tree-sitter, LSP, autocompletion, and formatting.
+#+BEGIN_SRC emacs-lisp
+(use-package go-ts-mode
+  :ensure t
+  :mode ("\\.go\\'" . go-ts-mode)
+  :hook
+  ((go-ts-mode . eglot-ensure)
+   (go-ts-mode . go-format-on-save-mode)
+   (go-ts-mode . company-mode)
+   (go-ts-mode . flycheck-mode))
+  :init
+  (add-to-list 'treesit-language-source-alist '(go "https://github.com/tree-sitter/tree-sitter-go"))
+  (add-to-list 'treesit-language-source-alist '(gomod "https://github.com/camdencheek/tree-sitter-go-mod"))
+  (add-to-list 'auto-mode-alist '("/go\\.mod\\'" . go-mod-ts-mode))
+  (unless (boundp 'go-ts-mode-map)
+    (defvar go-ts-mode-map (make-sparse-keymap)
+      "Keymap for `go-ts-mode'."))
+  :bind (:map go-ts-mode-map
+              ("C-c C-r" . my-go-run)
+              ("C-c C-b" . my-go-build)
+              ("C-c C-f" . eglot-format-buffer)
+              ("M-." . eglot-find-declaration)
+              ("M-," . eglot-find-implementation))
+  :config
+  (unless (treesit-language-available-p 'go)
+    (treesit-install-language-grammar 'go))
+  (unless (treesit-language-available-p 'gomod)
+    (treesit-install-language-grammar 'gomod))
+  (setq go-ts-mode-indent-offset 2)
+  (defun my-go-run ()
+    "Run the current Go file."
+    (interactive)
+    (let ((compile-command (concat "go run " buffer-file-name)))
+      (compile compile-command)))
+  (defun my-go-build ()
+    "Build the current Go project."
+    (interactive)
+    (compile "go build")))
+#+END_SRC
+
+** Jump-to-Definition with godef
+While `eglot` handles jump-to-definition, `godef` is a lightweight fallback for non-LSP environments.
+
+#+BEGIN_SRC emacs-lisp
+(use-package go-mode
+  :commands (godef-jump)
+ :ensure t
+  :config
+  (bind-key "M-." 'godef-jump go-ts-mode-map)
+  (bind-key "M-," 'pop-tag-mark go-ts-mode-map))
+#+END_SRC

@@ -1,0 +1,27 @@
+#+TITLE: Common Language Stuffs
+#+DATE: Tuesday, May 06 2025
+
+
+* Flycheck with eglot
+
+Configure `flycheck` for real-time syntax checking, using `staticcheck` and `gopls` via `flycheck-eglot` for Go.
+
+#+BEGIN_SRC emacs-lisp
+(use-package flycheck
+  :ensure t
+  :hook
+  (go-ts-mode . flycheck-mode)
+  :config
+  ;; Use staticcheck for Go linting
+  (setq flycheck-go-staticcheck-executable "staticcheck")
+  (flycheck-add-mode 'go-staticcheck 'go-ts-mode)
+  ;; Include go-vet for additional checks
+  (flycheck-add-mode 'go-vet 'go-ts-mode))
+
+;; Integrate flycheck with eglot for gopls diagnostics
+(use-package flycheck-eglot
+  :ensure t
+  :after (flycheck eglot)
+  :config
+  (flycheck-eglot-mode 1))
+#+END_SRC

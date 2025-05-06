@@ -29,3 +29,7 @@ rake.cache
 ac-comphist.dat
 
 .cache
+/js.el
+/lsp.el
+/langs.el
+/go.el
