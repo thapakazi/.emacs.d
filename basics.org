@@ -198,3 +198,13 @@
   (setenv "EDITOR" (getenv "VISUAL"))
   #+end_src
 
+* Exec path from shell
+#+begin_src emacs-lisp
+(use-package exec-path-from-shell
+  :ensure t
+  :vc (:url "https://github.com/purcell/exec-path-from-shell")
+  :config
+  (when (memq window-system '(mac ns x))
+    (exec-path-from-shell-initialize))
+  )
+#+end_src

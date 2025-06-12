@@ -3,9 +3,9 @@
 #+DESCRIPTION: Since everything is orgified, so I need this seperate file
 #+STARTUP: content
 
-* Org mode 
+* Org mode
 
-  One mode to rule them all. 
+  One mode to rule them all.
 
   Truly the way to [[http://orgmode.org/][live life in plain text]]. I mainly use it to take
   notes and save executable source blocks. I'm also starting +to make  use of its agenda, timestamping and+ capturing features.
@@ -56,7 +56,7 @@
  #+end_src
 ** Org tags
  Ok brother I follow you here, as it is...
- 
+
  The default value is -77, which is weird for smaller width windows.
  I'd rather have the tags align horizontally with the header. 45 is a
  good column number to do that.
@@ -91,9 +91,9 @@
     ;; (defun my-org-confirm-babel-evaluate (lang body)
     ;;   "Do not confirm evaluation for these languages."
     ;;   (not (or (string= lang "C")
-    ;; 	   (string= lang "java")
-    ;; 	   (string= lang "python")
-    ;; 	   (string= lang "sqlite"))))
+    ;;     (string= lang "java")
+    ;;     (string= lang "python")
+    ;;     (string= lang "sqlite"))))
     ;; (setq org-confirm-babel-evaluate 'my-org-confirm-babel-evaluate)
   #+end_src
 ** Org babel/source blocks
@@ -119,7 +119,7 @@
 ** Org exporting
 *** COMMENT Pandoc exporter                  :fixme: :future:
 
- Pandoc converts between a huge number of different file formats. 
+ Pandoc converts between a huge number of different file formats.
 
  #+begin_src emacs-lisp
  (use-package ox-pandoc
@@ -146,7 +146,7 @@
                      ("\\.png\\'" . "feh %s")
                      ("\\.mkv\\'" . "mplayer %s")
                      ("\\.mp4\\'" . "mplayer %s")
-		             ("\\.avi\\'" . "mplayer %s")
+                             ("\\.avi\\'" . "mplayer %s")
                      ("\\.pdf\\'" . "evince %s")))))
 
 ;; removing the C-j bind for goto-last-change, of el-get
@@ -208,7 +208,7 @@
                   'my-html-filter-headline-yesdot)))
 
 
-                                        ; Setting Colours (faces) for todo states to give clearer view of work 
+                                        ; Setting Colours (faces) for todo states to give clearer view of work
 (setq org-todo-keyword-faces
       '(("TODO" . org-warning)
         ("DOING" . "yellow")
@@ -240,9 +240,9 @@
 
    and I am used to ~<s TAB~ folow for generating babel block, to get
    the key binding:
-   
+
    video: https://www.youtube.com/watch?v=u46CL0-gVTU
-   
+
    #+begin_src emacs-lisp
    (require 'org-tempo)
    #+end_src
@@ -260,9 +260,9 @@
               ("n" "note" entry (file (concat org-directory "/notes.org"))
                "* %? :NOTE:\n%U\n%a\n" :clock-in t :clock-resume t)
               ("j" "Journal"
-	       entry (file (get-journal-file-today))
-	       "* Event: %?\n\n  %i\n\n  From: %a"
-	       :empty-lines 1)
+               entry (file (get-journal-file-today))
+               "* Event: %?\n\n  %i\n\n  From: %a"
+               :empty-lines 1)
               ("y" "youtube-me" entry (file (concat org-directory "/youtube-dl.org"))  "* %?")
               ("o" "CloudFactory" entry (file+datetree (concat org-directory "/cloudfactory.org"))
                "* %?\n%U\n" :clock-in t :clock-resume t)
@@ -427,6 +427,20 @@ Returns list of properties that still must be filled in"
 * Org Roam to rescue
   Org roam to rescue
 
+
+  fix issue with org-roam
+  #+begin_quote
+  byte-code: Cannot open load file: No such file or directory, emacsql-sqlite-common
+  #+end_quote
+
+#+begin_src emacs-lisp
+(use-package emacsql
+  :ensure t
+  :vc (:url "https://github.com/magit/emacsql.git"))
+#+end_src
+
+#+RESULTS:
+
   #+begin_src emacs-lisp
     (use-package org-roam
       :ensure t
@@ -464,7 +478,7 @@ Returns list of properties that still must be filled in"
   : org-roam-dailies-map
 
 
-* Org customs 
+* Org customs
 
 src: https://systemcrafters.net/emacs-tips/presentations-with-org-present/
 #+begin_src emacs-lisp
@@ -474,28 +488,25 @@ src: https://systemcrafters.net/emacs-tips/presentations-with-org-present/
 (defvar my/fixed-width-font "JetBrains Mono"
   "The font to use for monospaced (fixed width) text.")
 
-(defvar my/variable-width-font "Iosevka Aile"
-  "The font to use for variable-pitch (document) text.")
-
 ;; Load org-faces to make sure we can set appropriate faces
 (require 'org-faces)
 
 ;; Hide emphasis markers on formatted text
 (setq org-hide-emphasis-markers t)
 
-;; Resize Org headings
-(dolist (face '((org-level-1 . 1.5)
-                (org-level-2 . 1.25)
-                (org-level-3 . 1.5)
-                (org-level-4 . 1.2)
-                (org-level-5 . 1.1)
-                (org-level-6 . 1.1)
-                (org-level-7 . 1.1)
-                (org-level-8 . 1.1)))
-  (set-face-attribute (car face) nil :font my/variable-width-font :weight 'medium :height (cdr face)))
+;; ;; Resize Org headings
+;; (dolist (face '((org-level-1 . 1.5)
+;;                 (org-level-2 . 1.25)
+;;                 (org-level-3 . 1.5)
+;;                 (org-level-4 . 1.2)
+;;                 (org-level-5 . 1.1)
+;;                 (org-level-6 . 1.1)
+;;                 (org-level-7 . 1.1)
+;;                 (org-level-8 . 1.1)))
+;;   (set-face-attribute (car face) nil :font my/variable-width-font :weight 'medium :height (cdr face)))
 
-;; Make the document title a bit bigger
-(set-face-attribute 'org-document-title nil :font my/variable-width-font :weight 'bold :height 1.3)
+;; ;; Make the document title a bit bigger
+;; (set-face-attribute 'org-document-title nil :font my/variable-width-font :weight 'bold :height 1.3)
 
 ;; Make sure certain org faces use the fixed-pitch face when variable-pitch-mode is on
 (set-face-attribute 'org-block nil :foreground nil :inherit 'fixed-pitch)
@@ -513,7 +524,7 @@ src: https://systemcrafters.net/emacs-tips/presentations-with-org-present/
 * Org Present
 ** configuration
 #+begin_src emacs-lisp
-(use-package org-present 
+(use-package org-present
   :ensure t)
 
 (defun my/org-present-prepare-slide (buffer-name heading)
@@ -545,7 +556,7 @@ src: https://systemcrafters.net/emacs-tips/presentations-with-org-present/
   ;; hide cursor
   (org-present-show-cursor)
 
-  ;; no line numbers 
+  ;; no line numbers
   (display-line-numbers-mode 0)
 
   ;; no beacon flash
@@ -553,10 +564,10 @@ src: https://systemcrafters.net/emacs-tips/presentations-with-org-present/
 
   ;; no flyspell check
   (flyspell-mode-off)
-  
+
   ;; hide modeline
   (hide-mode-line-mode 1)
-  
+
   ;; Center the presentation and wrap lines
   (visual-fill-column-mode 1)
   (visual-line-mode 1))
@@ -571,7 +582,7 @@ src: https://systemcrafters.net/emacs-tips/presentations-with-org-present/
   ;; Stop displaying inline images
   (org-remove-inline-images)
 
-  ;; no line numbers 
+  ;; no line numbers
   (display-line-numbers-mode 1)
 
   ;; no beacon flash
@@ -582,7 +593,7 @@ src: https://systemcrafters.net/emacs-tips/presentations-with-org-present/
 
   ;; unhide modeline
   (hide-mode-line-mode 0)
-  
+
   ;; Stop centering the document
   (visual-fill-column-mode 0)
   (visual-line-mode 0))
