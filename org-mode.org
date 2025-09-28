@@ -1,445 +1,36 @@
-#+TITLE: Org file for my org mode config
-#+DATE: Thursday, Jan 21 2016
-#+DESCRIPTION: Since everything is orgified, so I need this seperate file
-#+STARTUP: content
+    #+end_src
+    
+** Usability
 
-* Org mode
+#+begin_src emacs-lisp
+  ;; good stuffs: https://protesilaos.com/codelog/2025-01-16-emacs-org-todo-agenda-basics/
+  (setq org-M-RET-may-split-line '((default . nil)))
+  (setq org-insert-heading-respect-content t)
+  (setq org-log-done 'time)
+  (setq org-log-into-drawer t)
+#+end_src
 
-  One mode to rule them all.
+** Evil: org evil mode
 
-  Truly the way to [[http://orgmode.org/][live life in plain text]]. I mainly use it to take
-  notes and save executable source blocks. I'm also starting +to make  use of its agenda, timestamping and+ capturing features.
-
-  It goes without saying that I also use it to manage my Emacs config.
-
-** Org activation bindings
-
-  Set up some global key bindings that integrate with Org Mode features.
-
- #+begin_src emacs-lisp
- (bind-key "C-c a" 'org-agenda)
- #+end_src
-
-*** Org agenda
-
-  #+begin_src emacs-lisp
-(setq org-directory "~/repos/thapakazi/repos/orgr")
-(setq org-agenda-files '("Tasks.org" "Birthdays.org" "Habits.org"))
-
-;; If you only want to see the agenda for today
-;; (setq org-agenda-span 'day)
-
-(setq org-agenda-start-with-log-mode t)
-(setq org-log-done 'time)
-(setq org-log-into-drawer t)
-  #+end_src
-
- *** Org capture
-
- #+begin_src emacs-lisp
- (bind-key "C-c c" 'org-capture)
- (setq org-default-notes-file "~/Dropbox/Notes/notes.org")
- #+end_src
-** Org setup
-
- Speed commands are a nice and quick way to perform certain actions
- while at the beginning of a heading. It's not activated by default.
-
- See the doc for speed keys by checking out [[elisp:(info%20"(org)%20speed%20keys")][the documentation for  speed keys in Org mode]].
-
- #+begin_src emacs-lisp
- (setq org-use-speed-commands t)
- #+end_src
-
- #+begin_src emacs-lisp
- (setq org-image-actual-width 550)
- #+end_src
-** Org tags
- Ok brother I follow you here, as it is...
-
- The default value is -77, which is weird for smaller width windows.
- I'd rather have the tags align horizontally with the header. 45 is a
- good column number to do that.
-
- #+begin_src emacs-lisp
- (setq org-tags-column 45)
-(require 'org-mouse)
- #+end_src
-** Org babel for golang
-   #+BEGIN_SRC emacs-lisp
-   (use-package ob-go
-     :ensure t
-     )
-   #+END_SRC
-** Org babel languages
-
-  #+begin_src emacs-lisp
-    (org-babel-do-load-languages
-     'org-babel-load-languages
-     '((python . t)
-       (C . t)
-       (calc . t)
-       (latex . t)
-       (java . t)
-       (ruby . t)
-       (scheme . t)
-       (shell . t)
-       (sqlite . t)
-       (go . t)
-       (js . t)))
-
-    ;; (defun my-org-confirm-babel-evaluate (lang body)
-    ;;   "Do not confirm evaluation for these languages."
-    ;;   (not (or (string= lang "C")
-    ;;     (string= lang "java")
-    ;;     (string= lang "python")
-    ;;     (string= lang "sqlite"))))
-    ;; (setq org-confirm-babel-evaluate 'my-org-confirm-babel-evaluate)
-  #+end_src
-** Org babel/source blocks
-
-  I like to have source blocks properly syntax highlighted and with the
-  editing popup window staying within the same window so all the windows
-  don't jump around. Also, having the top and bottom trailing lines in
-  the block is a waste of space, so we can remove them.
-
-  I noticed that fontification doesn't work with markdown mode when the
-  block is indented after editing it in the org src buffer---the leading
-  #s for headers don't get fontified properly because they appear as Org
-  comments. Setting ~org-src-preserve-indentation~ makes things
-  consistent as it doesn't pad source blocks with leading spaces.
-
-  #+begin_src emacs-lisp
-  (setq org-src-fontify-natively t
-        org-src-window-setup 'current-window
-        org-src-strip-leading-and-trailing-blank-lines t
-        org-src-preserve-indentation t
-        org-src-tab-acts-natively t)
-  #+end_src
-** Org exporting
-*** COMMENT Pandoc exporter                  :fixme: :future:
-
- Pandoc converts between a huge number of different file formats.
-
- #+begin_src emacs-lisp
- (use-package ox-pandoc
-   :no-require t
-   :ensure t)
- #+end_src
-** COMMENT Org old config
- Old good configs for org
-
-#+BEGIN_SRC emacs-lisp
-;;======================================================================
-;; ORG-MODE
-
-(add-hook 'org-mode-hook 'turn-on-auto-fill)
-
-;; TODO: org -mode image zoom
-;; (setq org-image-actual-width 800)
-
-(add-hook 'org-mode-hook
-          '(lambda ()
-             (setq org-file-apps
-                   '((auto-mode . emacs)
-                     ("\\.jpg\\'" . "feh %s")
-                     ("\\.png\\'" . "feh %s")
-                     ("\\.mkv\\'" . "mplayer %s")
-                     ("\\.mp4\\'" . "mplayer %s")
-                             ("\\.avi\\'" . "mplayer %s")
-                     ("\\.pdf\\'" . "evince %s")))))
-
-;; removing the C-j bind for goto-last-change, of el-get
-(add-hook 'org-mode-hook
-          '(lambda ()
-             (define-key org-mode-map (kbd "C-j") nil)))
-
-;;----------------------------------------------------------------------
-;; Sort list by checkbox type
-;; http://orgmode.org/worg/org-hacks.html
-
-(defun org-sort-list-by-checkbox-type ()
-  "Sort list items according to Checkbox state."
-  (interactive)
-  (org-sort-list
-   nil ?f
-   (lambda ()
-     (if (looking-at org-list-full-item-re)
-         (cdr (assoc (match-string 3)
-                     '(("[X]" . 1) ("[-]" . 2) ("[ ]" . 3) (nil . 4))))
-       4))))
-
-;;----------------------------------------------------------------------
-;; org put checkbox if previous is checkbox
-
-(defun org-i-need-checkbox ()
-  (interactive)
-  (previous-line)
-  (setq previous_line
-        (buffer-substring
-         (line-beginning-position) (line-end-position)))
-  (next-line)
-  (when (string-match "- \\[" previous_line)
-    (insert "[ ] "))
-  (insert "haoeush")
-  )
-
-;; (add-hook 'org-meta-return 'org-i-need-checkbox)
-
-
-;;----------------------------------------------------------------------
-;; Add dot after headline
-;; https://yoo2080.wordpress.com/2013/08/24/changing-the-number-format-for-section-headings-in-org-mode-html-export/
-(defun my-html-filter-headline-yesdot (text backend info)
-  "Ensure dots in headlines."
-  (when (org-export-derived-backend-p backend 'html)
-    (save-match-data
-      (when (let ((case-fold-search t))
-              (string-match (rx (group "<span class=\"section-number-" (+ (char digit)) "\">"
-                                       (+ (char digit ".")))
-                                (group "</span>"))
-                            text))
-        (replace-match "\\1.\\2"
-                       t nil text)))))
-
-(eval-after-load 'ox
-  '((point)
-     (add-to-list 'org-export-filter-headline-functions
-                  'my-html-filter-headline-yesdot)))
-
-
-                                        ; Setting Colours (faces) for todo states to give clearer view of work
-(setq org-todo-keyword-faces
-      '(("TODO" . org-warning)
-        ("DOING" . "yellow")
-        ("BLOCKED" . "red")
-        ("REVIEW" . "orange")
-        ("DONE" . "green")
-        ("ARCHIVED" .  "blue")
-        ("FUTURE" .  "#EE82EE")))
-
-
-#+END_SRC
-** org-bullets
-    #+begin_src emacs-lisp
-(use-package org-bullets
+#+begin_src emacs-lisp
+(use-package evil-org
   :ensure t
+  :after org
+  :hook (org-mode . (lambda () evil-org-mode))
   :config
-  (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
-  )
-    #+end_src
-** [[https://orgmode.org/manual/Easy-templates.html][org-easy-templates]]
-
-   As my org-version is 9.2
-   #+begin_src emacs-lisp
-   org-version
-   #+end_src
-
-   #+RESULTS:
-   : 9.2
-
-   and I am used to ~<s TAB~ folow for generating babel block, to get
-   the key binding:
-
-   video: https://www.youtube.com/watch?v=u46CL0-gVTU
-
-   #+begin_src emacs-lisp
-   (require 'org-tempo)
-   #+end_src
-** COMMENT Org mouse
-   Better mouse support for org-mode: [[http://orgmode.org/w/?p=org-mode.git;a=blob_plain;f=lisp/org-mouse.el;hb=HEAD][org-mouse]]
-   Its loaded from [[./custom-load-list/org-mouse.el][custom-load-list-dir]]
-
-** TODO Org capture
-   Org capture kungfu configs
-   #+BEGIN_SRC emacs-lisp
-;; org-capture
-(setq org-capture-templates
-      (quote (("t" "todo" entry (file (concat org-directory "/todos.org"))
-               "* TODO %?\n%U\n%a\n" :clock-in t :clock-resume t)
-              ("n" "note" entry (file (concat org-directory "/notes.org"))
-               "* %? :NOTE:\n%U\n%a\n" :clock-in t :clock-resume t)
-              ("j" "Journal"
-               entry (file (get-journal-file-today))
-               "* Event: %?\n\n  %i\n\n  From: %a"
-               :empty-lines 1)
-              ("y" "youtube-me" entry (file (concat org-directory "/youtube-dl.org"))  "* %?")
-              ("o" "CloudFactory" entry (file+datetree (concat org-directory "/cloudfactory.org"))
-               "* %?\n%U\n" :clock-in t :clock-resume t)
-              ("d" "CloudFactory Docs " entry (file (concat org-directory "/cloudfactory-docs.org"))
-               "* %?")
-              ("h" "Hisab Kitab " entry (file+datetree+prompt (concat org-directory "/hisab-kitab.org")) "* %?")
-              ("x" "What on my plate today ?? " entry (file+datetree+prompt (concat org-directory "/devops.org"))
-               "* TODO %?")
-              ("g" "awesome tools " entry (file (concat org-directory "/awesome_tools.org"))
-               "* %?")
-              ("c" "Coursera Download List" entry (file (concat org-directory "/coursera-dl.org"))
-               "* [ ]  %?")
-              )))
-
-;; org-caputre goodies
-;; http://www.howardism.org/Technical/Emacs/journaling-org.html
-(defun get-journal-file-today ()
-  "Return filename for today's journal entry."
-  (let ((daily-name (format-time-string "%Y%m%d")))
-    (expand-file-name (concat org-journal-dir daily-name))))
-
-(defun journal-file-today ()
-  "Create and load a journal file based on today's date."
-  (interactive)
-  (find-file (get-journal-file-today)))
-
-(global-set-key (kbd "C-c f j") 'journal-file-today)
-
-
-(defun journal-file-insert ()
-  "Insert's the journal heading based on the file's name."
-  (interactive)
-  (when (string-match "\\(20[0-9][0-9]\\)\\([0-9][0-9]\\)\\([0-9][0-9]\\)"
-                      (buffer-name))
-    (let ((year  (string-to-number (match-string 1 (buffer-name))))
-          (month (string-to-number (match-string 2 (buffer-name))))
-          (day   (string-to-number (match-string 3 (buffer-name))))
-          (datim nil))
-      (setq datim (encode-time 0 0 0 day month year))
-      (insert (format-time-string
-               "#+TITLE: Journal Entry- %Y-%b-%d (%A)\n\n" datim)))))
-
-   #+END_SRC
-
-* blog with org and hugo
-  All the things are described here: [[https://thapakazi.github.io/posts/partial_publish/#org85703f5][History of it all]]
-** Requirements
-*** Define content dir
-    #+begin_src emacs-lisp
-(defvar hugo-content-dir
-  (concat user-emacs-directory "blog/posts/")
-  ;; (getenv "HUGO_CONTENT_PROJECT_DIR")
-  "Path to Hugo's content directory"
-  )
-    #+end_src
-
-    #+RESULTS:
-    : hugo-content-dir
-
-*** Github flavoured markdown
-   #+begin_src emacs-lisp
-(use-package ox-gfm
-  :ensure t
-  :no-require t
-)
-   #+end_src
-
-   #+RESULTS:
-
-** Hugo properties
-   #+begin_src emacs-lisp
-;; This is GPLv2. If you still don't know the details, read
-;; http://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html
-;; copied verbatium from http://www.holgerschurig.de/en/emacs-blog-from-org-to-hugo/
-
-
-(defun hugo-ensure-property (property)
-  "Make sure that a property exists. If not, it will be created.
-
-Returns the property name if the property has been created,
-otherwise nil."
-  (if (org-entry-get nil property)
-      nil
-    (progn (org-entry-put nil property "")
-           property)))
-
-(defun hugo-ensure-properties ()
-  "This ensures that several properties exists. If not, these
-properties will be created in an empty form. In this case, the
-drawer will also be opened and the cursor will be positioned
-at the first element that needs to be filled.
-
-Returns list of properties that still must be filled in"
-  (require 'dash)
-  (let ((current-time (format-time-string (org-time-stamp-format t t) (org-current-time)))
-        first)
-    (save-excursion
-      (unless (org-entry-get nil "TITLE")
-        (org-entry-put nil "TITLE" (nth 4 (org-heading-components))))
-      (setq first (--first it (mapcar #'hugo-ensure-property '("HUGO_TAGS" "HUGO_TOPICS" "HUGO_FILE"))))
-      (unless (org-entry-get nil "HUGO_DATE")
-        (org-entry-put nil "HUGO_DATE" current-time)))
-    (when first
-      (goto-char (org-entry-beginning-position))
-      ;; The following opens the drawer
-      (forward-line 1)
-      (beginning-of-line 1)
-      (when (looking-at org-drawer-regexp)
-        (org-flag-drawer nil))
-      ;; And now move to the drawer property
-      (search-forward (concat ":" first ":"))
-      (end-of-line))
-    first))
-   #+end_src
-** Hugo export properties Function
-   #+begin_src emacs-lisp
-;; This is GPLv2. If you still don't know the details, read
-;; http://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html
-
-(defun hugo ()
-  (interactive)
-  (unless (hugo-ensure-properties)
-    (let* ((title    (concat "title = \"" (org-entry-get nil "TITLE") "\"\n"))
-           (date     (concat "date = \"" (format-time-string "%Y-%m-%d" (apply 'encode-time (org-parse-time-string (org-entry-get nil "HUGO_DATE"))) t) "\"\n"))
-           (topics   (concat "topics = [ \"" (mapconcat 'identity (split-string (org-entry-get nil "HUGO_TOPICS") "\\( *, *\\)" t) "\", \"") "\" ]\n"))
-           (tags     (concat "tags = [ \"" (mapconcat 'identity (split-string (org-entry-get nil "HUGO_TAGS") "\\( *, *\\)" t) "\", \"") "\" ]\n"))
-           (fm (concat "+++\n"
-                       title
-                       date
-                       tags
-                       topics
-                       "+++\n\n"))
-           (file     (org-entry-get nil "HUGO_FILE"))
-           (coding-system-for-write buffer-file-coding-system)
-           (backend  'md)
-           (blog))
-      ;; try to load org-mode/contrib/lisp/ox-gfm.el and use it as backend
-      (if (require 'ox-gfm nil t)
-          (setq backend 'gfm)
-        (require 'ox-md))
-      (setq blog (org-export-as backend t))
-      ;; Normalize save file path
-      (unless (string-match "^[/~]" file)
-        (setq file (concat hugo-content-dir file))
-        (unless (string-match "\\.md$" file)
-          (setq file (concat file ".md")))
-        ;; save markdown
-        (with-temp-buffer
-          (insert fm)
-          (insert blog)
-          (untabify (point-min) (point-max))
-          (write-file file)
-          (message "Exported to %s" file))
-        ))))
-   #+end_src
-** config
-   #+begin_src emacs-lisp
-(bind-key "M-g h" #'hugo)
-   #+end_src
+  (require 'evil-org-agenda)
+  (evil-org-agenda-set-keys))
+#+end_src
 
 
 * Org Roam to rescue
   Org roam to rescue
-
 
   fix issue with org-roam
   #+begin_quote
   byte-code: Cannot open load file: No such file or directory, emacsql-sqlite-common
   #+end_quote
 
-#+begin_src emacs-lisp
-(use-package emacsql
-  :ensure t
-  :vc (:url "https://github.com/magit/emacsql.git"))
-#+end_src
-
-#+RESULTS:
 
   #+begin_src emacs-lisp
     (use-package org-roam
@@ -477,140 +68,159 @@ Returns list of properties that still must be filled in"
   #+RESULTS:
   : org-roam-dailies-map
 
-
-* Org customs
-
-src: https://systemcrafters.net/emacs-tips/presentations-with-org-present/
+* Agenda & Capture 
 #+begin_src emacs-lisp
-;;; Org Mode Appearance ------------------------------------
+  ;; Org-mode setup for life planning
+  (require 'org)
+  (require 'org-agenda)
+  (require 'org-capture)
 
-;; Set reusable font name variables
-(defvar my/fixed-width-font "JetBrains Mono"
-  "The font to use for monospaced (fixed width) text.")
+  ;; Set your org directory (FIXED PATH)
+  (setq org-directory "~/org/agendas/")
+  (setq org-default-notes-file (concat org-directory "inbox.org"))
 
-;; Load org-faces to make sure we can set appropriate faces
-(require 'org-faces)
+  ;; Org agenda files
+  (setq org-agenda-files '("~/org/agendas/inbox.org"
+                           "~/org/agendas/daily.org"
+                           ;;"~/org/agendas/weekly.org" 
+                           ;;"~/org/agendas/monthly.org"
+                           ;;"~/org/agendas/yearly.org"
+                           "~/org/agendas/routine.org"
+                           ;;"~/org/agendas/challenges.org")
+                           ))
 
-;; Hide emphasis markers on formatted text
-(setq org-hide-emphasis-markers t)
+  ;; If you only want to see the agenda for today
+  ;; (setq org-agenda-span 'day)
+  ;; Only show one day of the agenda at a time
+  (setq org-agenda-span 1
+      org-agenda-start-day "+0d")
 
-;; ;; Resize Org headings
-;; (dolist (face '((org-level-1 . 1.5)
-;;                 (org-level-2 . 1.25)
-;;                 (org-level-3 . 1.5)
-;;                 (org-level-4 . 1.2)
-;;                 (org-level-5 . 1.1)
-;;                 (org-level-6 . 1.1)
-;;                 (org-level-7 . 1.1)
-;;                 (org-level-8 . 1.1)))
-;;   (set-face-attribute (car face) nil :font my/variable-width-font :weight 'medium :height (cdr face)))
+  ;; Custom agenda views
+  (setq org-agenda-custom-commands
+        '(("d" "Daily Dashboard"
+           ((agenda "" ((org-agenda-span 1)
+                        (org-agenda-start-on-weekday nil)
+                        (org-agenda-start-day "today")))
+            (tags-todo "priority" ((org-agenda-overriding-header "Priority Tasks")))
+            (tags-todo "admin" ((org-agenda-overriding-header "Administrative")))
+            (tags-todo "health" ((org-agenda-overriding-header "Health & Routine")))
+            (tags-todo "family" ((org-agenda-overriding-header "Family & Social")))))
+          
+          ("w" "Weekly Review"
+           ((todo "TODO|PROGRESS" ((org-agenda-files '("~/org/agendas/weekly.org"))
+                                   (org-agenda-overriding-header "This Week's Goals")))
+            (agenda "" ((org-agenda-span 7)
+                        (org-agenda-start-on-weekday 1)))))
+          ("i" "Inbox Review"
+            ((tags-todo ""))
+           )
+          
+          ("M" "Monthly Overview"
+           ((todo "TODO|PROGRESS" ((org-agenda-files '("~/org/agendas/monthly.org"))
+                                   (org-agenda-overriding-header "Monthly Goals")))))))
 
-;; ;; Make the document title a bit bigger
-;; (set-face-attribute 'org-document-title nil :font my/variable-width-font :weight 'bold :height 1.3)
+  ;; Simple function to create daily template
+  (defun org-create-daily-template ()
+    "Create today's daily template with tags"
+    (interactive)
+    (let ((today (format-time-string "%Y-%m-%d"))
+          (today-full (format-time-string "%Y-%m-%d %a")))
+      (find-file "~/org/agendas/daily.org")
+      (goto-char (point-min))
+      (insert (format "* Today - [%s]\n\n" today))
+      (insert (format "** TODO Complete security training module    :priority:\n   SCHEDULED: <%s 09:00>\n" today-full))
+      (insert (format "** TODO Work on main project               :priority:\n   SCHEDULED: <%s 14:00>\n" today-full))
+      (insert (format "** TODO Learning task                      :priority:learning:\n   SCHEDULED: <%s 16:00>\n\n" today-full))
+      
+      (insert (format "** TODO Check emails and messages          :admin:\n   SCHEDULED: <%s 08:00>\n" today-full))
+      (insert (format "** TODO Plan next day                      :admin:\n   SCHEDULED: <%s 21:00>\n\n" today-full))
+      
+      (insert (format "** TODO Review health goals                :health:\n   SCHEDULED: <%s 18:00>\n" today-full))
+      (insert (format "** TODO Track daily progress               :health:\n   SCHEDULED: <%s 21:30>\n\n" today-full))
+      
+      (insert (format "** TODO Family connection                  :family:\n   SCHEDULED: <%s 17:00>\n" today-full))
+      (insert (format "** TODO Pet care (Budi)                   :family:\n   SCHEDULED: <%s 15:00>\n\n" today-full))
+      
+      (save-buffer)
+      (message "Daily template created for %s" today)))
 
-;; Make sure certain org faces use the fixed-pitch face when variable-pitch-mode is on
-(set-face-attribute 'org-block nil :foreground nil :inherit 'fixed-pitch)
-(set-face-attribute 'org-table nil :inherit 'fixed-pitch)
-(set-face-attribute 'org-formula nil :inherit 'fixed-pitch)
-(set-face-attribute 'org-code nil :inherit '(shadow fixed-pitch))
-(set-face-attribute 'org-verbatim nil :inherit '(shadow fixed-pitch))
-(set-face-attribute 'org-special-keyword nil :inherit '(font-lock-comment-face fixed-pitch))
-(set-face-attribute 'org-meta-line nil :inherit '(font-lock-comment-face fixed-pitch))
-(set-face-attribute 'org-checkbox nil :inherit 'fixed-pitch)
-#+end_src
+  ;; Capture templates (SIMPLIFIED)
+  (setq org-capture-templates
+        '(("t" "Todo" entry (file+headline "~/org/agendas/inbox.org" "Tasks")
+           "* TODO %?\n  %i\n  %a")
+          
+          ("p" "Priority Task" entry (file+headline "~/org/agendas/daily.org" "Tasks")
+           "* TODO %?    :priority:\n  SCHEDULED: %^t")
+          
+          ("a" "Admin Task" entry (file+headline "~/org/agendas/daily.org" "Tasks") 
+           "* TODO %?    :admin:\n  SCHEDULED: %^t")
+          
+          ("h" "Health Task" entry (file+headline "~/org/agendas/daily.org" "Tasks")
+           "* TODO %?    :health:\n  SCHEDULED: %^t")
+          
+          ("f" "Family Task" entry (file+headline "~/org/agendas/daily.org" "Tasks")
+           "* TODO %?    :family:\n  SCHEDULED: %^t")
 
+          ("r" "Routine Task" entry (file+headline "~/org/agendas/routine.org" "Daily Routine Tasks")
+           "* TODO %?    :routine:\n  SCHEDULED: %^t")
+          
+          ("w" "Weekly Goal" entry (file+headline "~/org/agendas/weekly.org" "Weekly Goals")
+           "* TODO %?\n  DEADLINE: <%(org-read-date nil nil \"+7d\")>")
+          
+          ("m" "Monthly Goal" entry (file+headline "~/org/agendas/monthly.org" "Monthly Goals")  
+           "* TODO %?\n  DEADLINE: <%(org-read-date nil nil \"+1m\")>")
+          
+          ("c" "Challenge" entry (file+headline "~/org/agendas/challenges.org" "Active Challenges")
+           "* CHALLENGE %?\n  DEADLINE: %^t\n  :PROPERTIES:\n  :TYPE: %^{Type|daily|weekly|monthly|yearly}\n  :END:")
+          
+          ("R" "Review" entry (file+datetree "~/org/agendas/reviews.org")
+           "* %^{Review Type|Daily|Weekly|Monthly|Yearly} Review %U\n** What went well:\n%?\n** What needs improvement:\n\n** Plans for next period:\n\n")))
 
+  ;; Custom TODO keywords
+  (setq org-todo-keywords
+        '((sequence "TODO(t)" "PROGRESS(p!)" "WAIT(w!)" "|" "DONE(d!)" "CANCELLED(c!)")
+          (sequence "CHALLENGE(e)" "💯(h!)" "|" "COMPLETED(C!)" "FAILED(f!)")))
 
-* Org Present
-** configuration
-#+begin_src emacs-lisp
-(use-package org-present
-  :ensure t)
+  ;; Tags for easy categorization
+  (setq org-tag-alist '(("priority" . ?p)
+                        ("admin" . ?a) 
+                        ("health" . ?h)
+                        ("family" . ?f)
+                        ("work" . ?w)
+                        ("learning" . ?l)
+                        ("routine" . ?r)
+                        ("meal" . ?m)
+                        ("fun" . ?n)))
 
-(defun my/org-present-prepare-slide (buffer-name heading)
-  ;; Show only top-level headlines
-  (org-overview)
+  ;; Habit tracking
+  (add-to-list 'org-modules 'org-habit)
+  (setq org-habit-graph-column 60)
 
-  ;; Unfold the current entry
-  (org-show-entry)
-
-  ;; Show only direct subheadings of the slide but don't expand them
-  (org-show-children))
-
-(defun my/org-present-start ()
-  ;; Tweak font sizes
-  (setq-local face-remapping-alist '((default (:height 1.5) variable-pitch)
-                                     (header-line (:height 5.0) variable-pitch)
-                                     (org-document-title (:height 1.75) org-document-title)
-                                     (org-code (:height 1.25) org-code)
-                                     (org-verbatim (:height 1.55) org-verbatim)
-                                     (org-block (:height 1.05) org-block)
-                                     (org-block-begin-line (:height 0.7) org-block)))
-
-  ;; Set a blank header line string to create blank space at the top
-  (setq header-line-format " ")
-
-  ;; Display inline images automatically
-  (org-display-inline-images)
-
-  ;; hide cursor
-  (org-present-show-cursor)
-
-  ;; no line numbers
-  (display-line-numbers-mode 0)
-
-  ;; no beacon flash
-  (beacon-mode 0)
-
-  ;; no flyspell check
-  (flyspell-mode-off)
-
-  ;; hide modeline
-  (hide-mode-line-mode 1)
-
-  ;; Center the presentation and wrap lines
-  (visual-fill-column-mode 1)
-  (visual-line-mode 1))
-
-(defun my/org-present-end ()
-  ;; Reset font customizations
-  (setq-local face-remapping-alist '((default variable-pitch default)))
-
-  ;; Clear the header line string so that it isn't displayed
-  (setq header-line-format nil)
-
-  ;; Stop displaying inline images
-  (org-remove-inline-images)
-
-  ;; no line numbers
-  (display-line-numbers-mode 1)
-
-  ;; no beacon flash
-  (beacon-mode 1)
-
- ;; no flyspell check
-  (flyspell-mode-on)
-
-  ;; unhide modeline
-  (hide-mode-line-mode 0)
-
-  ;; Stop centering the document
-  (visual-fill-column-mode 0)
-  (visual-line-mode 0))
-
-;; Turn on variable pitch fonts in Org Mode buffers
-(add-hook 'org-mode-hook 'variable-pitch-mode)
-
-;; Register hooks with org-present
-(add-hook 'org-present-mode-hook 'my/org-present-start)
-(add-hook 'org-present-mode-quit-hook 'my/org-present-end)
-(add-hook 'org-present-after-navigate-functions 'my/org-present-prepare-slide)
-#+end_src
-
-** COMMENT org remoting
-#+begin_src emacs-lisp
-(use-package org-remoteimg
-  :straight (org-remoteimg :type git :host github :repo "gaoDean/org-remoteimg"))
+  ;; Key bindings
+  (global-set-key (kbd "C-c l") 'org-store-link)
+  (global-set-key (kbd "C-c a") 'org-agenda)
+  (global-set-key (kbd "C-c c") 'org-capture)
+  (global-set-key (kbd "C-c d") 'org-create-daily-template)
 #+end_src
 
 #+RESULTS:
+: org-create-daily-template
+
+***  COMMENT org agenda better ui 
+  #+begin_src emacs-lisp
+    ;; Function to be run when org-agenda is opened
+    (defun org-agenda-open-hook ()
+      "Hook to be run when org-agenda is opened"
+      (olivetti-mode))
+
+    (use-package olivetti  
+      :ensure t
+      :config
+      ;; Adds hook to org agenda mode, making follow mode active in org agenda
+      (add-hook 'org-agenda-mode-hook 'org-agenda-open-hook)
+      (setq olivetti-set-width 90)
+      )
+  #+end_src
+
+  #+RESULTS:
+  : [nil 26826 63066 94989 nil elpaca-process-queues nil nil 0 nil]

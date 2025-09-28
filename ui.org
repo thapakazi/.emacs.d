@@ -6,40 +6,7 @@
 * Theme
   Out of numerous themes availabe, I find *wombat* best fit most of
   the times.
-** COMMENT Wombat theme
-   Pleasing theme for eyes
-   #+begin_src emacs-lisp
-     (load-theme 'wombat t)
-     (set-face-attribute `mode-line nil
-                         :box nil)
-     (set-face-attribute `mode-line-inactive nil
-                         :box nil)
 
-   #+end_src
-** COMMENT doom theme
-
-   Here's some configuration for [[https://github.com/bbatsov/solarized-emacs/][bbatsov's solarized themes]].
-
-   #+begin_src emacs-lisp
-     (use-package doom-themes
-       :ensure t
-       :config
-  
-       ;; Global settings (defaults)
-       (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
-             doom-themes-enable-italic t) ; if nil, italics is universally disabled
-
-       ;; Load the theme (doom-one, doom-molokai, etc); keep in mind that each theme
-       ;; may have their own settings.
-       (load-theme 'dichromacy t) ;; lol this is unfair :P
-
-       ;; Enable flashing mode-line on errors
-       (doom-themes-visual-bell-config)
-
-       ;; Enable custom neotree theme
-       ;;(doom-themes-neotree-config)  ; all-the-icons fonts must be installed!
-       )
-   #+end_src
 ** SpaceEmacs theme ;)
 
    Here's some configuration for [[https://github.com/bbatsov/solarized-emacs/][bbatsov's solarized themes]].
@@ -76,28 +43,8 @@
     (bind-key "s-<f12>" 'switch-theme)
     (bind-key "s-<f11>" 'disable-active-themes)
     #+end_src
-** COMMENT Jazz Theme for nights
-   #+begin_src emacs-lisp
-(use-package jazz-theme
-  :ensure t
-  :config
-  ;; (load-theme 'spacemacs-light t)
-  )
-   #+end_src
 
-   #+RESULTS:
-** COMMENT github themes
-   #+begin_src emacs-lisp
-(use-package github-theme
-  :ensure t
-  :config
-  ;; (load-theme 'github t)
-  )
-   #+end_src
-
-   #+RESULTS:
-
-* Time based theme switch
+* COMMENT Time based theme switch
   Theme switch based on time, written with assist from ChatGPT 4.0
   #+begin_src emacs-lisp
 (defun set-theme-based-on-time ()
@@ -111,8 +58,11 @@
 (set-theme-based-on-time)
 
 ;; Optionally, re-check every hour
-(run-at-time "20 minutes" 3600 'set-theme-based-on-time)
+(run-at-time "20 minutes" 360 'set-theme-based-on-time)
   #+end_src
+
+  #+RESULTS:
+  : [nil 26788 58122 801045 3600 set-theme-based-on-time nil nil 0 nil]
 
 * Font
 
@@ -151,7 +101,7 @@
 
   #+begin_src emacs-lisp
 (add-to-list 'default-frame-alist
-             '(font . "JetBrains Mono 20")
+             '(font . "JetBrains Mono 24")
 )
 (set-face-attribute 'default nil
                     :family "JetBrains Mono"

@@ -50,6 +50,10 @@
  access magit.
 
  #+begin_src emacs-lisp
+
+(use-package transient :ensure (:fetcher github :repo "magit/transient"))
+
+
 (use-package magit
   :ensure t
   :bind ("C-c m" . magit-status)
@@ -58,6 +62,7 @@
  #+end_src
 
  #+RESULTS:
+ : [nil 26790 3576 107990 nil elpaca-process-queues nil nil 0 nil]
 
 *** Fullscreen magit
 
@@ -215,7 +220,35 @@ Version 2017-07-31"
   #+RESULTS:
   : xah-run-current-file
 
-  
+* General Keyboard mapping
+
+More convenient key definitions in emacs
+https://github.com/noctuid/general.el
+
+#+begin_src emacs-lisp
+  (use-package general
+    :config
+    (general-evil-setup t)
+
+    (general-create-definer my-leader-keys
+      :keymaps '(normal visual motion)
+      :prefix "SPC"
+      :global-prefix "C-SPC")
+
+    (my-leader-keys
+      "f" 'counsel-projectile-find-file
+      "s" 'save-buffer
+      "b b" 'switch-to-buffer
+      "p p" 'counsel-projectile-switch-project 
+      "p f" 'counsel-projectile-find-file 
+      "p f" 'counsel-projectile-find-file 
+      "w d" 'delete-window)
+
+    ;; Make sure the spacebar works normally in insert mode
+    (define-key evil-insert-state-map (kbd "SPC") 'self-insert-command)
+    )
+#+end_src
+
 * Emacs Setting
   Tired of rebooting the emacs. Closing and opening as ~emacs --debug-init /home/thapakazi/.emacs.d/config.org -fs~.
   I have a solution
@@ -456,7 +489,7 @@ move things up and down easily
 (asdf-enable) ;; This ensures Emacs has the correct paths to asdf shims and bin
 #+end_src
 
-* Blog
+* COMMENT Blog
 #+begin_src emacs-lisp
 (use-package easy-hugo
 :ensure t

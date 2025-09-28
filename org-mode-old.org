@@ -1,0 +1,506 @@
+#+TITLE: Old configs for org-mode
+#+DESCRIPTION: old config moved from org-mode.org
+#+DATE: Tuesday, Sep 16 2025
+
+
+* TODO refile these old stuffs
+** COMMENT Org setup
+
+ Speed commands are a nice and quick way to perform certain actions
+ while at the beginning of a heading. It's not activated by default.
+
+ See the doc for speed keys by checking out [[elisp:(info%20"(org)%20speed%20keys")][the documentation for  speed keys in Org mode]].
+
+ #+begin_src emacs-lisp
+ (setq org-use-speed-commands t)
+ #+end_src
+
+ #+begin_src emacs-lisp
+ (setq org-image-actual-width 550)
+ #+end_src
+
+** COMMENT Org agenda
+
+  Set up some global key bindings that integrate with Org Mode features.
+ #+begin_src emacs-lisp
+ (bind-key "C-c a" 'org-agenda)
+ #+end_src
+
+Org config for tags & files to capture agendas 
+  #+begin_src emacs-lisp
+(setq org-directory "~/repos/thapakazi/orgr/agendas")
+(setq org-agenda-files '(
+                         "health.org"
+                         "family.org"
+                         "learn.org"
+                         "projects.org"
+                         "career.org"
+                         "social.org"
+                          ))
+
+(setq org-agenda-start-with-log-mode t)
+(setq org-log-done 'time)
+(setq org-log-into-drawer t)
+  #+end_src
+
+** COMMENT Org tags
+ Ok brother I follow you here, as it is...
+
+ The default value is -77, which is weird for smaller width windows.
+ I'd rather have the tags align horizontally with the header. 45 is a
+ good column number to do that.
+
+ #+begin_src emacs-lisp
+(setq org-tag-alist
+      '(;;Catageories
+        ("@health" . ?h)
+        ("@family" . ?f)
+        ("@budi"   . ?B)
+        ("@home"   . ?o)
+        ("@self"   . ?s)
+        ("@work"   . ?w)
+
+        ;;Location
+        ;; ("@Nepal" . ?N)
+
+        ;;Activities
+        ("@backlog"     . ?b) 
+        ("@planning"    . ?P) 
+        ("@write"       . ?r) 
+        ("@practise"    . ?p) 
+        ("@call"        . ?l) 
+        ("@chores"      . ?c)
+
+        ))
+
+ (setq org-tags-column 45)
+ #+end_src
+
+** COMMENT Org capture
+Org capture kungfu configs
+ #+begin_src emacs-lisp
+ (bind-key "C-c c" 'org-capture)
+ (setq org-default-notes-file "~/repos/thapakazi/orgr/agendas/dump.org")
+ #+end_src
+
+   #+BEGIN_SRC emacs-lisp
+;; org-capture
+(setq org-capture-templates
+      (quote (
+              ("t" "TODOszz" entry (file (concat org-directory "/dump.org"))
+               "* TODO %?\n%U\n%a\n" :clock-in t :clock-resume t)
+
+              ("j" "Journal"
+               entry (file (get-journal-file-today))
+               "* Event: %?\n\n  %i\n\n  From: %a"
+               :empty-lines 1)
+
+              ("x" "What on my plate today ?? " entry (file+datetree+prompt (concat org-directory "/devops.org"))
+               "* TODO %?")
+
+              ("g" "awesome tools " entry (file (concat org-directory "/awesome_tools.org"))
+               "* %?")
+              )))
+
+** COMMENT Org babel languages
+
+  #+begin_src emacs-lisp
+    (org-babel-do-load-languages
+     'org-babel-load-languages
+     '((python . t)
+       (C . t)
+       (calc . t)
+       (latex . t)
+       (java . t)
+       (ruby . t)
+       (scheme . t)
+       (shell . t)
+       (sqlite . t)
+       (go . t)
+       (js . t)))
+  #+end_src
+
+** COMMENT Org babel/source blocks
+
+  I like to have source blocks properly syntax highlighted and with the
+  editing popup window staying within the same window so all the windows
+  don't jump around. Also, having the top and bottom trailing lines in
+  the block is a waste of space, so we can remove them.
+
+  I noticed that fontification doesn't work with markdown mode when the
+  block is indented after editing it in the org src buffer---the leading
+  #s for headers don't get fontified properly because they appear as Org
+  comments. Setting ~org-src-preserve-indentation~ makes things
+  consistent as it doesn't pad source blocks with leading spaces.
+
+  #+begin_src emacs-lisp
+  (setq org-src-fontify-natively t
+        org-src-window-setup 'current-window
+        org-src-strip-leading-and-trailing-blank-lines t
+        org-src-preserve-indentation t
+        org-src-tab-acts-natively t)
+  #+end_src
+
+** COMMENT Pandoc exporter                  :fixme: :future:
+
+ Pandoc converts between a huge number of different file formats.
+
+ #+begin_src emacs-lisp
+ (use-package ox-pandoc
+   :no-require t
+   :ensure t)
+ #+end_src
+** COMMENT Org old config
+ Old good configs for org
+
+#+BEGIN_SRC emacs-lisp
+;;======================================================================
+;; ORG-MODE
+
+(add-hook 'org-mode-hook 'turn-on-auto-fill)
+
+;; TODO: org -mode image zoom
+;; (setq org-image-actual-width 800)
+
+(add-hook 'org-mode-hook
+          '(lambda ()
+             (setq org-file-apps
+                   '((auto-mode . emacs)
+                     ("\\.jpg\\'" . "feh %s")
+                     ("\\.png\\'" . "feh %s")
+                     ("\\.mkv\\'" . "mplayer %s")
+                     ("\\.mp4\\'" . "mplayer %s")
+                             ("\\.avi\\'" . "mplayer %s")
+                     ("\\.pdf\\'" . "evince %s")))))
+
+;; removing the C-j bind for goto-last-change, of el-get
+(add-hook 'org-mode-hook
+          '(lambda ()
+             (define-key org-mode-map (kbd "C-j") nil)))
+
+;;----------------------------------------------------------------------
+;; Sort list by checkbox type
+;; http://orgmode.org/worg/org-hacks.html
+
+(defun org-sort-list-by-checkbox-type ()
+  "Sort list items according to Checkbox state."
+  (interactive)
+  (org-sort-list
+   nil ?f
+   (lambda ()
+     (if (looking-at org-list-full-item-re)
+         (cdr (assoc (match-string 3)
+                     '(("[X]" . 1) ("[-]" . 2) ("[ ]" . 3) (nil . 4))))
+       4))))
+
+;;----------------------------------------------------------------------
+;; org put checkbox if previous is checkbox
+
+(defun org-i-need-checkbox ()
+  (interactive)
+  (previous-line)
+  (setq previous_line
+        (buffer-substring
+         (line-beginning-position) (line-end-position)))
+  (next-line)
+  (when (string-match "- \\[" previous_line)
+    (insert "[ ] "))
+  (insert "haoeush")
+  )
+
+;; (add-hook 'org-meta-return 'org-i-need-checkbox)
+
+
+;;----------------------------------------------------------------------
+;; Add dot after headline
+;; https://yoo2080.wordpress.com/2013/08/24/changing-the-number-format-for-section-headings-in-org-mode-html-export/
+(defun my-html-filter-headline-yesdot (text backend info)
+  "Ensure dots in headlines."
+  (when (org-export-derived-backend-p backend 'html)
+    (save-match-data
+      (when (let ((case-fold-search t))
+              (string-match (rx (group "<span class=\"section-number-" (+ (char digit)) "\">"
+                                       (+ (char digit ".")))
+                                (group "</span>"))
+                            text))
+        (replace-match "\\1.\\2"
+                       t nil text)))))
+
+(eval-after-load 'ox
+  '((point)
+     (add-to-list 'org-export-filter-headline-functions
+                  'my-html-filter-headline-yesdot)))
+
+
+                                        ; Setting Colours (faces) for todo states to give clearer view of work
+(setq org-todo-keyword-faces
+      '(("TODO" . org-warning)
+        ("DOING" . "yellow")
+        ("BLOCKED" . "red")
+        ("REVIEW" . "orange")
+        ("DONE" . "green")
+        ("ARCHIVED" .  "blue")
+        ("FUTURE" .  "#EE82EE")))
+
+
+#+END_SRC
+
+
+** COMMENT blog with org and hugo
+  All the things are described here: [[https://thapakazi.github.io/posts/partial_publish/#org85703f5][History of it all]]
+*** Requirements
+**** Define content dir
+    #+begin_src emacs-lisp
+(defvar hugo-content-dir
+  (concat user-emacs-directory "blog/posts/")
+  ;; (getenv "HUGO_CONTENT_PROJECT_DIR")
+  "Path to Hugo's content directory"
+  )
+    #+end_src
+
+    #+RESULTS:
+    : hugo-content-dir
+
+**** Github flavoured markdown
+   #+begin_src emacs-lisp
+(use-package ox-gfm
+  :ensure t
+  :no-require t
+)
+   #+end_src
+
+   #+RESULTS:
+
+*** Hugo properties
+   #+begin_src emacs-lisp
+;; This is GPLv2. If you still don't know the details, read
+;; http://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html
+;; copied verbatium from http://www.holgerschurig.de/en/emacs-blog-from-org-to-hugo/
+
+
+(defun hugo-ensure-property (property)
+  "Make sure that a property exists. If not, it will be created.
+
+Returns the property name if the property has been created,
+otherwise nil."
+  (if (org-entry-get nil property)
+      nil
+    (progn (org-entry-put nil property "")
+           property)))
+
+(defun hugo-ensure-properties ()
+  "This ensures that several properties exists. If not, these
+properties will be created in an empty form. In this case, the
+drawer will also be opened and the cursor will be positioned
+at the first element that needs to be filled.
+
+Returns list of properties that still must be filled in"
+  (require 'dash)
+  (let ((current-time (format-time-string (org-time-stamp-format t t) (org-current-time)))
+        first)
+    (save-excursion
+      (unless (org-entry-get nil "TITLE")
+        (org-entry-put nil "TITLE" (nth 4 (org-heading-components))))
+      (setq first (--first it (mapcar #'hugo-ensure-property '("HUGO_TAGS" "HUGO_TOPICS" "HUGO_FILE"))))
+      (unless (org-entry-get nil "HUGO_DATE")
+        (org-entry-put nil "HUGO_DATE" current-time)))
+    (when first
+      (goto-char (org-entry-beginning-position))
+      ;; The following opens the drawer
+      (forward-line 1)
+      (beginning-of-line 1)
+      (when (looking-at org-drawer-regexp)
+        (org-flag-drawer nil))
+      ;; And now move to the drawer property
+      (search-forward (concat ":" first ":"))
+      (end-of-line))
+    first))
+   #+end_src
+*** Hugo export properties Function
+   #+begin_src emacs-lisp
+;; This is GPLv2. If you still don't know the details, read
+;; http://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html
+
+(defun hugo ()
+  (interactive)
+  (unless (hugo-ensure-properties)
+    (let* ((title    (concat "title = \"" (org-entry-get nil "TITLE") "\"\n"))
+           (date     (concat "date = \"" (format-time-string "%Y-%m-%d" (apply 'encode-time (org-parse-time-string (org-entry-get nil "HUGO_DATE"))) t) "\"\n"))
+           (topics   (concat "topics = [ \"" (mapconcat 'identity (split-string (org-entry-get nil "HUGO_TOPICS") "\\( *, *\\)" t) "\", \"") "\" ]\n"))
+           (tags     (concat "tags = [ \"" (mapconcat 'identity (split-string (org-entry-get nil "HUGO_TAGS") "\\( *, *\\)" t) "\", \"") "\" ]\n"))
+           (fm (concat "+++\n"
+                       title
+                       date
+                       tags
+                       topics
+                       "+++\n\n"))
+           (file     (org-entry-get nil "HUGO_FILE"))
+           (coding-system-for-write buffer-file-coding-system)
+           (backend  'md)
+           (blog))
+      ;; try to load org-mode/contrib/lisp/ox-gfm.el and use it as backend
+      (if (require 'ox-gfm nil t)
+          (setq backend 'gfm)
+        (require 'ox-md))
+      (setq blog (org-export-as backend t))
+      ;; Normalize save file path
+      (unless (string-match "^[/~]" file)
+        (setq file (concat hugo-content-dir file))
+        (unless (string-match "\\.md$" file)
+          (setq file (concat file ".md")))
+        ;; save markdown
+        (with-temp-buffer
+          (insert fm)
+          (insert blog)
+          (untabify (point-min) (point-max))
+          (write-file file)
+          (message "Exported to %s" file))
+        ))))
+   #+end_src
+*** config
+   #+begin_src emacs-lisp
+(bind-key "M-g h" #'hugo)
+   #+end_src
+
+** COMMENT Org customs
+
+src: https://systemcrafters.net/emacs-tips/presentations-with-org-present/
+#+begin_src emacs-lisp
+;;; Org Mode Appearance ------------------------------------
+
+;; Set reusable font name variables
+(defvar my/fixed-width-font "JetBrains Mono"
+  "The font to use for monospaced (fixed width) text.")
+
+;; Load org-faces to make sure we can set appropriate faces
+(require 'org-faces)
+
+;; Hide emphasis markers on formatted text
+(setq org-hide-emphasis-markers t)
+
+;; ;; Resize Org headings
+;; (dolist (face '((org-level-1 . 1.5)
+;;                 (org-level-2 . 1.25)
+;;                 (org-level-3 . 1.5)
+;;                 (org-level-4 . 1.2)
+;;                 (org-level-5 . 1.1)
+;;                 (org-level-6 . 1.1)
+;;                 (org-level-7 . 1.1)
+;;                 (org-level-8 . 1.1)))
+;;   (set-face-attribute (car face) nil :font my/variable-width-font :weight 'medium :height (cdr face)))
+
+;; ;; Make the document title a bit bigger
+;; (set-face-attribute 'org-document-title nil :font my/variable-width-font :weight 'bold :height 1.3)
+
+;; Make sure certain org faces use the fixed-pitch face when variable-pitch-mode is on
+(set-face-attribute 'org-block nil :foreground nil :inherit 'fixed-pitch)
+(set-face-attribute 'org-table nil :inherit 'fixed-pitch)
+(set-face-attribute 'org-formula nil :inherit 'fixed-pitch)
+(set-face-attribute 'org-code nil :inherit '(shadow fixed-pitch))
+(set-face-attribute 'org-verbatim nil :inherit '(shadow fixed-pitch))
+(set-face-attribute 'org-special-keyword nil :inherit '(font-lock-comment-face fixed-pitch))
+(set-face-attribute 'org-meta-line nil :inherit '(font-lock-comment-face fixed-pitch))
+(set-face-attribute 'org-checkbox nil :inherit 'fixed-pitch)
+#+end_src
+
+** COMMENT Org Present
+*** COMMENT configuration
+#+begin_src emacs-lisp
+(use-package org-present
+  :ensure t)
+
+(defun my/org-present-prepare-slide (buffer-name heading)
+  ;; Show only top-level headlines
+  (org-overview)
+
+  ;; Unfold the current entry
+  (org-show-entry)
+
+  ;; Show only direct subheadings of the slide but don't expand them
+  (org-show-children))
+
+(defun my/org-present-start ()
+  ;; Tweak font sizes
+  (setq-local face-remapping-alist '((default (:height 1.5) variable-pitch)
+                                     (header-line (:height 5.0) variable-pitch)
+                                     (org-document-title (:height 1.75) org-document-title)
+                                     (org-code (:height 1.25) org-code)
+                                     (org-verbatim (:height 1.55) org-verbatim)
+                                     (org-block (:height 1.05) org-block)
+                                     (org-block-begin-line (:height 0.7) org-block)))
+
+  ;; Set a blank header line string to create blank space at the top
+  (setq header-line-format " ")
+
+  ;; Display inline images automatically
+  (org-display-inline-images)
+
+  ;; hide cursor
+  (org-present-show-cursor)
+
+  ;; no line numbers
+  (display-line-numbers-mode 0)
+
+  ;; no beacon flash
+  (beacon-mode 0)
+
+  ;; no flyspell check
+  (flyspell-mode-off)
+
+  ;; hide modeline
+  (hide-mode-line-mode 1)
+
+  ;; Center the presentation and wrap lines
+  (visual-fill-column-mode 1)
+  (visual-line-mode 1))
+
+(defun my/org-present-end ()
+  ;; Reset font customizations
+  (setq-local face-remapping-alist '((default variable-pitch default)))
+
+  ;; Clear the header line string so that it isn't displayed
+  (setq header-line-format nil)
+
+  ;; Stop displaying inline images
+  (org-remove-inline-images)
+
+  ;; no line numbers
+  (display-line-numbers-mode 1)
+
+  ;; no beacon flash
+  (beacon-mode 1)
+
+ ;; no flyspell check
+  (flyspell-mode-on)
+
+  ;; unhide modeline
+  (hide-mode-line-mode 0)
+
+  ;; Stop centering the document
+  (visual-fill-column-mode 0)
+  (visual-line-mode 0))
+
+;; Turn on variable pitch fonts in Org Mode buffers
+(add-hook 'org-mode-hook 'variable-pitch-mode)
+
+;; Register hooks with org-present
+(add-hook 'org-present-mode-hook 'my/org-present-start)
+(add-hook 'org-present-mode-quit-hook 'my/org-present-end)
+(add-hook 'org-present-after-navigate-functions 'my/org-present-prepare-slide)
+#+end_src
+
+*** COMMENT org remoting
+#+begin_src emacs-lisp
+(use-package org-remoteimg
+  :straight (org-remoteimg :type git :host github :repo "gaoDean/org-remoteimg"))
+#+end_src
+
+#+RESULTS:
+
+** [[https://orgmode.org/manual/Easy-templates.html][org-easy-templates]]
+
+   I am used to ~<s TAB~ folow for generating babel block, to get
+   the key binding:
+   #+begin_src emacs-lisp
+   (require 'org-tempo)
+   #+end_src
