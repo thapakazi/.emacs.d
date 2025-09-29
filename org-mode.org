@@ -224,3 +224,22 @@
 
   #+RESULTS:
   : [nil 26826 63066 94989 nil elpaca-process-queues nil nil 0 nil]
+
+
+** Org babel languages
+
+  #+begin_src emacs-lisp
+    (org-babel-do-load-languages
+     'org-babel-load-languages
+     '((python . t)
+       (C . t)
+       (calc . t)
+       (latex . t)
+       (java . t)
+       (ruby . t)
+       (scheme . t)
+       (shell . t)
+       (sqlite . t)
+       (go . t)
+       (js . t)))
+  #+end_src

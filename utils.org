@@ -238,6 +238,7 @@ https://github.com/noctuid/general.el
     (my-leader-keys
       "f" 'counsel-projectile-find-file
       "s" 'save-buffer
+      "/" 'counsel-projectile-ag
       "b b" 'switch-to-buffer
       "p p" 'counsel-projectile-switch-project 
       "p f" 'counsel-projectile-find-file 
