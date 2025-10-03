@@ -1,29 +1,44 @@
 #+TITLE: swift mode
 #+DATE: Tuesday, Sep 30 2025
 
+* Swift mode
 
-* COMMENT Swift devenv setup
+**Note**: The [[https://github.com/alex-pinkus/tree-sitter-swift#:~:text=Parsers%20generated%20by%20the%20tree,be%20available%20in%20your%20download.][alex-pinkus/tree-sitter-swift]] repository no longer checks in the generated `parser.c` file
+ for version compatibility. This causes ~treesit-install-language-grammar~ to fail.
+
+ To fix this, you have two options for providing the grammar source:
+
+ 1.  **Generate it manually:**
+     -   Clone the `tree-sitter-swift` repository.
+     -   Run `npm install` and `npx tree-sitter generate` to create the `parser.c` file.
+     -   Point `treesit-language-source-alist` to the local clone, e.g., `("/path/to/your/clone" nil "src")`.
+
+ 2.  **Download a pre-generated artifact:**
+     -   Find a recent "[[https://github.com/alex-pinkus/tree-sitter-swift/actions/workflows/parser-src.yml][Publish grammar.json and parser.c]]" workflow run on the repository's GitHub Actions page.
+     -   Download the `generated-parser-src` artifact.
+     -   Unzip its contents (`parser.c`, `grammar.json`, `scanner.c`) directly into your tree-sitter installation directory for Swift, typically `~/.emacs.d/tree-sitter/tree-sitter-swift`.
+
+ This configuration, while still pointing to the remote repository for convenience,
+ assumes that one of the above manual steps has been performed to reso
+
+
 #+begin_src emacs-lisp
-  (use-package swift-mode
+  (use-package swift-ts-mode
     :ensure t
     :config
-    ;; Tell eglot to use sourcekit-lsp for swift-mode.
-    ;; The executable name is often found via xcrun on macOS.
-    ;; On Linux, ensure 'sourcekit-lsp' is in your PATH.
-    (add-to-list 'eglot-custom-server-info '(swift-mode . ("sourcekit-lsp")))
-    
-    ;; This hook ensures eglot starts automatically when you visit a Swift file.
-    (add-hook 'swift-mode-hook #'eglot-ensure))
-#+end_src
+    ;; Ensure treesit grammars are installed
+    (with-eval-after-load 'swift-ts-mode
+      (unless (assoc 'swift treesit-language-source-alist)
+        (push '(swift . ("https://github.com/alex-pinkus/tree-sitter-swift" nil "tree-sitter-swift"))
+              treesit-language-source-alist))
 
-* Swift mode
-#+begin_src emacs-lisp
-  (use-package swift-mode
-  :ensure t
-  :mode "\\.swift\\'"
-  :config
-  ;; You can add more swift-mode specific configurations here
-  (message "swift-mode is loaded"))
+      (unless (treesit-language-available-p 'swift)
+        (message "Installing Tree-sitter grammar for Swift from custom source...")
+        (treesit-install-language-grammar "swift")
+        (message "Tree-sitter grammar for Swift installed.")))
+
+    (setq swift-ts-basic-offset 4)
+    (message "swift-ts-mode is configured"))
 #+end_src
 
 * eglot with swift
@@ -31,13 +46,13 @@
   ;; Configure eglot for swift-mode using sourcekit-lsp
   (use-package eglot
     :ensure nil ;; eglot is built into modern Emacs
-    :hook (swift-mode . eglot-ensure)
+    :hook (swift-ts-mode-hook . eglot-ensure)
     :config
     ;; Tell eglot to use sourcekit-lsp for swift-mode.
     ;; `xcrun` may be necessary on macOS to find the correct executable.
     (with-eval-after-load 'eglot
       (add-to-list 'eglot-server-programs
-                   '(swift-mode . ("xcrun" "sourcekit-lsp")))))
+                   '(swift-ts-mode . ("xcrun" "sourcekit-lsp")))))
 #+end_src
 
 * Company goddies
@@ -51,12 +66,28 @@
     (with-eval-after-load 'eglot
       (add-to-list 'company-backends 'company-capf)))
 
-  ;; Optional: Automatically format Swift code on save using swift-format
-  ;; You must first install swift-format, e.g., `brew install swift-format`.
-  (use-package swift-format
-    :commands (swift-format-buffer)
-    :hook (swift-mode-hook . (lambda ()
-                              (add-hook 'before-save-hook #'swift-format-buffer nil t)))
-    )
+  ;; ;; Optional: Automatically format Swift code on save using swift-format
+  ;; ;; You must first install swift-format, e.g., `brew install swift-format`.
+  ;; (use-package swift-format
+  ;;   :commands (swift-format-buffer)
+  ;;   :hook (swift-ts-mode-hook . (lambda ()
+  ;;                                 (add-hook 'before-save-hook #'swift-format-buffer nil t))))
 #+end_src
 
+* [[https://github.com/radian-software/apheleia][apheleia]]
+🌷 Run code formatter on buffer contents without moving point, using RCS patches and dynamic programming.
+
+#+begin_src emacs-lisp
+  ;; Apheleia for formatting Swift code
+  (use-package apheleia
+    :ensure t
+    :init
+    (apheleia-global-mode +1)
+    :config
+    ;; Tell apheleia how to run swift-format as an in-place formatter.
+    ;; The symbol `inplace` will be replaced by apheleia with the temporary file path.
+    (setf (alist-get 'swift-format apheleia-formatters)
+          '("swift-format" "--in-place" inplace))
+    ;; Associate the 'swift-format' formatter with swift-ts-mode.
+    (add-to-list 'apheleia-mode-alist '(swift-ts-mode . swift-format)))
+#+end_src
