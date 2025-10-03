@@ -4,8 +4,9 @@
 
 * Default Scratch Pad
   #+begin_src emacs-lisp
-  (setq initial-major-mode 'js-mode)
+  ;;(setq initial-major-mode 'js-mode)
   #+end_src
+
 * [[https://www.emacswiki.org/emacs/AutoComplete][AutoComplete]]
   Auto complete whem you type with nice popup menu :D
   #+BEGIN_SRC emacs-lisp

@@ -1,0 +1,62 @@
+#+TITLE: swift mode
+#+DATE: Tuesday, Sep 30 2025
+
+
+* COMMENT Swift devenv setup
+#+begin_src emacs-lisp
+  (use-package swift-mode
+    :ensure t
+    :config
+    ;; Tell eglot to use sourcekit-lsp for swift-mode.
+    ;; The executable name is often found via xcrun on macOS.
+    ;; On Linux, ensure 'sourcekit-lsp' is in your PATH.
+    (add-to-list 'eglot-custom-server-info '(swift-mode . ("sourcekit-lsp")))
+    
+    ;; This hook ensures eglot starts automatically when you visit a Swift file.
+    (add-hook 'swift-mode-hook #'eglot-ensure))
+#+end_src
+
+* Swift mode
+#+begin_src emacs-lisp
+  (use-package swift-mode
+  :ensure t
+  :mode "\\.swift\\'"
+  :config
+  ;; You can add more swift-mode specific configurations here
+  (message "swift-mode is loaded"))
+#+end_src
+
+* eglot with swift
+#+begin_src emacs-lisp
+  ;; Configure eglot for swift-mode using sourcekit-lsp
+  (use-package eglot
+    :ensure nil ;; eglot is built into modern Emacs
+    :hook (swift-mode . eglot-ensure)
+    :config
+    ;; Tell eglot to use sourcekit-lsp for swift-mode.
+    ;; `xcrun` may be necessary on macOS to find the correct executable.
+    (with-eval-after-load 'eglot
+      (add-to-list 'eglot-server-programs
+                   '(swift-mode . ("xcrun" "sourcekit-lsp")))))
+#+end_src
+
+* Company goddies
+#+begin_src emacs-lisp
+    ;; Optional: Add company for advanced completion integration with eglot
+  (use-package company
+    :ensure t
+    :config
+    (global-company-mode)
+    ;; Make company use eglot's completion backend
+    (with-eval-after-load 'eglot
+      (add-to-list 'company-backends 'company-capf)))
+
+  ;; Optional: Automatically format Swift code on save using swift-format
+  ;; You must first install swift-format, e.g., `brew install swift-format`.
+  (use-package swift-format
+    :commands (swift-format-buffer)
+    :hook (swift-mode-hook . (lambda ()
+                              (add-hook 'before-save-hook #'swift-format-buffer nil t)))
+    )
+#+end_src
+

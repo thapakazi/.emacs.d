@@ -1,5 +1,6 @@
 (setq package-enable-at-startup nil)
 
+
 ;; Print startup time
 (defun display-startup-time ()
   (message "Emacs loaded in %s with %d garbage collections."
@@ -16,7 +17,7 @@
   (tooltip-mode -1))
 
 (setq inhibit-startup-message t)
-(setq initial-scratch-message "yo, whatssssup")
+(setq initial-scratch-message "YOOOooo, whatssssup")
 
 ;; switching to elpaca as the pacakge manger
 (defvar elpaca-installer-version 0.11)
@@ -79,6 +80,8 @@
 (org-babel-load-file (concat user-emacs-directory "lsp.org"))
 (org-babel-load-file (concat user-emacs-directory "langs.org"))
 (org-babel-load-file (concat user-emacs-directory "go.org"))
+(org-babel-load-file (concat user-emacs-directory "swift.org"))
+(org-babel-load-file (concat user-emacs-directory "testing.org")) ;; testing pkgs
 ;; (org-babel-load-file (concat user-emacs-directory "rust-lang.org"))
 ;; (org-babel-load-file (concat user-emacs-directory "ror.org"))
 (org-babel-load-file (concat user-emacs-directory "js.org"))

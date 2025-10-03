@@ -227,14 +227,19 @@ https://github.com/noctuid/general.el
 
 #+begin_src emacs-lisp
   (use-package general
+    :after evil
     :config
+    ;; Unbind keys before they are used as a prefix
+    (general-auto-unbind-keys)
+    ;; Setup general for evil-mode
     (general-evil-setup t)
-
+    ;; Create the key definer
     (general-create-definer my-leader-keys
       :keymaps '(normal visual motion)
       :prefix "SPC"
       :global-prefix "C-SPC")
 
+    ;; Define your keybindings
     (my-leader-keys
       "f" 'counsel-projectile-find-file
       "s" 'save-buffer
@@ -242,11 +247,10 @@ https://github.com/noctuid/general.el
       "b b" 'switch-to-buffer
       "p p" 'counsel-projectile-switch-project 
       "p f" 'counsel-projectile-find-file 
-      "p f" 'counsel-projectile-find-file 
       "w d" 'delete-window)
 
-    ;; Make sure the spacebar works normally in insert mode
-    (define-key evil-insert-state-map (kbd "SPC") 'self-insert-command)
+    ;; The :prefix and :global-prefix handle evil states, so you don't need this
+    ;; (define-key evil-insert-state-map (kbd "SPC") 'self-insert-command)
     )
 #+end_src
 
