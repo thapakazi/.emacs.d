@@ -1,0 +1,26 @@
+#+TITLE: my dev defs
+#+DATE: Saturday, Oct 04 2025
+
+
+* Protobuf mode
+#+begin_src emacs-lisp
+  (use-package protobuf-ts-mode
+    :ensure (:host github :repo "emacsattic/protobuf-ts-mode")
+    :config
+    ;; Ensure treesit grammars are installed
+    (with-eval-after-load 'protobuf-ts-mode
+      (unless (assoc 'proto treesit-language-source-alist)
+        (push '(proto . ("https://github.com/mitchellh/tree-sitter-proto" nil "tree-sitter-proto"))
+              treesit-language-source-alist))
+
+      (unless (treesit-language-available-p 'proto)
+        (message "Installing Tree-sitter grammar for Proto from custom source...")
+        (treesit-install-language-grammar "proto")
+        (message "Tree-sitter grammar for Protobuf installed.")))
+
+    (setq protobuf-ts-basic-offset 4)
+    (message "protobuf-ts-mode is configured")
+
+    :init
+    (add-to-list 'auto-mode-alist '("\\.proto\\'" . protobuf-ts-mode))) 
+#+end_src

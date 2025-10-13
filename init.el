@@ -76,6 +76,7 @@
 
 (org-babel-load-file (concat user-emacs-directory "org-mode.org"))
 (org-babel-load-file (concat user-emacs-directory "devops.org"))
+(org-babel-load-file (concat user-emacs-directory "dev.org"))
 
 (org-babel-load-file (concat user-emacs-directory "lsp.org"))
 (org-babel-load-file (concat user-emacs-directory "langs.org"))
