@@ -85,7 +85,8 @@
                            ;;"~/org/agendas/weekly.org" 
                            ;;"~/org/agendas/monthly.org"
                            ;;"~/org/agendas/yearly.org"
-                           "~/org/agendas/routine.org"
+                           "~/org/agendas/learn.org"
+                           "~/org/agendas/projects.org"
                            ;;"~/org/agendas/challenges.org")
                            ))
 
@@ -105,7 +106,7 @@
             (tags-todo "admin" ((org-agenda-overriding-header "Administrative")))
             (tags-todo "health" ((org-agenda-overriding-header "Health & Routine")))
             (tags-todo "family" ((org-agenda-overriding-header "Family & Social")))))
-          
+
           ("w" "Weekly Review"
            ((todo "TODO|PROGRESS" ((org-agenda-files '("~/org/agendas/weekly.org"))
                                    (org-agenda-overriding-header "This Week's Goals")))
@@ -149,15 +150,18 @@
         '(("t" "Todo" entry (file+headline "~/org/agendas/inbox.org" "Tasks")
            "* TODO %?\n  %i\n  %a")
           
-          ("p" "Priority Task" entry (file+headline "~/org/agendas/daily.org" "Tasks")
+          ("x" "Priority Task" entry (file+headline "~/org/agendas/daily.org" "Tasks")
            "* TODO %?    :priority:\n  SCHEDULED: %^t")
           
-          ("a" "Admin Task" entry (file+headline "~/org/agendas/daily.org" "Tasks") 
+          ("p" "Project Items" entry (file+headline "~/org/agendas/projects.org" "Projects")
+           "* TODO %?    :projects:\n  SCHEDULED: %^t")
+
+          ("a" "Admin Task" entry (file+headline "~/org/agendas/daily.org" "Tasks")
            "* TODO %?    :admin:\n  SCHEDULED: %^t")
-          
+
           ("h" "Health Task" entry (file+headline "~/org/agendas/daily.org" "Tasks")
            "* TODO %?    :health:\n  SCHEDULED: %^t")
-          
+
           ("f" "Family Task" entry (file+headline "~/org/agendas/daily.org" "Tasks")
            "* TODO %?    :family:\n  SCHEDULED: %^t")
 
