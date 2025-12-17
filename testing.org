@@ -43,12 +43,83 @@
 nil
 :end:
 
-* ef themes
+* treesit-fold
 #+begin_src emacs-lisp
-  (use-package ef-themes
+ (use-package treesit-fold
     :ensure t
-    :no-require t
+    :defer t ; Load when needed
+
+    ;; Hook into the appropriate mode
+    ;; global-treesit-fold-mode is recommended to enable folding globally
     :config
-    (load-theme 'ef-bio t)
-    )
+    (global-treesit-fold-mode 1)
+    (message "treesit-fold is active globally for supported modes.")
+
+    ;; OPTIONAL: Enable indicators mode globally for visual fold markers
+    (global-treesit-fold-indicators-mode 1)
+    
+    ;; OPTIONAL: Show line count in folded regions
+    (setq treesit-fold-line-count-show t) 
+
+    ;; Keybindings (Evil Mode Support)
+    ;; The package automatically adds its commands to the Evil folding list
+    ;; (e.g., 'za', 'zc', 'zR', 'zM', etc. in normal mode)
+    ;; but you can add your own map to normal mode for convenience.
+    :bind (:map evil-normal-state-map
+                ;; Example of mapping to 'zf' prefix (like Emacs fold-mode)
+                ("zf c" . treesit-fold-close)
+                ("zf o" . treesit-fold-open)
+                ("zf r" . treesit-fold-open-recursively)
+                ("zf a" . treesit-fold-close-all)
+                ("zf A" . treesit-fold-open-all)
+                ("zF" . treesit-fold-toggle)))
 #+end_src
+
+* sqlite mode
+#+begin_src emacs-lisp
+  (use-package sqlite-mode
+    :ensure nil ;; its built from 29.1 onwards 
+    :defer t
+    :config
+    (evil-local-mode)
+
+    ;; Define keybindings using general.el syntax
+    (general-define-key
+     :keymaps 'sqlite-mode-map
+     :states 'normal
+     "rq" 'sqlite-mode-extras-execute-and-display-select-query
+     "y" 'sqlite-mode-list-columns)
+
+    ;; Bind the RETURN key to 'sqlite-mode-list-data' for both
+    ;; the main table list and data display buffers.
+    ;; This command lists data when pressed on a table name
+    ;; and will hide the data buffer if pressed again from the table list.
+    ;; (general-define-key
+    ;;  :keymaps '(sqlite-mode-map sqlite-list-table-map)
+    ;;  :states 'normal
+    ;;  (kbd "<return>") 'sqlite-mode-list-data))
+  )
+  (use-package sqlite-mode-extras
+    :ensure t
+    :bind (:map
+           sqlite-mode-map
+           ("n" . next-line)
+           ("p" . previous-line)
+           ("<backtab>" . sqlite-mode-extras-backtab-dwim)
+           ("<tab>" . sqlite-mode-extras-tab-dwim)
+           ("RET" . sqlite-mode-extras-ret-dwim)))
+#+end_src
+
+#+RESULTS:
+: [nil 26885 26921 728156 nil elpaca-process-queues nil nil 0 nil]
+
+* Structured Editing with Combobulate
+Since you want to "jump back and forth" effectively, `combobulate` is a game-changer for Tree-sitter users. It allows you to navigate by the actual logic of the code (move to sibling, parent, etc.).
+
+#+BEGIN_SRC emacs-lisp
+  (use-package combobulate
+    :ensure (combobulate
+             :host github
+             :repo "mickeynp/combobulate")
+    :hook(python-ts-mode . combobulate-mode))
+#+END_SRC

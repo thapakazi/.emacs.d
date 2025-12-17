@@ -30,6 +30,14 @@ ac-comphist.dat
 
 .cache
 /js.el
+/defaults.el
+/basics.el
+/utils.el
+/org-mode.el
 /lsp.el
 /langs.el
 /go.el
+/py.el
+/swift.el
+/devops.el
+/dev.el

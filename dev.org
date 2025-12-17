@@ -24,3 +24,25 @@
     :init
     (add-to-list 'auto-mode-alist '("\\.proto\\'" . protobuf-ts-mode))) 
 #+end_src
+
+* Reformatter Configuration
+This defines the "format on save" behavior using the  different formatters.
+
+#+BEGIN_SRC emacs-lisp
+  (use-package reformatter
+    :ensure t
+    :config
+    ;; Python formatting with black
+    (reformatter-define python-format
+      :program "black"
+      :args '("-" "--quiet")
+      :group 'python)
+
+    ;; Go formatting with goimports
+    (reformatter-define go-format
+      :program "goimports"
+      :args '("/dev/stdin")
+      :group 'go))
+
+#+END_SRC
+

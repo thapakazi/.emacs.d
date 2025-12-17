@@ -22,23 +22,6 @@ asdf reshim golang
 
 #+RESULTS:
 
-** Reformatter Configuration
-
-Configure `reformatter` for Go code formatting with `goimports`.
-
-#+BEGIN_SRC emacs-lisp
-(use-package reformatter
-  :ensure t
-  :config
-  (reformatter-define go-format
-    :program "goimports"
-    :args '("/dev/stdin")
-    :group 'go))
-#+END_SRC
-
-#+RESULTS:
-: [nil 26848 9952 641490 nil elpaca-process-queues nil nil 0 nil]
-
 ** Go Tree-sitter Support
 Use `go-ts-mode` for modern Go syntax highlighting and Tree-sitter integration.
 

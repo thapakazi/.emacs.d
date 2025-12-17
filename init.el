@@ -75,13 +75,16 @@
 (org-babel-load-file (concat user-emacs-directory "ui.org"))
 
 (org-babel-load-file (concat user-emacs-directory "org-mode.org"))
-(org-babel-load-file (concat user-emacs-directory "devops.org"))
-(org-babel-load-file (concat user-emacs-directory "dev.org"))
 
 (org-babel-load-file (concat user-emacs-directory "lsp.org"))
 (org-babel-load-file (concat user-emacs-directory "langs.org"))
 (org-babel-load-file (concat user-emacs-directory "go.org"))
+(org-babel-load-file (concat user-emacs-directory "py.org"))
 (org-babel-load-file (concat user-emacs-directory "swift.org"))
+
+(org-babel-load-file (concat user-emacs-directory "devops.org"))
+(org-babel-load-file (concat user-emacs-directory "dev.org"))
+
 (org-babel-load-file (concat user-emacs-directory "testing.org")) ;; testing pkgs
 ;; (org-babel-load-file (concat user-emacs-directory "rust-lang.org"))
 ;; (org-babel-load-file (concat user-emacs-directory "ror.org"))
@@ -92,11 +95,43 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(custom-safe-themes
-   '("cd5f8f91cc2560c017cc9ec24a9ab637451e36afd22e00a03e08d7b1b87c29ca"
+   '("ae20535e46a88faea5d65775ca5510c7385cbf334dfa7dde93c0cd22ed663ba0"
+     "cd5f8f91cc2560c017cc9ec24a9ab637451e36afd22e00a03e08d7b1b87c29ca"
      "36c5acdaf85dda0dad1dd3ad643aacd478fb967960ee1f83981d160c52b3c8ac"
      "9af2b1c0728d278281d87dc91ead7f5d9f2287b1ed66ec8941e97ab7a6ab73c0"
      "01f347a923dd21661412d4c5a7c7655bf17fb311b57ddbdbd6fce87bd7e58de6"
-     default)))
+     default))
+ '(org-agenda-files
+   '("~/repos/thapakazi/vibecare/core/docs/backlog.org"
+     "/Users/thapakazi/org/agendas/inbox.org"
+     "/Users/thapakazi/org/agendas/daily.org"
+     "/Users/thapakazi/org/agendas/learn.org"
+     "/Users/thapakazi/org/agendas/projects.org"))
+ '(package-selected-packages
+   '(ace-jump-mode ace-window activity-watch-mode ag all-the-icons
+                   auto-complete beacon bm chruby company-emoji
+                   counsel-projectile dockerfile-mode doom-modeline
+                   drag-stuff dumb-jump easy-hugo edit-indirect
+                   emacsql-sqlite emacsql-sqlite-module
+                   evil-collection exec-path-from-shell expand-region
+                   flycheck-eglot general git-commit go-eldoc gptel
+                   hide-mode-line highlight-symbol ht hungry-delete
+                   hydra magit markdown-mode mode-icons
+                   multiple-cursors neotree ob-go org-bullets
+                   org-present org-roam org-tree-slide ox-gfm
+                   popup-kill-ring projectile-rails react-snippets
+                   reformatter rjsx-mode rust-mode simple-httpd
+                   spacemacs-theme spinner terraform-mode try
+                   typescript-mode websocket which-key writeroom-mode
+                   yaml-mode zoom-window))
+ '(safe-local-variable-values
+   '((org-roam-capture-templates
+      ("d" "default" plain "%?" :target
+       (file+head "${slug}.org" "#+title: ${title}\12#+created: %U\12")
+       :unnarrowed t))
+     (org-roam-directory . "./docs")
+     (org-roam-db-location . "./org-roam.db")
+     (org-roam-directory . "."))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.

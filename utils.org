@@ -486,13 +486,15 @@ move things up and down easily
 | efs/presentation-end |
 
 
-* [[https://github.com/tabfugnic/asdf.el][asdf mode]]
+* Environment Management
+We install `asdf.el` directly from the source and enable it immediately. This ensures that when Emacs looks for `python` or `black`, `go` or any asdf managed things, it uses the `asdf` shims.
 
-#+begin_src emacs-lisp
-(add-to-list 'load-path "~/.emacs.d/manual/asdf.el/")
-(require 'asdf)
-(asdf-enable) ;; This ensures Emacs has the correct paths to asdf shims and bin
-#+end_src
+#+BEGIN_SRC emacs-lisp
+(use-package asdf
+  :ensure (:host github :repo "tabfugnic/asdf.el")
+  :config
+  (asdf-enable))
+#+END_SRC
 
 * COMMENT Blog
 #+begin_src emacs-lisp

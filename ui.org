@@ -44,6 +44,16 @@
     (bind-key "s-<f11>" 'disable-active-themes)
     #+end_src
 
+** ef themes
+#+begin_src emacs-lisp
+  (use-package ef-themes
+    :ensure t
+    :no-require t
+    :config
+    (load-theme 'ef-bio t)
+    )
+#+end_src
+
 * COMMENT Time based theme switch
   Theme switch based on time, written with assist from ChatGPT 4.0
   #+begin_src emacs-lisp

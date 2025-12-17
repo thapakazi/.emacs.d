@@ -1,0 +1,95 @@
+#+TITLE: PYthon 🐍 are real
+#+DESCRIPTION: Complete Python setup with asdf environment management
+
+
+* Pyenv
+#+BEGIN_SRC emacs-lisp
+  (use-package pyvenv
+    :ensure t
+    :config
+    (setq pyvenv-mode-line-indicator '(pyvenv-virtual-env-name ("[venv:" venv "] ")))
+    (pyvenv-mode 1))
+#+END_SRC
+
+* Python Tree-sitter Support
+This uses the built-in `python-ts-mode`. The `:config` block handles the automatic installation of the grammar to fix that `dlopen` error.
+
+#+BEGIN_SRC emacs-lisp
+  (use-package python
+    :ensure nil ; Built-in package
+    :mode ("\\.py\\'" . python-ts-mode)
+    :hook
+    ((python-ts-mode . eglot-ensure)
+     (python-ts-mode . company-mode)
+     (python-ts-mode . flycheck-mode)
+     ;; Automatically try to find and activate a venv when opening a python file
+     (python-ts-mode . my-pyvenv-autoload))
+    
+    :init
+    ;; Pinning grammar version to avoid mismatch errors
+    (setq treesit-language-source-alist
+          '((python "https://github.com/tree-sitter/tree-sitter-python" "v0.21.0")))
+    
+    :bind (:map python-ts-mode-map
+                ("C-c C-r" . my-python-run)
+                ("C-c C-f" . eglot-format-buffer)
+                ;; Tree-sitter Navigation
+                ("C-M-a" . treesit-beginning-of-defun)
+                ("C-M-e" . treesit-end-of-defun)
+                ("M-n" . treesit-next-line)
+                ("M-p" . treesit-previous-line)
+                ("M-." . xref-find-definitions)
+                ("M-," . xref-go-back))
+    
+    :config
+    ;; 1. Automatic Grammar Installation
+    (unless (treesit-language-available-p 'python)
+      (treesit-install-language-grammar 'python))
+
+    (setq python-indent-offset 4)
+
+    ;; 2. Improved Venv Autoload
+    (defun my-pyvenv-autoload ()
+      "Look for a .venv or venv directory in the project root and activate it."
+      (interactive)
+      (when-let ((project (project-current)))
+        (let ((venv-dirs '(".venv" "venv" ".virtualenv"))
+              (root (project-root project)))
+          (cl-loop for dir in venv-dirs
+                   for path = (expand-file-name dir root)
+                   when (file-directory-p path)
+                   return (progn
+                            (pyvenv-activate path)
+                            (message "Activated venv: %s" path))))))
+    
+    ;; 3. Execution Helper
+    (defun my-python-run ()
+      "Run the current python file using the asdf shim / current env."
+      (interactive)
+      (let ((compile-command (concat "python3 " (shell-quote-argument buffer-file-name))))
+        (compile compile-command))))
+#+END_SRC
+
+#+RESULTS:
+: [nil 26946 55971 337554 nil elpaca-process-queues nil nil 0 nil]
+
+* COMMENT LSP (Eglot) Configuration
+#+BEGIN_SRC emacs-lisp
+(use-package eglot
+  :ensure t
+  :config
+  ;; Ensure pylsp is the preferred server
+  (add-to-list 'eglot-server-programs
+               `(python-ts-mode . ("pylsp"))))
+#+END_SRC
+
+* Org babel for Python
+#+BEGIN_SRC emacs-lisp
+  (use-package ob-python
+    :ensure f
+    :defer t)
+
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '((python . t)))
+#+END_SRC+END_SRC
