@@ -1,5 +1,3 @@
-    #+end_src
-    
 ** Usability
 
 #+begin_src emacs-lisp
@@ -22,7 +20,6 @@
     (evil-org-agenda-set-keys))
 #+end_src
 
-
 * Org Roam to rescue
   Org roam to rescue
 
@@ -30,7 +27,6 @@
   #+begin_quote
   byte-code: Cannot open load file: No such file or directory, emacsql-sqlite-common
   #+end_quote
-
 
   #+begin_src emacs-lisp
     (use-package org-roam
@@ -57,6 +53,11 @@
       (org-roam-setup)
       (setq org-roam-dailies-directory "daily/")
 
+      (add-hook 'org-roam-find-file-hook
+                (lambda ()
+                  (add-hook 'completion-at-point-functions
+                            #'org-roam-complete-link-at-point nil t)))
+      ;; emacstx meetup, karthink's fix for this [[]] auto completions suggestion
       (setq org-roam-dailies-capture-templates
             '(("d" "default" entry
                "* %?"
@@ -66,7 +67,7 @@
   #+end_src
 
   #+RESULTS:
-  : org-roam-dailies-map
+  : [nil 26976 26960 96375 nil elpaca-process-queues nil nil 0 nil]
 
 * Agenda & Capture 
 #+begin_src emacs-lisp

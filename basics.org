@@ -60,6 +60,12 @@
   projectile-find-file; C-c p f
   #+END_EXAMPLE
 
+* Forcing Vertical Splits
+#+begin_src emacs-lisp
+(setq split-width-threshold 0)
+(setq split-height-threshold nil)
+#+end_src
+
 * Multiple cursors
   yes, everyones fan of this video: [[http://emacsrocks.com/e13.html][on youtube]]
 
@@ -142,57 +148,126 @@
   ("g" text-scale-increase "in")
   ("l" text-scale-decrease "out"))
   #+END_SRC
-* [[https://github.com/abo-abo/swiper][Swiper]] [[https://www.youtube.com/watch?v=VvnJQpTFVDc][youtube]]
-  ~isearch~ && ~ido-mode~ made better, fast and interactive with
-  ~ivy-mode~
+  
+* Modern Minibuffer Completion
+  :PROPERTIES:
+  :CUSTOM_ID: minibuffer-completion
+  :END:
 
-  #+BEGIN_SRC emacs-lisp
-(use-package ivy
+  The following packages provide a modern, modular minibuffer completion system.
+  Each package does one thing well and composes with the others.
+
+  Reference: [[https://protesilaos.com/codelog/2024-02-17-emacs-modern-minibuffer-packages/][Emacs: modern minibuffer packages (Prot)]]
+
+** [[https://github.com/minad/vertico][Vertico]] - Vertical Completion UI
+   Applies a vertical layout to the minibuffer and pops it up eagerly
+   so we can see available options without further interactions.
+   Fast and "just works", but also highly customisable.
+
+   #+BEGIN_SRC emacs-lisp
+(use-package vertico
+  :ensure t
+  :config
+  (setq vertico-cycle t)
+  (setq vertico-resize nil)
+  (vertico-mode 1))
+
+;; savehist-mode saves minibuffer histories.
+;; Vertico uses this to put recently selected options at the top.
+(savehist-mode 1)
+
+;; recentf-mode keeps track of recently visited files.
+;; Access through consult-buffer or consult-recent-file.
+(recentf-mode 1)
+   #+END_SRC
+
+** [[https://github.com/oantolin/orderless][Orderless]] - Flexible Matching
+   Lets the minibuffer use out-of-order pattern matching.
+   Matches space-separated words or regexes in any order.
+   e.g., "ins pac" matches ~package-menu-mark-install~ and ~package-install~.
+
+   #+BEGIN_SRC emacs-lisp
+(use-package orderless
+  :ensure t
+  :config
+  (setq completion-styles '(orderless basic)))
+   #+END_SRC
+
+** [[https://github.com/minad/marginalia][Marginalia]] - Rich Annotations
+   Provides helpful annotations next to completion candidates.
+   Shows file permissions, modification dates, buffer sizes, docstrings, etc.
+
+   #+BEGIN_SRC emacs-lisp
+(use-package marginalia
+  :ensure t
+  :config
+  (marginalia-mode 1))
+   #+END_SRC
+
+** [[https://github.com/minad/consult][Consult]] - Enhanced Commands
+   Provides enhanced variants of built-in commands with live preview.
+   Shows context of current match in another window as you navigate.
+
+   #+BEGIN_SRC emacs-lisp
+(use-package consult
   :ensure t
   :bind
-  (:map ivy-mode-map
-   ("C-'" . ivy-avy))
-  :config
-  (ivy-mode 1)
-  ;; add ‘recentf-mode’ and bookmarks to ‘ivy-switch-buffer’.
-  (setq ivy-use-virtual-buffers t)
-  ;; number of result lines to display
-  (setq ivy-height 10)
-  ;; does not count candidates
-  (setq ivy-count-format "")
-  ;; no regexp by default
-  (setq ivy-initial-inputs-alist nil)
-  ;; configure regexp engine.
-  (setq ivy-re-builders-alist
-	;; allow input not in order
-        '((t   . ivy--regex-ignore-order))))
-(use-package swiper
+  (("C-s" . consult-line)             ; search current buffer
+   ("C-x b" . consult-buffer)         ; switch buffer/recent/bookmark
+   ("M-g g" . consult-goto-line)
+   ("M-g M-g" . consult-goto-line)
+   ("M-g o" . consult-outline)        ; jump to outline headings
+   ("M-s r" . consult-ripgrep)        ; recursive grep
+   ("M-s f" . consult-find)           ; find files by name
+   ("M-s l" . consult-line)
+   ("M-s g" . consult-grep)))
+   #+END_SRC
+
+** [[https://github.com/oantolin/embark][Embark]] - Contextual Actions
+   Target the thing at point and select an action to perform on it.
+   In the minibuffer, ~embark-collect~ retains minibuffer behaviour,
+   while ~embark-export~ places results in a specialised buffer
+   (e.g., grep results → grep-mode, files → dired).
+
+   #+BEGIN_SRC emacs-lisp
+(use-package embark
   :ensure t
-  :config
-  (progn
-    (ivy-mode 1)
-    (setq ivy-use-virtual-buffers t)
-    (global-set-key "\C-s" 'swiper)
-    )
-  )
+  :bind
+  (("C-." . embark-act)               ; pick an action
+   ("C-;" . embark-dwim)              ; do what I mean
+   ("C-h B" . embark-bindings)        ; show all bindings
+   :map minibuffer-local-map
+   ("C-c C-c" . embark-collect)       ; collect to buffer (keeps minibuffer behavior)
+   ("C-c C-e" . embark-export)))      ; export to appropriate mode (dired/grep-mode)
 
-  #+END_SRC
-
-  #+RESULTS:
-  : t
-
-
-* Counsel Mode
-#+BEGIN_SRC emacs-lisp
-
-(use-package counsel-projectile
+(use-package embark-consult
   :ensure t
-  :config
-  (counsel-projectile-mode 1)
-  :bind 
-  ("C-c p" . 'projectile-command-map)
-  )
-#+END_SRC
+  :after (embark consult))
+   #+END_SRC
+
+** [[https://github.com/mhayashi1120/Emacs-wgrep][Wgrep]] - Edit Grep Results
+   Edit results of a grep search inside a ~grep-mode~ buffer.
+   Toggle editable mode, make changes, then ~C-c C-c~ to confirm or ~C-c C-k~ to abort.
+   Powerful combo: ~consult-ripgrep~ → ~C-c C-e~ (embark-export) → edit with wgrep.
+
+   #+BEGIN_SRC emacs-lisp
+(use-package wgrep
+  :ensure t
+  :bind
+  (:map grep-mode-map
+   ("e" . wgrep-change-to-wgrep-mode)
+   ("C-x C-q" . wgrep-change-to-wgrep-mode)
+   ("C-c C-c" . wgrep-finish-edit)))
+   #+END_SRC
+
+** Consult + Projectile Integration
+   #+BEGIN_SRC emacs-lisp
+(use-package consult-projectile
+  :ensure t
+  :after (consult projectile)
+  :bind
+  ("C-c p" . projectile-command-map))
+   #+END_SRC
 * Set default envs
   #+begin_src emacs-lisp
   (setenv "VISUAL" "emacsclient")

@@ -26,22 +26,16 @@
       ;;       (highlight-symbol-at-point))))
       ;; :bind ("<C-mouse-1>" . highlight-with-mouse))
 #+END_SRC
-* Recentf
- quick navigate to recent files
+* Recentf Settings
+  Configure recentf (mode enabled in basics.org with the Vertico stack).
 
- #+begin_src emacs-lisp
-(use-package recentf
-  :init
-  (progn
-    (recentf-mode t)
-    (setq recentf-max-saved-items 500)
-	:config
-	(bind-key "C-x ," 'counsel-recentf)
-	)
-  )
- #+end_src
+  #+begin_src emacs-lisp
+;; Keep more recent files in history
+(setq recentf-max-saved-items 500)
 
- #+RESULTS:
+;; Quick access to recent files
+(global-set-key (kbd "C-x ,") 'consult-recent-file)
+  #+end_src
 
 * Magit
  I <3 magit.
@@ -239,15 +233,17 @@ https://github.com/noctuid/general.el
       :prefix "SPC"
       :global-prefix "C-SPC")
 
-    ;; Define your keybindings
+    ;; Define your keybindings (using consult)
     (my-leader-keys
-      "f" 'counsel-projectile-find-file
+      "f" 'consult-projectile-find-file
       "s" 'save-buffer
-      "/" 'counsel-projectile-ag
-      "b b" 'switch-to-buffer
-      "p p" 'counsel-projectile-switch-project 
-      "p f" 'counsel-projectile-find-file 
-      "w d" 'delete-window)
+      "/" 'consult-ripgrep
+      "b b" 'consult-buffer
+      "p p" 'consult-projectile-switch-project
+      "p f" 'consult-projectile-find-file
+      "w d" 'delete-window
+      "s s" 'consult-line
+      "s o" 'consult-outline)
 
     ;; The :prefix and :global-prefix handle evil states, so you don't need this
     ;; (define-key evil-insert-state-map (kbd "SPC") 'self-insert-command)
