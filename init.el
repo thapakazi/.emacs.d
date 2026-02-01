@@ -75,11 +75,13 @@
 (org-babel-load-file (concat user-emacs-directory "ui.org"))
 
 (org-babel-load-file (concat user-emacs-directory "org-mode.org"))
+(org-babel-load-file (concat user-emacs-directory "org-workflow.org"))
 
 (org-babel-load-file (concat user-emacs-directory "lsp.org"))
 (org-babel-load-file (concat user-emacs-directory "langs.org"))
 (org-babel-load-file (concat user-emacs-directory "go.org"))
 (org-babel-load-file (concat user-emacs-directory "py.org"))
+(org-babel-load-file (concat user-emacs-directory "ror.org"))
 (org-babel-load-file (concat user-emacs-directory "swift.org"))
 
 (org-babel-load-file (concat user-emacs-directory "devops.org"))
@@ -87,7 +89,6 @@
 
 (org-babel-load-file (concat user-emacs-directory "testing.org")) ;; testing pkgs
 ;; (org-babel-load-file (concat user-emacs-directory "rust-lang.org"))
-;; (org-babel-load-file (concat user-emacs-directory "ror.org"))
 (org-babel-load-file (concat user-emacs-directory "js.org"))
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
@@ -95,16 +96,21 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(custom-safe-themes
-   '("ae20535e46a88faea5d65775ca5510c7385cbf334dfa7dde93c0cd22ed663ba0"
+   '("0a8cf72fd94bfb67dd72dc085538b39ea47aeae8bfc2b8545c0d3c99c339c204"
+     "516ec39655c85f346393f5d93e0f03602b6bfc33335bf2fd673016c9c4cdc69e"
+     "bf9c0f5ceb3129fad9b8d6d97c873e4c3192c646a2c3b4055904b77414a494b6"
+     "22336e660b7c5d945499a5c85af1c44dae6c94a5f67e004faaa80e56f65378ce"
+     "9411f687fba5ab671a3b09ad3ae9fb4036bcd2d93cfcb51d4ee9509944dee298"
+     "ae20535e46a88faea5d65775ca5510c7385cbf334dfa7dde93c0cd22ed663ba0"
      "cd5f8f91cc2560c017cc9ec24a9ab637451e36afd22e00a03e08d7b1b87c29ca"
      "36c5acdaf85dda0dad1dd3ad643aacd478fb967960ee1f83981d160c52b3c8ac"
      "9af2b1c0728d278281d87dc91ead7f5d9f2287b1ed66ec8941e97ab7a6ab73c0"
      "01f347a923dd21661412d4c5a7c7655bf17fb311b57ddbdbd6fce87bd7e58de6"
      default))
  '(org-agenda-files
-   '("~/repos/thapakazi/vibecare/core/docs/backlog.org"
+   '("~/org/agendas/tasks.org" "/Users/thapakazi/org/agendas/daily.org"
+     "/Users/thapakazi/repos/thapakazi/vibecare/core/docs/backlog.org"
      "/Users/thapakazi/org/agendas/inbox.org"
-     "/Users/thapakazi/org/agendas/daily.org"
      "/Users/thapakazi/org/agendas/learn.org"
      "/Users/thapakazi/org/agendas/projects.org"))
  '(package-selected-packages
@@ -116,7 +122,7 @@
                    evil-collection exec-path-from-shell expand-region
                    flycheck-eglot general git-commit go-eldoc gptel
                    hide-mode-line highlight-symbol ht hungry-delete
-                   hydra magit markdown-mode mode-icons
+                   hydra lolipop magit markdown-mode mode-icons
                    multiple-cursors neotree ob-go org-bullets
                    org-present org-roam org-tree-slide ox-gfm
                    popup-kill-ring projectile-rails react-snippets
@@ -124,6 +130,7 @@
                    spacemacs-theme spinner terraform-mode try
                    typescript-mode websocket which-key writeroom-mode
                    yaml-mode zoom-window))
+ '(package-vc-selected-packages '((lolipop :url "https://github.com/RadioNoiseE/lolipop")))
  '(safe-local-variable-values
    '((org-roam-capture-templates
       ("d" "default" plain "%?" :target
@@ -131,7 +138,8 @@
        :unnarrowed t))
      (org-roam-directory . "./docs")
      (org-roam-db-location . "./org-roam.db")
-     (org-roam-directory . "."))))
+     (org-roam-directory . ".")))
+ '(zoom-window-mode-line-color "WHITESMOKE"))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.

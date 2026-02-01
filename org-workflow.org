@@ -1,0 +1,468 @@
+#+TITLE: Org Workflow - Simplified & Effective
+#+PROPERTY: header-args:emacs-lisp :tangle yes
+
+* Core Philosophy
+This config follows: *Capture Fast → Review Weekly → Do Daily → Complete*
+
+* 1. Basic Setup
+#+begin_src emacs-lisp
+  (require 'org)
+  (require 'org-agenda)
+  (require 'org-capture)
+  (require 'org-habit)
+
+  ;; Core directories
+  (setq org-directory "~/org/agendas/")
+  (setq org-default-notes-file (concat org-directory "inbox.org"))
+
+  ;; Only 3 files to manage
+  (setq org-agenda-files '("~/org/agendas/inbox.org"
+                           "~/org/agendas/tasks.org"
+                           "~/org/agendas/projects.org"))
+
+  ;; Log when tasks are done
+  (setq org-log-done 'time)
+  (setq org-log-into-drawer t)
+
+  ;; Don't split lines on M-RET
+  (setq org-M-RET-may-split-line '((default . nil)))
+  (setq org-insert-heading-respect-content t)
+
+  ;; Habits
+  (add-to-list 'org-modules 'org-habit)
+  (setq org-habit-graph-column 50)
+#+end_src
+
+* 2. Simple TODO States
+#+begin_src emacs-lisp
+  ;; Keep it simple: TODO → DOING → DONE
+  (setq org-todo-keywords
+        '((sequence "TODO(t)" "DOING(d!)" "WAIT(w@)" "|" "DONE(x!)" "SKIP(s)")))
+
+  ;; Colors for states
+  (setq org-todo-keyword-faces
+        '(("TODO"  . (:foreground "#ff6b6b" :weight bold))
+          ("DOING" . (:foreground "#ffd93d" :weight bold))
+          ("WAIT"  . (:foreground "#a8a8a8" :weight bold))
+          ("DONE"  . (:foreground "#6bcb77" :weight bold))
+          ("SKIP"  . (:foreground "#666666"))))
+#+end_src
+
+* 3. Capture Templates - Just 4 Options
+#+begin_src emacs-lisp
+  ;; FAST capture - minimal friction
+  (setq org-capture-templates
+        '(
+          ;; Quick dump - no questions asked, goes under Tasks heading
+          ("d" "Dump (quick)" entry (file+headline "~/org/agendas/inbox.org" "Tasks")
+           "* TODO %?\n:PROPERTIES:\n:CREATED: %U\n:END:"
+           :empty-lines 1)
+
+          ;; Today's task - auto scheduled for today
+          ("t" "Today" entry (file "~/org/agendas/tasks.org")
+           "* TODO %?\nSCHEDULED: %t"
+           :empty-lines 1)
+
+          ;; Scheduled task - asks for date
+          ("s" "Scheduled" entry (file "~/org/agendas/tasks.org")
+           "* TODO %?\nSCHEDULED: %^t"
+           :empty-lines 1)
+
+          ;; Deadline task
+          ("D" "Deadline" entry (file "~/org/agendas/tasks.org")
+           "* TODO %?\nDEADLINE: %^t"
+           :empty-lines 1)))
+#+end_src
+
+* 4. Tags - Keep Minimal
+#+begin_src emacs-lisp
+  (setq org-tag-alist
+        '((:startgroup)
+          ("@work" . ?w)
+          ("@home" . ?h)
+          ("@errand" . ?e)
+          (:endgroup)
+          ("urgent" . ?u)
+          ("quick" . ?q)))  ;; tasks < 15 min
+#+end_src
+
+* 5. Super Agenda - Better Views
+#+begin_src emacs-lisp
+  (use-package org-super-agenda
+    :ensure t
+    :after org-agenda
+    :config
+    (org-super-agenda-mode 1)
+
+    ;; Don't let super-agenda break evil keybindings
+    (setq org-super-agenda-header-map (make-sparse-keymap)))
+
+  ;; Show done items in log mode
+  (setq org-agenda-log-mode-items '(closed clock state))
+  (setq org-agenda-start-with-log-mode nil)  ;; don't auto-enable, we'll add sections
+
+  ;; Custom agenda views with super-agenda grouping
+  (setq org-agenda-custom-commands
+        '(
+          ;; === DAILY VIEW: What to do NOW ===
+          ("d" "Today"
+           ((agenda "" ((org-agenda-span 'day)
+                        (org-agenda-start-day "today")
+                        (org-super-agenda-groups
+                         '((:name "In Progress"
+                            :todo "DOING"
+                            :order 1)
+                           (:name "Scheduled Today"
+                            :scheduled today
+                            :order 2)
+                           (:name "Overdue"
+                            :deadline past
+                            :scheduled past
+                            :order 3)
+                           (:name "Due Today"
+                            :deadline today
+                            :order 4)
+                           (:name "Other"
+                            :anything t
+                            :order 99)))))
+            ;; Done today section - sorted by closed time (latest first)
+            (tags "CLOSED>=\"<today>\""
+                  ((org-agenda-overriding-header "\n──── ✓ Done ────────────────────────────────────────────────────────\n")
+                   (org-agenda-skip-function '(org-agenda-skip-entry-if 'nottodo 'done))
+                   (org-agenda-sorting-strategy '(tsia-down))))
+            (alltodo "" ((org-agenda-overriding-header "\n── ⚡ Quick Actions ────────────────────────────────────────────────")
+                         (org-super-agenda-groups
+                          '((:name "Waiting"
+                             :todo "WAIT")
+                            (:name "Quick Wins"
+                             :tag "quick")
+                            (:discard (:anything t))))))))
+
+          ;; === INBOX REVIEW: Process your dumps ===
+          ("i" "Inbox Review"
+           ((alltodo "" ((org-agenda-files '("~/org/agendas/inbox.org"))
+                         (org-agenda-overriding-header "Inbox - Process These:")
+                         (org-super-agenda-groups
+                          '((:auto-ts t)))))))
+
+          ;; === WEEKLY VIEW ===
+          ("w" "This Week"
+           ((agenda "" ((org-agenda-span 7)
+                        (org-agenda-start-on-weekday 1)
+                        (org-super-agenda-groups
+                         '((:name "In Progress" :todo "DOING" :order 1)
+                           (:name "Overdue" :deadline past :scheduled past :order 2)
+                           (:name "This Week" :anything t :order 10)))))
+            ;; Done this week section - sorted by closed time (latest first)
+            (tags "CLOSED>=\"<-7d>\""
+                  ((org-agenda-overriding-header "\n──── ✓ Done ────────────────────────────────────────────────────────\n")
+                   (org-agenda-skip-function '(org-agenda-skip-entry-if 'nottodo 'done))
+                   (org-agenda-sorting-strategy '(tsia-down))))))
+
+          ;; === DEADLINES COMING UP ===
+          ("u" "Upcoming Deadlines"
+           ((agenda "" ((org-agenda-span 30)
+                        (org-agenda-time-grid nil)
+                        (org-agenda-entry-types '(:deadline))
+                        (org-deadline-warning-days 30)
+                        (org-super-agenda-groups
+                         '((:name "Overdue" :deadline past)
+                           (:name "This Week" :deadline future)
+                           (:name "This Month" :anything t)))))))
+
+          ;; === ALL TASKS ===
+          ("a" "All Tasks"
+           ((alltodo "" ((org-super-agenda-groups
+                          '((:name "In Progress" :todo "DOING" :order 1)
+                            (:name "Overdue" :deadline past :scheduled past :order 2)
+                            (:name "Due Soon" :deadline future :order 3)
+                            (:name "Scheduled" :scheduled future :order 4)
+                            (:name "Waiting" :todo "WAIT" :order 80)
+                            (:name "Inbox (unprocessed)"
+                             :file-path "inbox" :order 90)
+                            (:name "No Date"
+                             :scheduled nil :deadline nil :order 100)))))
+            ;; Done last 7 days - sorted by closed time (latest first)
+            (tags "CLOSED>=\"<-7d>\""
+                  ((org-agenda-overriding-header "\n──── ✓ Done ────────────────────────────────────────────────────────\n")
+                   (org-agenda-skip-function '(org-agenda-skip-entry-if 'nottodo 'done))
+                   (org-agenda-sorting-strategy '(tsia-down))))))))
+#+end_src
+
+* 6. Better Agenda Display
+#+begin_src emacs-lisp
+  ;; Cleaner agenda look
+  (setq org-agenda-block-separator ?─)
+  (setq org-agenda-current-time-string "◀── NOW ──────────────────")
+  (setq org-agenda-time-grid
+        '((daily today require-timed)
+          (800 1000 1200 1400 1600 1800 2000)
+          " ┄┄┄┄┄ " "┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄"))
+
+  ;; Deadline/scheduled display
+  (setq org-deadline-warning-days 7)
+  (setq org-agenda-skip-deadline-prewarning-if-scheduled t)
+
+  ;; === CLEAN TAG & TEXT DISPLAY ===
+  ;; Prefix format - clean and compact
+  (setq org-agenda-prefix-format
+        '((agenda . " %i %-10:c%?-10t% s")
+          (todo   . " %i %-10:c ")
+          (tags   . " %i %-10:c ")
+          (search . " %i %-10:c ")))
+
+  ;; Start week on Monday
+  (setq org-agenda-start-on-weekday 1)
+
+  ;; Compact view
+  (setq org-agenda-compact-blocks t)
+
+  ;; Truncate lines - no wrapping
+  (add-hook 'org-agenda-mode-hook
+            (lambda () (setq truncate-lines t)))
+
+  ;; === FLUID TAG DISPLAY ===
+  ;; Dynamically set tag column based on window width
+  (defun my/org-agenda-set-tags-column ()
+    "Set tags column to align near right edge of window."
+    (setq org-agenda-tags-column (- 2 (window-width))))
+
+  ;; Truncate long tags with ellipsis (only tags, not text)
+  (defun my/org-agenda-truncate-tags ()
+    "Truncate tags longer than 20 chars with ellipsis."
+    (let ((inhibit-read-only t)
+          (max-tag-width 20))
+      (save-excursion
+        (goto-char (point-min))
+        (while (re-search-forward "[ \t]+\\(:[^ \t\n]+:\\)[ \t]*$" nil t)
+          (let* ((tag-str (match-string 1))
+                 (tag-len (length tag-str)))
+            (when (> tag-len max-tag-width)
+              (replace-match
+               (concat "  " (substring tag-str 0 (- max-tag-width 2)) "..")
+               t t)))))))
+
+  ;; Apply on agenda render
+  (add-hook 'org-agenda-finalize-hook #'my/org-agenda-set-tags-column)
+  (add-hook 'org-agenda-finalize-hook #'my/org-agenda-truncate-tags t)
+#+end_src
+
+* 7. Notifications with org-alert
+#+begin_src emacs-lisp
+  (use-package alert
+    :ensure t
+    :config
+    (setq alert-default-style 'osx-notifier))  ;; macOS native notifications
+
+  (use-package org-wild-notifier
+    :ensure (:host github :repo "emacsorphanage/org-wild-notifier")
+    :after org
+    :config
+    (setq org-wild-notifier-alert-time '(10 5 0))  ;; notify 10, 5, and 0 mins before
+    (setq org-wild-notifier-notification-title "Org Reminder")
+    (setq org-wild-notifier-keyword-whitelist '("TODO" "DOING"))
+    (org-wild-notifier-mode 1))
+#+end_src
+
+* 8. Quick Refile - For Processing Inbox
+#+begin_src emacs-lisp
+  ;; Refile targets (where to move tasks from inbox)
+  (setq org-refile-targets
+        '(("~/org/agendas/tasks.org" :maxlevel . 2)
+          ("~/org/agendas/projects.org" :maxlevel . 2)
+          ("~/org/agendas/someday.org" :maxlevel . 1)))
+
+  ;; Show full path for refiling
+  (setq org-refile-use-outline-path 'file)
+  (setq org-outline-path-complete-in-steps nil)
+
+  ;; Allow creating new nodes while refiling
+  (setq org-refile-allow-creating-parent-nodes 'confirm)
+#+end_src
+
+* 9. Hydra Menu - One Key to Rule Them All
+;; Note: hydra package is loaded in basics.org
+
+#+begin_src emacs-lisp
+  (defhydra hydra-org-quick (:color blue :hint nil :exit t)
+    "
+  ╭─────────────────── Org Workflow ────────────────────╮
+  │                                                     │
+  │  ^Capture^          ^View^            ^Do^          │
+  │  _d_: dump task     _t_: today        _x_: done     │
+  │  _s_: scheduled     _w_: week         _/_: search   │
+  │  _D_: with deadline _i_: inbox        _r_: refile   │
+  │                     _u_: upcoming                   │
+  │                     _a_: all tasks                  │
+  │                     _c_: calendar                   │
+  │                                                     │
+  ╰─────────────────────────────────────────────────────╯
+  "
+    ;; Capture
+    ("d" (org-capture nil "d") "dump")
+    ("s" (org-capture nil "s") "scheduled")
+    ("D" (org-capture nil "D") "deadline")
+
+    ;; View
+    ("t" (org-agenda nil "d") "today")
+    ("w" (org-agenda nil "w") "week")
+    ("i" (org-agenda nil "i") "inbox")
+    ("u" (org-agenda nil "u") "upcoming")
+    ("a" (org-agenda nil "a") "all")
+    ("c" my/open-org-calendar "calendar")
+
+    ;; Actions
+    ("x" org-todo "toggle state")
+    ("/" org-agenda "full agenda")
+    ("r" org-refile "refile")
+
+    ("q" nil "quit" :color red))
+
+  ;; Main keybinding - press once to access everything
+  (global-set-key (kbd "C-c o") 'hydra-org-quick/body)
+
+  ;; If using evil with SPC leader, also bind there
+  ;; (evil-leader/set-key "o" 'hydra-org-quick/body)
+#+end_src
+
+* 10. Quick Actions from Anywhere
+#+begin_src emacs-lisp
+  ;; Mark task done without opening file
+  (defun my/org-agenda-todo-done ()
+    "Mark the current agenda item as DONE."
+    (interactive)
+    (org-agenda-todo "DONE"))
+
+  ;; Schedule for today quickly
+  (defun my/org-schedule-today ()
+    "Schedule current item for today."
+    (interactive)
+    (org-schedule nil (format-time-string "%Y-%m-%d")))
+
+  ;; Schedule for tomorrow
+  (defun my/org-schedule-tomorrow ()
+    "Schedule current item for tomorrow."
+    (interactive)
+    (org-schedule nil "+1d"))
+#+end_src
+
+* 11. Agenda Mode Keybindings
+#+begin_src emacs-lisp
+  ;; Extra keybindings inside agenda view
+  (add-hook 'org-agenda-mode-hook
+            (lambda ()
+              ;; Quick scheduling
+              (local-set-key (kbd "T") 'my/org-schedule-today)
+              (local-set-key (kbd "M") 'my/org-schedule-tomorrow)))
+#+end_src
+
+* 12. Weekly Review Helper
+#+begin_src emacs-lisp
+  (defun my/weekly-review ()
+    "Start weekly review: show inbox, then completed, then upcoming."
+    (interactive)
+    (delete-other-windows)
+    ;; Show what's in inbox
+    (org-agenda nil "i")
+    (message "Weekly Review: First, process your inbox. Press 'r' to refile items."))
+
+  (global-set-key (kbd "C-c w") 'my/weekly-review)
+#+end_src
+
+* 13. Evil Integration
+#+begin_src emacs-lisp
+  (use-package evil-org
+    :ensure t
+    :after org
+    :hook (org-mode . evil-org-mode)
+    :config
+    (require 'evil-org-agenda)
+    (evil-org-agenda-set-keys))
+#+end_src
+
+* Cheatsheet                                                       :noexport:
+
+** Quick Start: Press ~C-c o~ for everything
+
+#+begin_example
+╭─────────────────── Org Workflow ────────────────────╮
+│                                                     │
+│  Capture          View            Do                │
+│  d: dump task     t: today        x: done           │
+│  s: scheduled     w: week         /: search         │
+│  D: with deadline i: inbox        r: refile         │
+│                   u: upcoming                       │
+│                   a: all tasks                      │
+│                   c: calendar                       │
+│                                                     │
+╰─────────────────────────────────────────────────────╯
+#+end_example
+
+** Daily Workflow
+
+*** Morning (2 min)
+1. ~C-c o t~ → See today's tasks
+2. Pick one task, press ~t~ to mark as DOING
+
+*** Throughout Day
+- New thought? ~C-c o d~ → Dump it (no scheduling, just capture)
+- Know when to do it? ~C-c o s~ → Schedule it
+- Done with task? On the task, press ~t~ until DONE
+
+*** Evening (5 min)
+1. ~C-c o i~ → Review inbox
+2. On each item: ~r~ to refile to tasks.org, or ~s~ to schedule, or ~d~ to delete
+
+** Weekly Review (Sunday, 15 min)
+
+1. ~C-c w~ → Starts weekly review
+2. Process inbox completely
+3. ~C-c o w~ → See the week ahead
+4. ~C-c o u~ → Check upcoming deadlines
+
+** Inside Agenda View
+
+| Key   | Action                |
+|-------+-----------------------|
+| ~t~   | Cycle TODO state      |
+| ~T~   | Schedule for TODAY    |
+| ~M~   | Schedule for TOMORROW |
+| ~s~   | Schedule (pick date)  |
+| ~d~   | Set deadline          |
+| ~r~   | Refresh view          |
+| ~RET~ | Go to task            |
+| ~q~   | Quit agenda           |
+
+*** Navigation (Evil)
+
+| Key   | Action              |
+|-------+---------------------|
+| ~j/k~ | Move down/up        |
+| ~f/b~ | Forward/back by day |
+| ~.~   | Go to today         |
+
+** File Structure
+
+#+begin_example
+~/org/agendas/
+├── inbox.org      ← Dump everything here first
+├── tasks.org      ← Active work (scheduled/deadlined)
+├── projects.org   ← Multi-step projects
+└── someday.org    ← "Maybe later" ideas
+#+end_example
+
+** Quick Capture Keys
+
+| Key | What                  | Where      |
+|-----+-----------------------+------------|
+| ~d~ | Quick dump (no date)  | inbox.org  |
+| ~t~ | Today's task          | tasks.org  |
+| ~s~ | Scheduled task        | tasks.org  |
+| ~D~ | Task with deadline    | tasks.org  |
+
+** The One Rule
+
+*Capture fast, schedule later.*
+
+Don't think about when during capture. Just dump (~C-c o d~).
+Then once a day, process inbox and schedule.

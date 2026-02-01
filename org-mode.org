@@ -1,4 +1,4 @@
-** Usability
+** COMMENT Usability - moved to org-workflow.org
 
 #+begin_src emacs-lisp
   ;; good stuffs: https://protesilaos.com/codelog/2025-01-16-emacs-org-todo-agenda-basics/
@@ -8,7 +8,7 @@
   (setq org-log-into-drawer t)
 #+end_src
 
-** Evil: org evil mode
+** COMMENT Evil: org evil mode - moved to org-workflow.org
 
 #+begin_src emacs-lisp
   (use-package evil-org
@@ -69,7 +69,7 @@
   #+RESULTS:
   : [nil 26976 26960 96375 nil elpaca-process-queues nil nil 0 nil]
 
-* Agenda & Capture 
+* COMMENT Agenda & Capture - moved to org-workflow.org
 #+begin_src emacs-lisp
   ;; Org-mode setup for life planning
   (require 'org)

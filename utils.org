@@ -237,13 +237,37 @@ https://github.com/noctuid/general.el
     (my-leader-keys
       "f" 'consult-projectile-find-file
       "s" 'save-buffer
+      "z" 'zoom-window-zoom
+      "," 'consult-recent-file
       "/" 'consult-ripgrep
       "b b" 'consult-buffer
       "p p" 'consult-projectile-switch-project
       "p f" 'consult-projectile-find-file
       "w d" 'delete-window
       "s s" 'consult-line
-      "s o" 'consult-outline)
+      "s o" 'consult-outline
+
+      ;; === Org Agenda (SPC o ...) ===
+      "o a" 'org-agenda                        ;; full agenda menu
+      "o t" '(lambda () (interactive) (org-agenda nil "d"))  ;; today
+      "o w" '(lambda () (interactive) (org-agenda nil "w"))  ;; week
+      "o i" '(lambda () (interactive) (org-agenda nil "i"))  ;; inbox
+      "o u" '(lambda () (interactive) (org-agenda nil "u"))  ;; upcoming deadlines
+      "o l" '(lambda () (interactive) (org-agenda nil "a"))  ;; all tasks
+
+      ;; === Org Capture (SPC c ...) ===
+      "c c" 'org-capture                       ;; capture menu
+      "c d" '(lambda () (interactive) (org-capture nil "d")) ;; dump quick task
+      "c t" '(lambda () (interactive) (org-capture nil "t")) ;; today task
+      "c s" '(lambda () (interactive) (org-capture nil "s")) ;; scheduled task
+
+      ;; === Calendar ===
+      "c a" 'my/open-org-calendar              ;; open calfw calendar
+
+      ;; === Org Actions ===
+      "o o" 'hydra-org-quick/body              ;; hydra menu (all in one)
+      "o r" 'org-refile                        ;; refile
+      "o x" 'org-todo)
 
     ;; The :prefix and :global-prefix handle evil states, so you don't need this
     ;; (define-key evil-insert-state-map (kbd "SPC") 'self-insert-command)
