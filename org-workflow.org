@@ -745,16 +745,28 @@ One command =C-c a= does everything -- like =C-x g= for magit.
                 (delete-other-windows))
             (message "Heading '%s' not found" heading)))))
 
-    (defun kazi/agenda-remove-restriction ()
-      "Remove restriction lock and rebuild the view."
-      (interactive)
+    (defun kazi/agenda-clear-restriction ()
+      "Remove any active restriction lock."
       (when kazi/agenda--focus-file
         (let ((buf (find-buffer-visiting
                     (expand-file-name kazi/agenda--focus-file))))
           (when buf
             (with-current-buffer buf
-              (org-agenda-remove-restriction-lock)))))
+              (org-agenda-remove-restriction-lock))))
+        (setq kazi/agenda--focus-file nil
+              kazi/agenda--focus-view-key nil)))
+
+    (defun kazi/agenda-remove-restriction ()
+      "Remove restriction lock and rebuild the view."
+      (interactive)
+      (kazi/agenda-clear-restriction)
       (org-agenda-redo))
+
+    (defun kazi/agenda-goto-view (key)
+      "Clear any restriction and open agenda view KEY."
+      (kazi/agenda-clear-restriction)
+      (org-agenda nil key)
+      (delete-other-windows))
 
     (defun kazi/agenda-focus-tmenu ()
       "Dynamic transient showing headings from the current view's org file."
@@ -786,19 +798,19 @@ One command =C-c a= does everything -- like =C-x g= for magit.
       ;; --- Global: always visible ---
       [["Goto"
         ("gi" "Inbox"
-         (lambda () (interactive) (org-agenda nil "i") (delete-other-windows))
+         (lambda () (interactive) (kazi/agenda-goto-view "i"))
          :description (lambda () (kazi/org-inbox-count)))
         ("gl" "Life"
-         (lambda () (interactive) (org-agenda nil "L") (delete-other-windows))
+         (lambda () (interactive) (kazi/agenda-goto-view "L"))
          :description (lambda () (kazi/org-life-count)))
         ("gp" "Projects"
-         (lambda () (interactive) (org-agenda nil "P") (delete-other-windows))
+         (lambda () (interactive) (kazi/agenda-goto-view "P"))
          :description (lambda () (kazi/org-projects-count)))
         ("gw" "Work"
-         (lambda () (interactive) (org-agenda nil "W") (delete-other-windows))
+         (lambda () (interactive) (kazi/agenda-goto-view "W"))
          :description (lambda () (kazi/org-work-count)))
         ("ga" "All"
-         (lambda () (interactive) (org-agenda nil "a") (delete-other-windows)))]
+         (lambda () (interactive) (kazi/agenda-goto-view "a")))]
        ["Actions"
         ("t" "TODO cycle"  org-agenda-todo :transient t)
         ("K" "Capture>"    kazi/org-capture-tmenu)
@@ -832,7 +844,7 @@ One command =C-c a= does everything -- like =C-x g= for magit.
        ;; --- Contextual: File views (Life/Projects/Work) ---
        ["Focus"
         :if kazi/agenda-in-focus-view-p
-        ("h" "Headings>"    kazi/agenda-focus-tmenu)
+        ("f" "Focus>"       kazi/agenda-focus-tmenu)
         ("p" "Preview"      kazi/agenda-preview-toggle)]
        ;; --- Contextual: Day/Week ---
        ["Schedule"
