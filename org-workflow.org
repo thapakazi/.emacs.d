@@ -193,7 +193,14 @@ This config follows: *Capture Fast → Review Weekly → Do Daily → Complete*
            ((alltodo "" ((org-agenda-files '("~/org/agendas/inbox.org"))
                          (org-agenda-overriding-header "Inbox — Process These:")
                          (org-super-agenda-groups
-                          '((:auto-ts t)))))))
+                          '((:name "⚡ Priority"
+                             :priority>= "B" :order 1)
+                            (:name "📅 Scheduled"
+                             :scheduled t :order 2)
+                            (:name "📅 Has Deadline"
+                             :deadline t :order 3)
+                            (:name "📥 Undated — Needs Triage"
+                             :anything t :order 10)))))))
 
           ("L" "Life"
            ((alltodo "" ((org-agenda-files '("~/org/agendas/life.org"))
@@ -357,6 +364,60 @@ This config follows: *Capture Fast → Review Weekly → Do Daily → Complete*
                              :height 1.15 :weight 'bold :foreground "#7dcfff"))
 
   (add-hook 'org-agenda-mode-hook #'kazi/style-org-agenda)
+
+  ;; Narrowed preview — show current item's body in a small side window
+  (defvar kazi/agenda-preview-buffer "*Agenda Preview*")
+  (defvar-local kazi/agenda-preview-mode nil
+    "When non-nil, show a narrowed preview of the current agenda item.")
+
+  (defun kazi/agenda-preview-update ()
+    "Show a narrowed preview of the org entry at point in a side window."
+    (when (and kazi/agenda-preview-mode
+               (eq major-mode 'org-agenda-mode))
+      (let ((marker (org-get-at-bol 'org-marker)))
+        (if (not marker)
+            (when-let ((win (get-buffer-window kazi/agenda-preview-buffer)))
+              (with-current-buffer kazi/agenda-preview-buffer
+                (let ((inhibit-read-only t)) (erase-buffer))))
+          (let* ((buf (marker-buffer marker))
+                 (pos (marker-position marker))
+                 preview-text)
+            (when buf
+              (with-current-buffer buf
+                (org-with-wide-buffer
+                 (goto-char pos)
+                 (let ((elt (org-element-at-point)))
+                   (setq preview-text
+                         (buffer-substring-no-properties
+                          (org-element-property :begin elt)
+                          (org-element-property :end elt))))))
+              (with-current-buffer (get-buffer-create kazi/agenda-preview-buffer)
+                (let ((inhibit-read-only t))
+                  (erase-buffer)
+                  (insert preview-text)
+                  (org-mode)
+                  (goto-char (point-min))
+                  (org-fold-show-subtree)
+                  (setq buffer-read-only t)))
+              (display-buffer kazi/agenda-preview-buffer
+                              '(display-buffer-in-side-window
+                                (side . right)
+                                (window-width . 0.4)
+                                (preserve-size . (t . nil))))))))))
+
+  (defun kazi/agenda-preview-toggle ()
+    "Toggle narrowed preview for the current agenda item."
+    (interactive)
+    (setq kazi/agenda-preview-mode (not kazi/agenda-preview-mode))
+    (if kazi/agenda-preview-mode
+        (progn
+          (add-hook 'post-command-hook #'kazi/agenda-preview-update nil t)
+          (kazi/agenda-preview-update)
+          (message "Agenda preview ON"))
+      (remove-hook 'post-command-hook #'kazi/agenda-preview-update t)
+      (when-let ((win (get-buffer-window kazi/agenda-preview-buffer)))
+        (delete-window win))
+      (message "Agenda preview OFF")))
 
   ;; Clean super-agenda group headers
   (with-eval-after-load 'org-super-agenda
@@ -610,15 +671,120 @@ One command =C-c a= does everything -- like =C-x g= for magit.
 
     ;; --- Our own compact transient (replaces casual-agenda default) ---
     ;; Magit-style: dense columns, everything visible at once
+    ;; --- View detection helpers ---
+    (defun kazi/agenda-view-key ()
+      "Return the current custom agenda view key, or nil."
+      (when (and (derived-mode-p 'org-agenda-mode)
+                 (bound-and-true-p org-agenda-redo-command))
+        (let ((cmd org-agenda-redo-command))
+          (cond
+           ;; Simple command: (org-agenda nil "L")
+           ((and (listp cmd) (eq (car cmd) 'org-agenda))
+            (nth 2 cmd))
+           ;; Composite/block command: (org-agenda-run-series "Life" ...)
+           ;; Look up the key from org-agenda-custom-commands by title
+           ((and (listp cmd) (eq (car cmd) 'org-agenda-run-series))
+            (let ((title (nth 1 cmd)))
+              (car (cl-find title org-agenda-custom-commands
+                            :key #'cadr :test #'string=))))))))
+
+    (defun kazi/agenda-in-inbox-p ()    (string= (kazi/agenda-view-key) "i"))
+    (defun kazi/agenda-in-day-p ()      (string= (kazi/agenda-view-key) "d"))
+    (defun kazi/agenda-in-life-p ()     (string= (kazi/agenda-view-key) "L"))
+    (defun kazi/agenda-in-projects-p () (string= (kazi/agenda-view-key) "P"))
+    (defun kazi/agenda-in-work-p ()     (string= (kazi/agenda-view-key) "W"))
+    (defun kazi/agenda-in-file-view-p ()
+      (member (kazi/agenda-view-key) '("i" "L" "P" "W")))
+    (defun kazi/agenda-in-focus-view-p ()
+      "File view but not inbox — shows Focus column."
+      (member (kazi/agenda-view-key) '("L" "P" "W")))
+    (defun kazi/agenda-in-calendar-p ()
+      (member (kazi/agenda-view-key) '("d" "w")))
+
+    ;; --- Dynamic heading picker ---
+    (defun kazi/agenda-current-file ()
+      "Return the org file for the current agenda view."
+      (let ((key (kazi/agenda-view-key)))
+        (cond
+         ((string= key "i") "~/org/agendas/inbox.org")
+         ((string= key "L") "~/org/agendas/life.org")
+         ((string= key "P") "~/org/agendas/projects.org")
+         ((string= key "W") "~/org/agendas/work.org"))))
+
+    (defun kazi/agenda-headings-in-file ()
+      "Get top-level headings from the org file backing the current agenda view."
+      (let ((file (kazi/agenda-current-file))
+            headings)
+        (when (and file (file-exists-p (expand-file-name file)))
+          (with-temp-buffer
+            (insert-file-contents (expand-file-name file))
+            (org-mode)
+            (goto-char (point-min))
+            (while (re-search-forward "^\\* " nil t)
+              (push (org-get-heading t t t t) headings))))
+        (nreverse headings)))
+
+    (defvar kazi/agenda--focus-file nil
+      "The org file for the current focus transient.")
+    (defvar kazi/agenda--focus-view-key nil
+      "The agenda view key for the current focus transient.")
+
+    (defun kazi/agenda-filter-to-heading (heading)
+      "Restrict agenda to subtree under HEADING and rebuild the view."
+      (let* ((file (expand-file-name kazi/agenda--focus-file))
+             (buf (find-file-noselect file)))
+        (with-current-buffer buf
+          (widen)
+          (goto-char (point-min))
+          (if (re-search-forward
+               (concat "^\\*[ \t]+" (regexp-quote heading) "[ \t]*$") nil t)
+              (progn
+                (beginning-of-line)
+                (org-agenda-set-restriction-lock 'subtree)
+                (org-agenda nil kazi/agenda--focus-view-key)
+                (delete-other-windows))
+            (message "Heading '%s' not found" heading)))))
+
+    (defun kazi/agenda-remove-restriction ()
+      "Remove restriction lock and rebuild the view."
+      (interactive)
+      (when kazi/agenda--focus-file
+        (let ((buf (find-buffer-visiting
+                    (expand-file-name kazi/agenda--focus-file))))
+          (when buf
+            (with-current-buffer buf
+              (org-agenda-remove-restriction-lock)))))
+      (org-agenda-redo))
+
+    (defun kazi/agenda-focus-tmenu ()
+      "Dynamic transient showing headings from the current view's org file."
+      (interactive)
+      (setq kazi/agenda--focus-file (kazi/agenda-current-file)
+            kazi/agenda--focus-view-key (kazi/agenda-view-key))
+      (let* ((headings (kazi/agenda-headings-in-file))
+             (keys "1234567890abcdefghijklmnopqrstuvwxyz")
+             (suffixes
+              (cl-loop for h in headings
+                       for i from 0
+                       for key = (substring keys i (1+ i))
+                       while (< i (length keys))
+                       collect (let ((heading h))
+                                 `(,key ,heading
+                                   (lambda () (interactive)
+                                     (kazi/agenda-filter-to-heading ,heading)))))))
+        (eval
+         `(transient-define-prefix kazi/agenda-focus--dynamic ()
+            ,(format "Focus — %s" (or kazi/agenda--focus-view-key ""))
+            [["Headings"
+              ,@suffixes
+              ("|" "Show all" kazi/agenda-remove-restriction)]])))
+      (kazi/agenda-focus--dynamic))
+
     (transient-define-prefix kazi/agenda-tmenu ()
-      "Org Agenda — compact help menu."
+      "Org Agenda — contextual help menu."
       :refresh-suffixes t
-      [["Workflow"
-        ("K" "Capture>"      kazi/org-capture-tmenu)
-        ("A" "Agenda..."     org-agenda)
-        ("R" "Weekly review" kazi/weekly-review)
-        ("C" "Calendar"      kazi/open-org-calendar)]
-       ["Goto"
+      ;; --- Global: always visible ---
+      [["Goto"
         ("gi" "Inbox"
          (lambda () (interactive) (org-agenda nil "i") (delete-other-windows))
          :description (lambda () (kazi/org-inbox-count)))
@@ -633,45 +799,55 @@ One command =C-c a= does everything -- like =C-x g= for magit.
          :description (lambda () (kazi/org-work-count)))
         ("ga" "All"
          (lambda () (interactive) (org-agenda nil "a") (delete-other-windows)))]
+       ["Actions"
+        ("t" "TODO cycle"  org-agenda-todo :transient t)
+        ("K" "Capture>"    kazi/org-capture-tmenu)
+        ("k" "Capture..."  org-capture)
+        ("o" "Operations>" casual-agenda-operations-tmenu)
+        ("M" "Mark>"       casual-agenda-mark-tmenu)]
+       ["Navigate"
+        (">" "Later"      kazi/org-agenda-forward :transient t)
+        ("<" "Earlier"    kazi/org-agenda-backward :transient t)
+        ("." "Today"      kazi/org-agenda-goto-today :transient t)
+        ("j" "Date..."    org-agenda-goto-date)
+        ("r" "Refresh"    org-agenda-redo :transient t)]
        ["View"
         ("d" "Day"       org-agenda-day-view :transient t)
         ("w" "Week"      org-agenda-week-view :transient t)
         ("m" "Month"     org-agenda-month-view :transient t)
-        ("y" "Year"      org-agenda-year-view :transient t)
-        ("." "Now"       casual-agenda-goto-now :transient t)]
+        ("y" "Year"      org-agenda-year-view :transient t)]
        ["Filter"
         ("/" "Filter..."   org-agenda-filter :transient t)
-        ("\\" "Tag..."     org-agenda-filter-by-tag :transient t)
-        ("=" "Regexp..."   org-agenda-filter-by-regexp :transient t)
         ("F" "Pick tag..." kazi/org-agenda-filter-by-tag-interactive)
         ("S" "By state..." kazi/org-agenda-filter-by-todo-interactive)
-        ("|" "Clear all"   org-agenda-filter-remove-all :transient t)]]
-      [["Actions"
-        ("o" "Operations>" casual-agenda-operations-tmenu)
-        ("M" "Mark>"       casual-agenda-mark-tmenu)
-        ("s" "Save all"    org-save-all-org-buffers :transient t)
-        ("k" "Capture..."  org-capture)
-        ("t" "TODO cycle"  org-agenda-todo :transient t)]
+        ("|" "Clear all"   org-agenda-filter-remove-all :transient t)]
+       ;; --- Contextual: Inbox ---
+       ["Inbox"
+        :if kazi/agenda-in-inbox-p
+        ("R" "Refile"          org-agenda-refile)
+        ("p" "Preview"         kazi/agenda-preview-toggle)
+        ("1" "Sched today"     kazi/org-schedule-today :transient t)
+        ("2" "Sched tomorrow"  kazi/org-schedule-tomorrow :transient t)
+        ("x" "Archive"         org-agenda-archive-default-with-confirmation)]
+       ;; --- Contextual: File views (Life/Projects/Work) ---
+       ["Focus"
+        :if kazi/agenda-in-focus-view-p
+        ("h" "Headings>"    kazi/agenda-focus-tmenu)
+        ("p" "Preview"      kazi/agenda-preview-toggle)]
+       ;; --- Contextual: Day/Week ---
        ["Schedule"
+        :if kazi/agenda-in-calendar-p
         ("1" "Today"     kazi/org-schedule-today :transient t)
         ("2" "Tomorrow"  kazi/org-schedule-tomorrow :transient t)
-        ("3" "Next week" kazi/org-schedule-next-week :transient t)
-        ("4" "Search..." kazi/org-search-all)]
-       ["Navigate"
-        (">" "Later"      kazi/org-agenda-forward :transient t)
-        ("<" "Earlier"    kazi/org-agenda-backward :transient t)
-        ("j" "Date..."    org-agenda-goto-date)
-        ("r" "Refresh"    org-agenda-redo :transient t)]]
-      [["Utils"
-        (";" "Timer..."    org-timer-set-timer :transient t)
-        ("c" "Date"        org-agenda-goto-calendar)
-        ("l" "Almanac>"    casual-agenda-almanac-tmenu)
-        ("J" "Bookmark..." bookmark-jump)]
+        ("3" "Next week" kazi/org-schedule-next-week :transient t)]
+       ;; --- Global: extras ---
        [""
-        ("RET" "Open"      org-agenda-switch-to)
-        ("C-/" "Undo"      org-agenda-undo)
-        ("," "Settings>"   casual-agenda-settings-tmenu)
-        ("q" "Quit"        org-agenda-quit)]])
+        ("4" "Search..."     kazi/org-search-all)
+        ("s" "Save all"      org-save-all-org-buffers :transient t)
+        ("R" "Weekly review" kazi/weekly-review
+         :if-not kazi/agenda-in-inbox-p)
+        ("A" "Agenda..."     org-agenda)
+        ("q" "Quit"          org-agenda-quit)]])
 
     ;; --- Smart dispatch: one key for everything ---
     (defun kazi/org-tmenu ()
@@ -694,9 +870,8 @@ One command =C-c a= does everything -- like =C-x g= for magit.
   ;; The transient (? / h) is for discovery, not the primary workflow.
   (with-eval-after-load 'evil-org-agenda
     (evil-define-key 'motion org-agenda-mode-map
-      ;; Help / discovery (like magit's h)
+      ;; Help / discovery
       "?" 'kazi/agenda-tmenu
-      "h" 'kazi/agenda-tmenu
 
       ;; Date navigation — rebuilds full custom view
       ">" 'kazi/org-agenda-forward
@@ -721,7 +896,8 @@ One command =C-c a= does everything -- like =C-x g= for magit.
     ;; Non-evil bindings (work in all states)
     (define-key org-agenda-mode-map (kbd "C-o") #'kazi/agenda-tmenu)
     (define-key org-agenda-mode-map (kbd "C-c a") #'kazi/agenda-tmenu)
-    (define-key org-agenda-mode-map (kbd "M-j") #'org-agenda-clock-goto))
+    (define-key org-agenda-mode-map (kbd "M-j") #'org-agenda-clock-goto)
+)
 
   ;; Header hint — shows available keys right in the buffer (like magit)
   (add-hook 'org-agenda-mode-hook
