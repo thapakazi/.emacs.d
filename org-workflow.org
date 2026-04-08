@@ -768,18 +768,40 @@ One command =C-c a= does everything -- like =C-x g= for magit.
       (org-agenda nil key)
       (delete-other-windows))
 
+    (defun kazi/agenda-focus--make-keys (headings)
+      "Generate unique single-char keys from HEADINGS.
+Uses first char of each word, then second char, etc."
+      (let ((used (list ?|))  ;; reserve | for clear filter
+            result)
+        (dolist (h headings (nreverse result))
+          (let* ((name (downcase h))
+                 (key nil))
+            (cl-block found
+              ;; Try each char in the heading
+              (dotimes (i (length name))
+                (let ((ch (aref name i)))
+                  (when (and (<= ?a ch) (<= ch ?z)
+                             (not (member ch used)))
+                    (setq key (char-to-string ch))
+                    (push ch used)
+                    (cl-return-from found))))
+              ;; Fallback: first available letter
+              (cl-loop for c from ?a to ?z
+                       unless (member c used)
+                       do (setq key (char-to-string c))
+                          (push c used)
+                          (cl-return-from found)))
+            (push (cons key h) result)))))
+
     (defun kazi/agenda-focus-tmenu ()
       "Dynamic transient showing headings from the current view's org file."
       (interactive)
       (setq kazi/agenda--focus-file (kazi/agenda-current-file)
             kazi/agenda--focus-view-key (kazi/agenda-view-key))
       (let* ((headings (kazi/agenda-headings-in-file))
-             (keys "1234567890abcdefghijklmnopqrstuvwxyz")
+             (keyed (kazi/agenda-focus--make-keys headings))
              (suffixes
-              (cl-loop for h in headings
-                       for i from 0
-                       for key = (substring keys i (1+ i))
-                       while (< i (length keys))
+              (cl-loop for (key . h) in keyed
                        collect (let ((heading h))
                                  `(,key ,heading
                                    (lambda () (interactive)
