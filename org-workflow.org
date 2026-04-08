@@ -1080,3 +1080,22 @@ Opens casual-agenda transient (extended with our custom groups):
 
 Don't think about when during capture. Just dump (~C-c a d~).
 Then once a day, process inbox and schedule.
+
+* Enhancements (TODO)
+
+** TODO Better dashboard view for =C-c a=
+   The main entry point should feel like a proper dashboard — summary counts,
+   today's focus, quick stats, not just a raw agenda block.
+
+** TODO Better UI for file-specific views (Life, Projects, Inbox)
+   Each file view deserves its own visual treatment — progress indicators,
+   category icons, maybe a header summary showing done/total counts.
+
+** TODO Reduce keystrokes for navigation
+   Too many keys to get around. Explore single-key jumps from anywhere
+   (e.g. =gl= → =l=), or a hydra/transient that stays open for rapid switching.
+
+** TODO Multiple org-agenda buffers
+   Support having Life, Projects, and Work open in separate buffers side-by-side
+   so you can focus on different contexts without constantly switching views.
+   Look into =org-agenda-sticky= and named agenda buffers.
