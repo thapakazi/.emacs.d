@@ -48,7 +48,7 @@ This config follows: *Capture Fast → Review Weekly → Do Daily → Complete*
   ;; Badge-style faces (colored background, tight box — looks like pills)
   (setq org-todo-keyword-faces
         '(("TODO"  . (:foreground "#1a1b26" :background "#ff6b6b" :weight bold :box (:line-width (-1 . -1))))
-          ("DOING" . (:foreground "#1a1b26" :background "#ffd93d" :weight bold :box (:line-width (-1 . -1))))
+          ("DOING" . (:foreground "#1a1b26" :background "#e0af68" :weight bold :box (:line-width (-1 . -1))))
           ("WAIT"  . (:foreground "#1a1b26" :background "#a8a8a8" :weight bold :box (:line-width (-1 . -1))))
           ("DONE"  . (:foreground "#1a1b26" :background "#6bcb77" :weight bold :box (:line-width (-1 . -1))))
           ("SKIP"  . (:foreground "#888888" :background "#333333" :box (:line-width (-1 . -1))))))
@@ -210,6 +210,7 @@ This config follows: *Capture Fast → Review Weekly → Do Daily → Complete*
                             (:name "Overdue" :deadline past :scheduled past :order 2)
                             (:name "Habits" :habit t :order 3)
                             (:name "Scheduled" :scheduled t :order 4)
+                            (:name "Done" :todo ("DONE" "SKIP") :order 90)
                             (:name "Unscheduled" :anything t :order 10)))))))
 
           ("P" "Projects"
@@ -218,6 +219,7 @@ This config follows: *Capture Fast → Review Weekly → Do Daily → Complete*
                          (org-super-agenda-groups
                           '((:name "In Progress" :todo "DOING" :order 1)
                             (:name "Waiting" :todo "WAIT" :order 2)
+                            (:name "Done" :todo ("DONE" "SKIP") :order 90)
                             (:name "Active" :anything t :order 10)))))))
 
           ("W" "Work"
@@ -227,6 +229,7 @@ This config follows: *Capture Fast → Review Weekly → Do Daily → Complete*
                           '((:name "In Progress" :todo "DOING" :order 1)
                             (:name "Overdue" :deadline past :scheduled past :order 2)
                             (:name "Scheduled" :scheduled t :order 3)
+                            (:name "Done" :todo ("DONE" "SKIP") :order 90)
                             (:name "Backlog" :anything t :order 10)))))))
 
           ;; === WEEKLY VIEW ===
@@ -293,7 +296,15 @@ This config follows: *Capture Fast → Review Weekly → Do Daily → Complete*
           org-modern-priority t
           org-modern-star 'replace
           org-modern-table t
-          org-modern-progress nil)
+          org-modern-progress nil
+
+          ;; Per-keyword faces so DOING is visually distinct from TODO
+          org-modern-todo-faces
+          '(("TODO"  :background "#ff6b6b" :foreground "#1a1b26")
+            ("DOING" :background "#e0af68" :foreground "#1a1b26")
+            ("WAIT"  :background "#a8a8a8" :foreground "#1a1b26")
+            ("DONE"  :background "#6bcb77" :foreground "#1a1b26")
+            ("SKIP"  :background "#555555" :foreground "#888888")))
 
     ;; Enable in org files
     (global-org-modern-mode)
@@ -419,14 +430,31 @@ This config follows: *Capture Fast → Review Weekly → Do Daily → Complete*
         (delete-window win))
       (message "Agenda preview OFF")))
 
+  ;; Toggle showing DONE items in agenda
+  (defvar kazi/agenda-show-done nil
+    "When non-nil, include DONE/SKIP items in agenda views.")
+
+  (defun kazi/agenda-toggle-done ()
+    "Toggle showing completed items in the current agenda view."
+    (interactive)
+    (setq kazi/agenda-show-done (not kazi/agenda-show-done))
+    (if kazi/agenda-show-done
+        ;; Show done: temporarily treat all keywords as not-done so alltodo includes them
+        (let ((org-done-keywords nil))
+          (org-agenda-redo)
+          (message "Done items: ON"))
+      (org-agenda-redo)
+      (message "Done items: OFF")))
+
   ;; Clean super-agenda group headers
   (with-eval-after-load 'org-super-agenda
     (setq org-super-agenda-header-separator "")
     (custom-set-faces
      '(org-super-agenda-header
-       ((t (:inherit org-agenda-structure
+       ((t (:inherit nil
             :weight bold
-            :height 1.05
+            :foreground "#7aa2f7"
+            :height 1.0
             :underline nil))))))
 #+end_src
 
@@ -854,6 +882,9 @@ Uses first char of each word, then second char, etc."
         ("/" "Filter..."   org-agenda-filter :transient t)
         ("F" "Pick tag..." kazi/org-agenda-filter-by-tag-interactive)
         ("S" "By state..." kazi/org-agenda-filter-by-todo-interactive)
+        ("D" "Done items"  kazi/agenda-toggle-done
+         :transient t
+         :description (lambda () (if kazi/agenda-show-done "Done [ON]" "Done [off]")))
         ("|" "Clear all"   org-agenda-filter-remove-all :transient t)]
        ;; --- Contextual: Inbox ---
        ["Inbox"
