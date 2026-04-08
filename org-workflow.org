@@ -6,6 +6,11 @@ This config follows: *Capture Fast → Review Weekly → Do Daily → Complete*
 
 * 1. Basic Setup
 #+begin_src emacs-lisp
+  ;; Namespace prefix for all custom functions in this config.
+  ;; Change this once to rename everything.
+  (defvar kazi/ns "kazi/"
+    "Namespace prefix used for custom org workflow functions.")
+
   (require 'org)
   (require 'org-agenda)
   (require 'org-capture)
@@ -15,10 +20,11 @@ This config follows: *Capture Fast → Review Weekly → Do Daily → Complete*
   (setq org-directory "~/org/agendas/")
   (setq org-default-notes-file (concat org-directory "inbox.org"))
 
-  ;; Only 3 files to manage
+  ;; 4 files — inbox, life, projects, work
   (setq org-agenda-files '("~/org/agendas/inbox.org"
-                           "~/org/agendas/tasks.org"
-                           "~/org/agendas/projects.org"))
+                           "~/org/agendas/life.org"
+                           "~/org/agendas/projects.org"
+                           "~/org/agendas/work.org"))
 
   ;; Log when tasks are done
   (setq org-log-done 'time)
@@ -39,38 +45,73 @@ This config follows: *Capture Fast → Review Weekly → Do Daily → Complete*
   (setq org-todo-keywords
         '((sequence "TODO(t)" "DOING(d!)" "WAIT(w@)" "|" "DONE(x!)" "SKIP(s)")))
 
-  ;; Colors for states
+  ;; Badge-style faces (colored background, tight box — looks like pills)
   (setq org-todo-keyword-faces
-        '(("TODO"  . (:foreground "#ff6b6b" :weight bold))
-          ("DOING" . (:foreground "#ffd93d" :weight bold))
-          ("WAIT"  . (:foreground "#a8a8a8" :weight bold))
-          ("DONE"  . (:foreground "#6bcb77" :weight bold))
-          ("SKIP"  . (:foreground "#666666"))))
+        '(("TODO"  . (:foreground "#1a1b26" :background "#ff6b6b" :weight bold :box (:line-width (-1 . -1))))
+          ("DOING" . (:foreground "#1a1b26" :background "#ffd93d" :weight bold :box (:line-width (-1 . -1))))
+          ("WAIT"  . (:foreground "#1a1b26" :background "#a8a8a8" :weight bold :box (:line-width (-1 . -1))))
+          ("DONE"  . (:foreground "#1a1b26" :background "#6bcb77" :weight bold :box (:line-width (-1 . -1))))
+          ("SKIP"  . (:foreground "#888888" :background "#333333" :box (:line-width (-1 . -1))))))
 #+end_src
 
-* 3. Capture Templates - Just 4 Options
+* 3. Capture Templates
 #+begin_src emacs-lisp
+  ;; --- Dynamic project capture ---
+  ;; Reads top-level headings from projects.org via completing-read (vertico).
+  ;; Pick an existing project or type a new name to create one on the fly.
+  (defun kazi/org-capture-project-heading ()
+    "Move point to a project heading in projects.org, picked via completing-read.
+  If the heading doesn't exist, create it."
+    (let* ((file "~/org/agendas/projects.org")
+           (headings (with-temp-buffer
+                       (when (file-exists-p file)
+                         (insert-file-contents file)
+                         (org-mode)
+                         (org-map-entries
+                          (lambda () (org-get-heading t t t t))
+                          "LEVEL=1"))))
+           (choice (completing-read "Project: " headings nil nil)))
+      (find-file file)
+      (goto-char (point-min))
+      (if (re-search-forward (format "^\\* %s" (regexp-quote choice)) nil t)
+          (end-of-line)
+        ;; New project — create it at the end of file
+        (goto-char (point-max))
+        (unless (bolp) (insert "\n"))
+        (insert (format "* %s\n" choice))
+        (backward-char))))
+
   ;; FAST capture - minimal friction
   (setq org-capture-templates
         '(
-          ;; Quick dump - no questions asked, goes under Tasks heading
+          ;; Quick dump - no questions asked
           ("d" "Dump (quick)" entry (file+headline "~/org/agendas/inbox.org" "Tasks")
            "* TODO %?\n:PROPERTIES:\n:CREATED: %U\n:END:"
            :empty-lines 1)
 
-          ;; Today's task - auto scheduled for today
-          ("t" "Today" entry (file "~/org/agendas/tasks.org")
+          ;; Schedule for today
+          ("t" "Today" entry (file "~/org/agendas/life.org")
            "* TODO %?\nSCHEDULED: %t"
            :empty-lines 1)
 
           ;; Scheduled task - asks for date
-          ("s" "Scheduled" entry (file "~/org/agendas/tasks.org")
+          ("s" "Scheduled" entry (file "~/org/agendas/life.org")
            "* TODO %?\nSCHEDULED: %^t"
            :empty-lines 1)
 
           ;; Deadline task
-          ("D" "Deadline" entry (file "~/org/agendas/tasks.org")
+          ("D" "Deadline" entry (file "~/org/agendas/life.org")
            "* TODO %?\nDEADLINE: %^t"
+           :empty-lines 1)
+
+          ;; Project task - pick project via vertico, or create new
+          ("p" "Project task" entry (function kazi/org-capture-project-heading)
+           "* TODO %?\n:PROPERTIES:\n:CREATED: %U\n:END:"
+           :empty-lines 1)
+
+          ;; Timed event (appointment, meeting)
+          ("e" "Event" entry (file+headline "~/org/agendas/life.org" "Appointments")
+           "* %?\nSCHEDULED: %^T"
            :empty-lines 1)))
 #+end_src
 
@@ -109,28 +150,37 @@ This config follows: *Capture Fast → Review Weekly → Do Daily → Complete*
            ((agenda "" ((org-agenda-span 'day)
                         (org-agenda-start-day "today")
                         (org-super-agenda-groups
-                         '((:name "In Progress"
+                         '((:name "▶ In Progress"
                             :todo "DOING"
                             :order 1)
-                           (:name "Scheduled Today"
+                           (:name "◆ Today"
                             :scheduled today
                             :order 2)
-                           (:name "Overdue"
+                           (:name "⚠ Overdue"
                             :deadline past
                             :scheduled past
-                            :order 3)
-                           (:name "Due Today"
+                            :order 3
+                            :face (:foreground "#ff6b6b"))
+                           (:name "⏰ Due Today"
                             :deadline today
                             :order 4)
                            (:name "Other"
                             :anything t
                             :order 99)))))
-            ;; Done today section - sorted by closed time (latest first)
+            ;; Upcoming this week (next 7 days, max 5 items)
+            (agenda "" ((org-agenda-span 7)
+                        (org-agenda-start-day "+1d")
+                        (org-agenda-overriding-header "\n📅 Upcoming This Week\n")
+                        (org-agenda-entry-types '(:deadline :scheduled))
+                        (org-agenda-max-entries 5)
+                        (org-super-agenda-groups
+                         '((:name "" :anything t)))))
+            ;; Done today
             (tags "CLOSED>=\"<today>\""
-                  ((org-agenda-overriding-header "\n──── ✓ Done ────────────────────────────────────────────────────────\n")
+                  ((org-agenda-overriding-header "\n✓ Done\n")
                    (org-agenda-skip-function '(org-agenda-skip-entry-if 'nottodo 'done))
                    (org-agenda-sorting-strategy '(tsia-down))))
-            (alltodo "" ((org-agenda-overriding-header "\n── ⚡ Quick Actions ────────────────────────────────────────────────")
+            (alltodo "" ((org-agenda-overriding-header "\n⚡ Quick Actions\n")
                          (org-super-agenda-groups
                           '((:name "Waiting"
                              :todo "WAIT")
@@ -138,12 +188,39 @@ This config follows: *Capture Fast → Review Weekly → Do Daily → Complete*
                              :tag "quick")
                             (:discard (:anything t))))))))
 
-          ;; === INBOX REVIEW: Process your dumps ===
+          ;; === FILE VIEWS: Actionable agenda per file ===
           ("i" "Inbox Review"
            ((alltodo "" ((org-agenda-files '("~/org/agendas/inbox.org"))
-                         (org-agenda-overriding-header "Inbox - Process These:")
+                         (org-agenda-overriding-header "Inbox — Process These:")
                          (org-super-agenda-groups
                           '((:auto-ts t)))))))
+
+          ("L" "Life"
+           ((alltodo "" ((org-agenda-files '("~/org/agendas/life.org"))
+                         (org-agenda-overriding-header "Life:")
+                         (org-super-agenda-groups
+                          '((:name "In Progress" :todo "DOING" :order 1)
+                            (:name "Overdue" :deadline past :scheduled past :order 2)
+                            (:name "Habits" :habit t :order 3)
+                            (:name "Scheduled" :scheduled t :order 4)
+                            (:name "Unscheduled" :anything t :order 10)))))))
+
+          ("P" "Projects"
+           ((alltodo "" ((org-agenda-files '("~/org/agendas/projects.org"))
+                         (org-agenda-overriding-header "Projects:")
+                         (org-super-agenda-groups
+                          '((:name "In Progress" :todo "DOING" :order 1)
+                            (:name "Waiting" :todo "WAIT" :order 2)
+                            (:name "Active" :anything t :order 10)))))))
+
+          ("W" "Work"
+           ((alltodo "" ((org-agenda-files '("~/org/agendas/work.org"))
+                         (org-agenda-overriding-header "Work:")
+                         (org-super-agenda-groups
+                          '((:name "In Progress" :todo "DOING" :order 1)
+                            (:name "Overdue" :deadline past :scheduled past :order 2)
+                            (:name "Scheduled" :scheduled t :order 3)
+                            (:name "Backlog" :anything t :order 10)))))))
 
           ;; === WEEKLY VIEW ===
           ("w" "This Week"
@@ -190,61 +267,121 @@ This config follows: *Capture Fast → Review Weekly → Do Daily → Complete*
 #+end_src
 
 * 6. Better Agenda Display
+** 6a. org-modern — pill-shaped TODOs and tags
 #+begin_src emacs-lisp
-  ;; Cleaner agenda look
-  (setq org-agenda-block-separator ?─)
-  (setq org-agenda-current-time-string "◀── NOW ──────────────────")
+  (use-package org-modern
+    :ensure t
+    :config
+    ;; Companion settings for org-modern
+    (setq org-auto-align-tags nil
+          org-tags-column 0
+          org-agenda-tags-column 0
+          org-catch-invisible-edits 'show-and-error
+          org-special-ctrl-a/e t
+          org-hide-emphasis-markers t
+
+          ;; org-modern visuals
+          org-modern-todo t
+          org-modern-tag t
+          org-modern-priority t
+          org-modern-star 'replace
+          org-modern-table t
+          org-modern-progress nil)
+
+    ;; Enable in org files
+    (global-org-modern-mode)
+    ;; Enable in agenda buffers
+    (add-hook 'org-agenda-finalize-hook #'org-modern-agenda))
+#+end_src
+
+** 6b. Clean layout — compact, no noise
+#+begin_src emacs-lisp
+  ;; Thin separator between blocks
+  (setq org-agenda-block-separator ?━)
+
+  ;; NOW indicator
+  (setq org-agenda-current-time-string
+        "◀ ─── now ────────────────────────────────────────")
+
+  ;; Time grid — only show on days with timed entries
   (setq org-agenda-time-grid
         '((daily today require-timed)
           (800 1000 1200 1400 1600 1800 2000)
           " ┄┄┄┄┄ " "┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄"))
 
-  ;; Deadline/scheduled display
+  ;; Deadlines
   (setq org-deadline-warning-days 7)
   (setq org-agenda-skip-deadline-prewarning-if-scheduled t)
 
-  ;; === CLEAN TAG & TEXT DISPLAY ===
-  ;; Prefix format - clean and compact
+  ;; Skip done duplicates
+  (setq org-agenda-skip-timestamp-if-done t
+        org-agenda-skip-deadline-if-done t
+        org-agenda-skip-scheduled-if-done t
+        org-agenda-skip-scheduled-if-deadline-is-shown t)
+
+  ;; Don't show empty days in multi-day views
+  (setq org-agenda-show-all-dates nil)
+
+  ;; Compact prefix — minimal, no redundant category in todo blocks
   (setq org-agenda-prefix-format
-        '((agenda . " %i %-10:c%?-10t% s")
-          (todo   . " %i %-10:c ")
-          (tags   . " %i %-10:c ")
-          (search . " %i %-10:c ")))
+        '((agenda . " %i %-12:c%?-12t% s")
+          (todo   . " %i ")
+          (tags   . " %i ")
+          (search . " %i %-12:c")))
 
   ;; Start week on Monday
   (setq org-agenda-start-on-weekday 1)
 
-  ;; Compact view
+  ;; Compact blocks
   (setq org-agenda-compact-blocks t)
 
-  ;; Truncate lines - no wrapping
-  (add-hook 'org-agenda-mode-hook
-            (lambda () (setq truncate-lines t)))
+  ;; Hide tags in agenda (org-modern shows them as pills in source)
+  (setq org-agenda-hide-tags-regexp ".")
 
-  ;; === FLUID TAG DISPLAY ===
-  ;; Dynamically set tag column based on window width
-  (defun my/org-agenda-set-tags-column ()
-    "Set tags column to align near right edge of window."
-    (setq org-agenda-tags-column (- 2 (window-width))))
+  ;; A bit of breathing room
+  (setq-default line-spacing 0.15)
+#+end_src
 
-  ;; Truncate long tags with ellipsis (only tags, not text)
-  (defun my/org-agenda-truncate-tags ()
-    "Truncate tags longer than 20 chars with ellipsis."
-    (let ((inhibit-read-only t)
-          (max-tag-width 20))
-      (save-excursion
-        (goto-char (point-min))
-        (while (re-search-forward "[ \t]+\\(:[^ \t\n]+:\\)[ \t]*$" nil t)
-          (let* ((tag-str (match-string 1))
-                 (tag-len (length tag-str)))
-            (when (> tag-len max-tag-width)
-              (replace-match
-               (concat "  " (substring tag-str 0 (- max-tag-width 2)) "..")
-               t t)))))))
+** 6c. Faces — visual hierarchy
+#+begin_src emacs-lisp
+  (defun kazi/style-org-agenda ()
+    "Apply modern faces to org-agenda buffer."
+    (face-remap-add-relative 'org-agenda-date
+                             :height 1.1 :weight 'bold :foreground "#7aa2f7")
+    (face-remap-add-relative 'org-agenda-date-today
+                             :height 1.15 :weight 'bold :foreground "#bb9af7"
+                             :slant 'italic :underline t)
+    (face-remap-add-relative 'org-agenda-date-weekend
+                             :height 1.1 :weight 'normal :foreground "#565f89")
+    (face-remap-add-relative 'org-agenda-structure
+                             :height 1.15 :weight 'bold :foreground "#7dcfff"))
 
-  ;; Apply on agenda render
-  (add-hook 'org-agenda-finalize-hook #'my/org-agenda-set-tags-column)
-  (add-hook 'org-agenda-finalize-hook #'my/org-agenda-truncate-tags t)
+  (add-hook 'org-agenda-mode-hook #'kazi/style-org-agenda)
+
+  ;; Clean super-agenda group headers
+  (with-eval-after-load 'org-super-agenda
+    (setq org-super-agenda-header-separator "")
+    (custom-set-faces
+     '(org-super-agenda-header
+       ((t (:inherit org-agenda-structure
+            :weight bold
+            :height 1.05
+            :underline nil))))))
+#+end_src
+
+** 6d. Focused buffer — centered, highlighted cursor line
+#+begin_src emacs-lisp
+  (defun kazi/org-agenda-visual-setup ()
+    "Set up a clean, focused agenda buffer."
+    (olivetti-mode 1)
+    (olivetti-set-width 100)
+    (hl-line-mode 1)
+    (display-line-numbers-mode -1)
+    (setq truncate-lines t))
+
+  (use-package olivetti
+    :ensure t
+    :hook (org-agenda-mode . kazi/org-agenda-visual-setup))
 #+end_src
 
 * 7. Notifications with org-alert
@@ -268,9 +405,9 @@ This config follows: *Capture Fast → Review Weekly → Do Daily → Complete*
 #+begin_src emacs-lisp
   ;; Refile targets (where to move tasks from inbox)
   (setq org-refile-targets
-        '(("~/org/agendas/tasks.org" :maxlevel . 2)
+        '(("~/org/agendas/life.org" :maxlevel . 2)
           ("~/org/agendas/projects.org" :maxlevel . 2)
-          ("~/org/agendas/someday.org" :maxlevel . 1)))
+          ("~/org/agendas/work.org" :maxlevel . 2)))
 
   ;; Show full path for refiling
   (setq org-refile-use-outline-path 'file)
@@ -280,85 +417,324 @@ This config follows: *Capture Fast → Review Weekly → Do Daily → Complete*
   (setq org-refile-allow-creating-parent-nodes 'confirm)
 #+end_src
 
-* 9. Hydra Menu - One Key to Rule Them All
-;; Note: hydra package is loaded in basics.org
+* 9. Transient Menus - Magit-style UI for Org
+Replaces hydra with transient for richer, discoverable menus.
+Transient is loaded via magit/transient in utils.org.
 
+** 9a. Helper Functions
 #+begin_src emacs-lisp
-  (defhydra hydra-org-quick (:color blue :hint nil :exit t)
-    "
-  ╭─────────────────── Org Workflow ────────────────────╮
-  │                                                     │
-  │  ^Capture^          ^View^            ^Do^          │
-  │  _d_: dump task     _t_: today        _x_: done     │
-  │  _s_: scheduled     _w_: week         _/_: search   │
-  │  _D_: with deadline _i_: inbox        _r_: refile   │
-  │                     _u_: upcoming                   │
-  │                     _a_: all tasks                  │
-  │                     _c_: calendar                   │
-  │                                                     │
-  ╰─────────────────────────────────────────────────────╯
-  "
-    ;; Capture
-    ("d" (org-capture nil "d") "dump")
-    ("s" (org-capture nil "s") "scheduled")
-    ("D" (org-capture nil "D") "deadline")
+  ;; === Date navigation for custom block agenda ===
+  ;; org-agenda-later doesn't work well with multi-block views.
+  ;; These rebuild the whole "d" view with a shifted start date.
+  (defvar kazi/org-agenda-date-offset 0
+    "Day offset from today for the custom agenda view.")
 
-    ;; View
-    ("t" (org-agenda nil "d") "today")
-    ("w" (org-agenda nil "w") "week")
-    ("i" (org-agenda nil "i") "inbox")
-    ("u" (org-agenda nil "u") "upcoming")
-    ("a" (org-agenda nil "a") "all")
-    ("c" my/open-org-calendar "calendar")
+  (defun kazi/org-agenda-goto-day (offset)
+    "Rebuild the daily agenda view with OFFSET days from today."
+    (setq kazi/org-agenda-date-offset offset)
+    (let ((org-agenda-start-day (format-time-string
+                                 "%Y-%m-%d"
+                                 (time-add (current-time)
+                                           (days-to-time offset)))))
+      (org-agenda nil "d")
+      (delete-other-windows)))
 
-    ;; Actions
-    ("x" org-todo "toggle state")
-    ("/" org-agenda "full agenda")
-    ("r" org-refile "refile")
+  (defun kazi/org-agenda-forward ()
+    "Show next day in the custom agenda view."
+    (interactive)
+    (kazi/org-agenda-goto-day (1+ kazi/org-agenda-date-offset)))
 
-    ("q" nil "quit" :color red))
+  (defun kazi/org-agenda-backward ()
+    "Show previous day in the custom agenda view."
+    (interactive)
+    (kazi/org-agenda-goto-day (1- kazi/org-agenda-date-offset)))
 
-  ;; Main keybinding - press once to access everything
-  (global-set-key (kbd "C-c o") 'hydra-org-quick/body)
+  (defun kazi/org-agenda-goto-today ()
+    "Reset to today's agenda view."
+    (interactive)
+    (kazi/org-agenda-goto-day 0))
 
-  ;; If using evil with SPC leader, also bind there
-  ;; (evil-leader/set-key "o" 'hydra-org-quick/body)
-#+end_src
+  ;; === Live counts for transient menu ===
+  (defun kazi/org-count-todos-in-file (file)
+    "Count active TODO entries in FILE."
+    (if (file-exists-p file)
+        (with-temp-buffer
+          (insert-file-contents file)
+          (count-matches "^\\*+ \\(TODO\\|DOING\\|WAIT\\)" (point-min) (point-max)))
+      0))
 
-* 10. Quick Actions from Anywhere
-#+begin_src emacs-lisp
+  (defun kazi/org-file-todo-count (file label)
+    "Return LABEL with TODO count from FILE appended."
+    (let ((n (kazi/org-count-todos-in-file file)))
+      (if (> n 0) (format "%s (%d)" label n) label)))
+
+  (defun kazi/org-inbox-count ()    (kazi/org-file-todo-count "~/org/agendas/inbox.org" "Inbox"))
+  (defun kazi/org-life-count ()     (kazi/org-file-todo-count "~/org/agendas/life.org" "Life"))
+  (defun kazi/org-projects-count () (kazi/org-file-todo-count "~/org/agendas/projects.org" "Projects"))
+  (defun kazi/org-work-count ()     (kazi/org-file-todo-count "~/org/agendas/work.org" "Work"))
+
   ;; Mark task done without opening file
-  (defun my/org-agenda-todo-done ()
+  (defun kazi/org-agenda-todo-done ()
     "Mark the current agenda item as DONE."
     (interactive)
     (org-agenda-todo "DONE"))
 
   ;; Schedule for today quickly
-  (defun my/org-schedule-today ()
+  (defun kazi/org-schedule-today ()
     "Schedule current item for today."
     (interactive)
-    (org-schedule nil (format-time-string "%Y-%m-%d")))
+    (if (derived-mode-p 'org-agenda-mode)
+        (let ((hdmarker (or (org-get-at-bol 'org-hd-marker)
+                            (org-agenda-error))))
+          (org-agenda-schedule nil (format-time-string "%Y-%m-%d")))
+      (org-schedule nil (format-time-string "%Y-%m-%d"))))
 
   ;; Schedule for tomorrow
-  (defun my/org-schedule-tomorrow ()
+  (defun kazi/org-schedule-tomorrow ()
     "Schedule current item for tomorrow."
     (interactive)
-    (org-schedule nil "+1d"))
+    (if (derived-mode-p 'org-agenda-mode)
+        (org-agenda-schedule nil "+1d")
+      (org-schedule nil "+1d")))
+
+  ;; Schedule for next week
+  (defun kazi/org-schedule-next-week ()
+    "Schedule current item for next Monday."
+    (interactive)
+    (if (derived-mode-p 'org-agenda-mode)
+        (org-agenda-schedule nil "+mon")
+      (org-schedule nil "+mon")))
+
+  ;; Quick tag setter using completing-read (works with vertico)
+  (defun kazi/org-agenda-set-tags ()
+    "Set tags on agenda item using completing-read."
+    (interactive)
+    (if (derived-mode-p 'org-agenda-mode)
+        (org-agenda-set-tags)
+      (org-set-tags-command)))
+
+  ;; Filter agenda by tag — picks from all known tags (works with vertico)
+  (defun kazi/org-agenda-filter-by-tag-interactive ()
+    "Filter agenda by tag using completing-read."
+    (interactive)
+    (let* ((tags (mapcar #'car (org-global-tags-completion-table)))
+           (tag (completing-read "Filter by tag: " tags nil t)))
+      (org-agenda-filter-apply (list (concat "+" tag)) 'tag)))
+
+  ;; Filter by TODO state — picks from org-todo-keywords
+  (defun kazi/org-agenda-filter-by-todo-interactive ()
+    "Filter agenda by TODO keyword using completing-read."
+    (interactive)
+    (let* ((keywords (cl-remove-if
+                      (lambda (s) (member s '("|")))
+                      (apply #'append
+                             (mapcar (lambda (seq)
+                                       (mapcar (lambda (k) (replace-regexp-in-string "(.*)" "" k))
+                                               seq))
+                                     org-todo-keywords))))
+           (kw (completing-read "Filter by state: " keywords nil t)))
+      (org-agenda-filter-apply (list kw) 'regexp)))
+
+  ;; Search all org files with consult-ripgrep
+  (defun kazi/org-search-all ()
+    "Search across all org agenda files."
+    (interactive)
+    (consult-ripgrep org-directory))
+
+  ;; Quick priority setter
+  (defun kazi/org-agenda-priority-up ()
+    "Increase priority of agenda item."
+    (interactive)
+    (org-agenda-priority 'up))
+
+  (defun kazi/org-agenda-priority-down ()
+    "Decrease priority of agenda item."
+    (interactive)
+    (org-agenda-priority 'down))
 #+end_src
 
-* 11. Agenda Mode Keybindings
+** 9b. Capture Transient (sub-menu, always available)
 #+begin_src emacs-lisp
-  ;; Extra keybindings inside agenda view
+  (require 'transient)
+
+  (transient-define-prefix kazi/org-capture-tmenu ()
+    "Org Capture"
+    [["Quick"
+      ("d" "Dump to inbox" (lambda () (interactive) (org-capture nil "d")))
+      ("t" "Today"         (lambda () (interactive) (org-capture nil "t")))
+      ("s" "Scheduled"     (lambda () (interactive) (org-capture nil "s")))
+      ("D" "Deadline"      (lambda () (interactive) (org-capture nil "D")))]
+     ["Targeted"
+      ("p" "Project task"  (lambda () (interactive) (org-capture nil "p")))
+      ("e" "Event"         (lambda () (interactive) (org-capture nil "e")))
+      ("c" "Full menu..."  org-capture)]])
+#+end_src
+
+** 9c. Casual + Unified Transient
+One command =C-c a= does everything -- like =C-x g= for magit.
+- *Outside agenda*: shows Capture + View to get you into an agenda buffer.
+- *Inside agenda*: shows the full casual-agenda power menu with our extensions.
+#+begin_src emacs-lisp
+  ;; Cap transient popup to ~30% of frame height
+  (setq transient-display-buffer-action
+        '(display-buffer-in-side-window
+          (side . bottom)
+          (inhibit-same-window . t)
+          (window-height . 0.33)))
+
+  ;; Prevent transient from resizing beyond the window-height above
+  (setq transient-force-fixed-pitch t)
+  (advice-add 'fit-window-to-buffer :around
+              (lambda (orig-fn &optional window max-height min-height &rest args)
+                "Limit transient window to 33% of frame."
+                (if (and transient--buffer
+                         (buffer-live-p transient--buffer)
+                         window
+                         (eq (window-buffer window) transient--buffer))
+                    (let ((max-h (round (* 0.33 (frame-height)))))
+                      (apply orig-fn window max-h min-height args))
+                  (apply orig-fn window max-height min-height args))))
+
+  (use-package casual
+    :ensure t
+    :after (org-agenda transient)
+    :config
+    (require 'casual-agenda)
+
+    ;; --- Calendar helper (calfw wrapper) ---
+    (defun kazi/open-org-calendar ()
+      "Open calfw calendar with org-agenda items."
+      (interactive)
+      (require 'calfw-org)
+      (calfw-org-open-calendar))
+
+    ;; --- Our own compact transient (replaces casual-agenda default) ---
+    ;; Magit-style: dense columns, everything visible at once
+    (transient-define-prefix kazi/agenda-tmenu ()
+      "Org Agenda — compact help menu."
+      :refresh-suffixes t
+      [["Workflow"
+        ("K" "Capture>"      kazi/org-capture-tmenu)
+        ("A" "Agenda..."     org-agenda)
+        ("R" "Weekly review" kazi/weekly-review)
+        ("C" "Calendar"      kazi/open-org-calendar)]
+       ["Goto"
+        ("gi" "Inbox"
+         (lambda () (interactive) (org-agenda nil "i") (delete-other-windows))
+         :description (lambda () (kazi/org-inbox-count)))
+        ("gl" "Life"
+         (lambda () (interactive) (org-agenda nil "L") (delete-other-windows))
+         :description (lambda () (kazi/org-life-count)))
+        ("gp" "Projects"
+         (lambda () (interactive) (org-agenda nil "P") (delete-other-windows))
+         :description (lambda () (kazi/org-projects-count)))
+        ("gw" "Work"
+         (lambda () (interactive) (org-agenda nil "W") (delete-other-windows))
+         :description (lambda () (kazi/org-work-count)))
+        ("ga" "All"
+         (lambda () (interactive) (org-agenda nil "a") (delete-other-windows)))]
+       ["View"
+        ("d" "Day"       org-agenda-day-view :transient t)
+        ("w" "Week"      org-agenda-week-view :transient t)
+        ("m" "Month"     org-agenda-month-view :transient t)
+        ("y" "Year"      org-agenda-year-view :transient t)
+        ("." "Now"       casual-agenda-goto-now :transient t)]
+       ["Filter"
+        ("/" "Filter..."   org-agenda-filter :transient t)
+        ("\\" "Tag..."     org-agenda-filter-by-tag :transient t)
+        ("=" "Regexp..."   org-agenda-filter-by-regexp :transient t)
+        ("F" "Pick tag..." kazi/org-agenda-filter-by-tag-interactive)
+        ("S" "By state..." kazi/org-agenda-filter-by-todo-interactive)
+        ("|" "Clear all"   org-agenda-filter-remove-all :transient t)]]
+      [["Actions"
+        ("o" "Operations>" casual-agenda-operations-tmenu)
+        ("M" "Mark>"       casual-agenda-mark-tmenu)
+        ("s" "Save all"    org-save-all-org-buffers :transient t)
+        ("k" "Capture..."  org-capture)
+        ("t" "TODO cycle"  org-agenda-todo :transient t)]
+       ["Schedule"
+        ("1" "Today"     kazi/org-schedule-today :transient t)
+        ("2" "Tomorrow"  kazi/org-schedule-tomorrow :transient t)
+        ("3" "Next week" kazi/org-schedule-next-week :transient t)
+        ("4" "Search..." kazi/org-search-all)]
+       ["Navigate"
+        (">" "Later"      kazi/org-agenda-forward :transient t)
+        ("<" "Earlier"    kazi/org-agenda-backward :transient t)
+        ("j" "Date..."    org-agenda-goto-date)
+        ("r" "Refresh"    org-agenda-redo :transient t)]]
+      [["Utils"
+        (";" "Timer..."    org-timer-set-timer :transient t)
+        ("c" "Date"        org-agenda-goto-calendar)
+        ("l" "Almanac>"    casual-agenda-almanac-tmenu)
+        ("J" "Bookmark..." bookmark-jump)]
+       [""
+        ("RET" "Open"      org-agenda-switch-to)
+        ("C-/" "Undo"      org-agenda-undo)
+        ("," "Settings>"   casual-agenda-settings-tmenu)
+        ("q" "Quit"        org-agenda-quit)]])
+
+    ;; --- Smart dispatch: one key for everything ---
+    (defun kazi/org-tmenu ()
+      "Single entry point for org workflow.
+  In agenda buffer: show full casual-agenda transient (with extensions).
+  Anywhere else: open today's agenda view full-screen."
+      (interactive)
+      (if (derived-mode-p 'org-agenda-mode)
+          (kazi/agenda-tmenu)
+        (org-agenda nil "d")
+        (delete-other-windows)))
+
+    ;; --- Bindings ---
+    (global-set-key (kbd "C-c a") 'kazi/org-tmenu))
+
+  ;; Inside agenda: evil-org puts agenda in motion state, so we must
+  ;; use evil-define-key to override at the right priority level.
+  ;;
+  ;; MAGIT PHILOSOPHY: Keys work DIRECTLY in the buffer.
+  ;; The transient (? / h) is for discovery, not the primary workflow.
+  (with-eval-after-load 'evil-org-agenda
+    (evil-define-key 'motion org-agenda-mode-map
+      ;; Help / discovery (like magit's h)
+      "?" 'kazi/agenda-tmenu
+      "h" 'kazi/agenda-tmenu
+
+      ;; Date navigation — rebuilds full custom view
+      ">" 'kazi/org-agenda-forward
+      "<" 'kazi/org-agenda-backward
+      "." 'kazi/org-agenda-goto-today
+
+      ;; View switching — direct
+      "D" 'org-agenda-day-view
+      "W" 'org-agenda-week-view
+      "gc" 'kazi/open-org-calendar
+
+      ;; Capture — straight into template picker
+      "K" 'org-capture
+
+      ;; Scheduling shortcuts
+      "T" 'kazi/org-schedule-today
+      "J" 'bookmark-jump
+
+      ;; Quit — clean exit
+      "q" 'org-agenda-quit)
+
+    ;; Non-evil bindings (work in all states)
+    (define-key org-agenda-mode-map (kbd "C-o") #'kazi/agenda-tmenu)
+    (define-key org-agenda-mode-map (kbd "C-c a") #'kazi/agenda-tmenu)
+    (define-key org-agenda-mode-map (kbd "M-j") #'org-agenda-clock-goto))
+
+  ;; Header hint — shows available keys right in the buffer (like magit)
   (add-hook 'org-agenda-mode-hook
             (lambda ()
-              ;; Quick scheduling
-              (local-set-key (kbd "T") 'my/org-schedule-today)
-              (local-set-key (kbd "M") 'my/org-schedule-tomorrow)))
+              (setq-local header-line-format
+                          (propertize
+                           "  ? help  > next  < prev  D day  W week  K capture  T today  gc calendar"
+                           'face 'font-lock-comment-face))))
 #+end_src
 
 * 12. Weekly Review Helper
 #+begin_src emacs-lisp
-  (defun my/weekly-review ()
+  (defun kazi/weekly-review ()
     "Start weekly review: show inbox, then completed, then upcoming."
     (interactive)
     (delete-other-windows)
@@ -366,7 +742,7 @@ This config follows: *Capture Fast → Review Weekly → Do Daily → Complete*
     (org-agenda nil "i")
     (message "Weekly Review: First, process your inbox. Press 'r' to refile items."))
 
-  (global-set-key (kbd "C-c w") 'my/weekly-review)
+  (global-set-key (kbd "C-c w") 'kazi/weekly-review)
 #+end_src
 
 * 13. Evil Integration
@@ -382,56 +758,62 @@ This config follows: *Capture Fast → Review Weekly → Do Daily → Complete*
 
 * Cheatsheet                                                       :noexport:
 
-** Quick Start: Press ~C-c o~ for everything
+** Quick Start: ~C-c a~ from anywhere, ~?~ inside agenda
 
-#+begin_example
-╭─────────────────── Org Workflow ────────────────────╮
-│                                                     │
-│  Capture          View            Do                │
-│  d: dump task     t: today        x: done           │
-│  s: scheduled     w: week         /: search         │
-│  D: with deadline i: inbox        r: refile         │
-│                   u: upcoming                       │
-│                   a: all tasks                      │
-│                   c: calendar                       │
-│                                                     │
-╰─────────────────────────────────────────────────────╯
-#+end_example
+*** Global: ~C-c a~ (or ~SPC o o~)
+Opens transient with Capture / View / Actions columns.
+Same keys as before: ~d~ dump, ~t~ today, ~w~ week, etc.
+
+*** Inside Agenda: ~?~ (or ~C-o~)
+Opens casual-agenda transient (extended with our custom groups):
+
+| Section          | What                                            |
+|------------------+-------------------------------------------------|
+| Agenda           | ~d~ day, ~w~ week, ~m~ month, ~y~ year          |
+| Filter           | ~/~ filter, ~\~ tag, ~=~ regexp, ~\vert~ clear   |
+| *Quick Filter*   | ~F~ by tag, ~S~ by state, ~X~ clear all   |
+| Actions          | ~o~ Operations, ~M~ Mark, ~k~ capture            |
+| *Quick Schedule* | ~1~ today, ~2~ tomorrow, ~3~ next week, ~4~ search org |
+| Navigation       | ~p/n~ lines, ~P/N~ items, ~b/f~ earlier/later    |
+| Utils            | ~;~ timer, ~c~ calendar, ~l~ almanac              |
+| Settings         | ~,~ settings (log, grid, diary, clock report)     |
 
 ** Daily Workflow
 
 *** Morning (2 min)
-1. ~C-c o t~ → See today's tasks
+1. ~C-c a t~ → See today's tasks
 2. Pick one task, press ~t~ to mark as DOING
 
 *** Throughout Day
-- New thought? ~C-c o d~ → Dump it (no scheduling, just capture)
-- Know when to do it? ~C-c o s~ → Schedule it
-- Done with task? On the task, press ~t~ until DONE
+- New thought? ~C-c a d~ → Dump it
+- Know when to do it? ~C-c a s~ → Schedule it
+- In agenda? Press ~?~ then ~s t~ to schedule today
 
 *** Evening (5 min)
-1. ~C-c o i~ → Review inbox
-2. On each item: ~r~ to refile to tasks.org, or ~s~ to schedule, or ~d~ to delete
+1. ~C-c a i~ → Review inbox
+2. On each item: ~r~ to refile, ~?~ ~s s~ to schedule
 
 ** Weekly Review (Sunday, 15 min)
 
 1. ~C-c w~ → Starts weekly review
 2. Process inbox completely
-3. ~C-c o w~ → See the week ahead
-4. ~C-c o u~ → Check upcoming deadlines
+3. ~C-c a w~ → See the week ahead
+4. ~C-c a u~ → Check upcoming deadlines
 
 ** Inside Agenda View
 
-| Key   | Action                |
-|-------+-----------------------|
-| ~t~   | Cycle TODO state      |
-| ~T~   | Schedule for TODAY    |
-| ~M~   | Schedule for TOMORROW |
-| ~s~   | Schedule (pick date)  |
-| ~d~   | Set deadline          |
-| ~r~   | Refresh view          |
-| ~RET~ | Go to task            |
-| ~q~   | Quit agenda           |
+| Key   | Action                           |
+|-------+----------------------------------|
+| ~?~   | *Casual transient (full menu)*   |
+| ~t~   | Cycle TODO state                 |
+| ~T~   | Schedule for TODAY               |
+| ~M~   | Schedule for TOMORROW            |
+| ~1~   | Quick: today (via transient)     |
+| ~2~   | Quick: tomorrow (via transient)  |
+| ~3~   | Quick: next week (via transient) |
+| ~W~   | Filter: @work (via transient)    |
+| ~RET~ | Go to task                       |
+| ~q~   | Quit agenda                      |
 
 *** Navigation (Evil)
 
@@ -451,18 +833,9 @@ This config follows: *Capture Fast → Review Weekly → Do Daily → Complete*
 └── someday.org    ← "Maybe later" ideas
 #+end_example
 
-** Quick Capture Keys
-
-| Key | What                  | Where      |
-|-----+-----------------------+------------|
-| ~d~ | Quick dump (no date)  | inbox.org  |
-| ~t~ | Today's task          | tasks.org  |
-| ~s~ | Scheduled task        | tasks.org  |
-| ~D~ | Task with deadline    | tasks.org  |
-
 ** The One Rule
 
 *Capture fast, schedule later.*
 
-Don't think about when during capture. Just dump (~C-c o d~).
+Don't think about when during capture. Just dump (~C-c a d~).
 Then once a day, process inbox and schedule.
