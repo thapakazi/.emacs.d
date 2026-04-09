@@ -11,6 +11,11 @@ This config follows: *Capture Fast → Review Weekly → Do Daily → Complete*
   (defvar kazi/ns "kazi/"
     "Namespace prefix used for custom org workflow functions.")
 
+  ;; Active dashboard layout (currently only "zen")
+  (defvar kazi/agenda-layout "zen"
+    "Active agenda dashboard layout.
+Available: \"zen\" — flat, minimal, time-aware daily view.")
+
   (require 'org)
   (require 'org-agenda)
   (require 'org-capture)
@@ -142,51 +147,66 @@ This config follows: *Capture Fast → Review Weekly → Do Daily → Complete*
   (setq org-agenda-log-mode-items '(closed clock state))
   (setq org-agenda-start-with-log-mode nil)  ;; don't auto-enable, we'll add sections
 
+  ;; Suppress date header in zen agenda blocks
+  (defun kazi/agenda-no-date (_date) "")
+  (defvar kazi/agenda-no-date #'kazi/agenda-no-date
+    "Function that returns empty string, used to suppress date headers.")
+
   ;; Custom agenda views with super-agenda grouping
   (setq org-agenda-custom-commands
         '(
-          ;; === DAILY VIEW: What to do NOW ===
+          ;; === ZEN LAYOUT: flat, focused daily dashboard ===
           ("d" "Today"
-           ((agenda "" ((org-agenda-span 'day)
+           (;; Schedule — timed events for today
+            (agenda "" ((org-agenda-span 'day)
                         (org-agenda-start-day "today")
+                        (org-agenda-overriding-header "")
+                        (org-agenda-format-date-aligned kazi/agenda-no-date)
+                        (org-agenda-prefix-format "     %?-12t")
+                        (org-agenda-entry-types '(:timestamp :sexp))
+                        (org-agenda-time-grid
+                         '((daily today require-timed) () "" ""))
                         (org-super-agenda-groups
-                         '((:name "▶ In Progress"
-                            :todo "DOING"
-                            :order 1)
-                           (:name "◆ Today"
-                            :scheduled today
-                            :order 2)
-                           (:name "⚠ Overdue"
-                            :deadline past
-                            :scheduled past
-                            :order 3
-                            :face (:foreground "#ff6b6b"))
-                           (:name "⏰ Due Today"
-                            :deadline today
-                            :order 4)
-                           (:name "Other"
-                            :anything t
-                            :order 99)))))
-            ;; Upcoming this week (next 7 days, max 5 items)
-            (agenda "" ((org-agenda-span 7)
-                        (org-agenda-start-day "+1d")
-                        (org-agenda-overriding-header "\n📅 Upcoming This Week\n")
+                         '((:name "  · schedule ·" :time-grid t :order 1)
+                           (:discard (:anything t))))))
+            ;; Tasks — flat list: DOING highlighted, overdue prefixed, rest follows
+            (agenda "" ((org-agenda-span 'day)
+                        (org-agenda-start-day "today")
+                        (org-agenda-overriding-header "")
+                        (org-agenda-format-date-aligned kazi/agenda-no-date)
+                        (org-agenda-prefix-format "     ")
+                        (org-agenda-time-grid nil)
                         (org-agenda-entry-types '(:deadline :scheduled))
-                        (org-agenda-max-entries 5)
                         (org-super-agenda-groups
-                         '((:name "" :anything t)))))
-            ;; Done today
+                         '((:name none
+                            :todo "DOING" :order 1)
+                           (:name none
+                            :deadline past :scheduled past :order 2)
+                           (:name none
+                            :deadline today :scheduled today :order 3)
+                           (:name none
+                            :anything t :order 10)))))
+            ;; Habits
+            (agenda "" ((org-agenda-span 'day)
+                        (org-agenda-start-day "today")
+                        (org-agenda-overriding-header "\n  · habits ·")
+                        (org-agenda-format-date-aligned kazi/agenda-no-date)
+                        (org-agenda-prefix-format "     ")
+                        (org-agenda-entry-types '(:scheduled))
+                        (org-agenda-time-grid nil)
+                        (org-super-agenda-groups
+                         '((:habit t)
+                           (:discard (:anything t))))))
+            ;; Done today — strikethrough, dimmed
             (tags "CLOSED>=\"<today>\""
-                  ((org-agenda-overriding-header "\n✓ Done\n")
-                   (org-agenda-skip-function '(org-agenda-skip-entry-if 'nottodo 'done))
-                   (org-agenda-sorting-strategy '(tsia-down))))
-            (alltodo "" ((org-agenda-overriding-header "\n⚡ Quick Actions\n")
-                         (org-super-agenda-groups
-                          '((:name "Waiting"
-                             :todo "WAIT")
-                            (:name "Quick Wins"
-                             :tag "quick")
-                            (:discard (:anything t))))))))
+                  ((org-agenda-overriding-header
+                    "\n  ┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄")
+                   (org-agenda-skip-function
+                    '(org-agenda-skip-entry-if 'nottodo 'done))
+                   (org-agenda-sorting-strategy '(tsia-down))
+                   (org-agenda-prefix-format "     ")
+                   (org-super-agenda-groups
+                    '((:name none :anything t)))))))
 
           ;; === FILE VIEWS: Actionable agenda per file ===
           ("i" "Inbox Review"
@@ -314,8 +334,8 @@ This config follows: *Capture Fast → Review Weekly → Do Daily → Complete*
 
 ** 6b. Clean layout — compact, no noise
 #+begin_src emacs-lisp
-  ;; Thin separator between blocks
-  (setq org-agenda-block-separator ?━)
+  ;; No separator between blocks (zen layout uses its own separators)
+  (setq org-agenda-block-separator nil)
 
   ;; NOW indicator
   (setq org-agenda-current-time-string
@@ -372,7 +392,12 @@ This config follows: *Capture Fast → Review Weekly → Do Daily → Complete*
     (face-remap-add-relative 'org-agenda-date-weekend
                              :height 1.1 :weight 'normal :foreground "#565f89")
     (face-remap-add-relative 'org-agenda-structure
-                             :height 1.15 :weight 'bold :foreground "#7dcfff"))
+                             :height 1.0 :weight 'normal :foreground "#565f89")
+    ;; Tone down overdue items — no bold, just normal text
+    (face-remap-add-relative 'org-scheduled-previously
+                             :weight 'normal :foreground "#c0caf5")
+    (face-remap-add-relative 'org-warning
+                             :weight 'normal :foreground "#c0caf5"))
 
   (add-hook 'org-agenda-mode-hook #'kazi/style-org-agenda)
 
@@ -453,9 +478,70 @@ This config follows: *Capture Fast → Review Weekly → Do Daily → Complete*
      '(org-super-agenda-header
        ((t (:inherit nil
             :weight bold
-            :foreground "#7aa2f7"
+            :foreground "#565f89"
             :height 1.0
             :underline nil))))))
+
+  ;; ── Zen layout: finalize hook for visual polish ──
+  ;; Runs after org-modern-agenda to override its rendering.
+
+  (defun kazi/zen--is-today-view-p ()
+    "Check if current agenda is the zen 'Today' view."
+    (and (derived-mode-p 'org-agenda-mode)
+         (bound-and-true-p org-agenda-redo-command)
+         (let ((cmd org-agenda-redo-command))
+           (or (and (listp cmd) (eq (car cmd) 'org-agenda)
+                    (equal (nth 2 cmd) "d"))
+               (and (listp cmd) (eq (car cmd) 'org-agenda-run-series)
+                    (string= (nth 1 cmd) "Today"))))))
+
+  (defun kazi/zen-agenda-finalize ()
+    "Post-process agenda buffer for Zen layout visual polish.
+Removes date headers, applies overlays, adds overdue/schedule indicators."
+    (when (kazi/zen--is-today-view-p)
+      (let ((inhibit-read-only t))
+        (save-excursion
+          ;; Remove day-header lines (e.g. "Wednesday  8 April 2026")
+          (goto-char (point-min))
+          (while (not (eobp))
+            (let ((day-prop (org-get-at-bol 'day))
+                  (has-marker (org-get-at-bol 'org-marker)))
+              (if (and day-prop (not has-marker))
+                  (delete-region (line-beginning-position)
+                                 (min (1+ (line-end-position)) (point-max)))
+                (forward-line 1))))
+          ;; Overlays and decorations
+          (goto-char (point-min))
+          (while (not (eobp))
+            (let* ((marker (org-get-at-bol 'org-marker))
+                   (todo-state (org-get-at-bol 'todo-state))
+                   (beg (line-beginning-position))
+                   (end (line-end-position)))
+              (when marker
+                (cond
+                 ;; DOING → already has amber badge from org-modern, skip
+                 ((equal todo-state "DOING") nil)
+                 ;; DONE/SKIP → dim text, keep badge, add ✓ at end
+                 ((member todo-state '("DONE" "SKIP"))
+                  (let ((ov (make-overlay beg end)))
+                    (overlay-put ov 'face '(:foreground "#565f89"))
+                    (overlay-put ov 'kazi-zen t))
+                  (goto-char end)
+                  (insert (propertize "  ✓" 'face '(:foreground "#6bcb77"))))
+                 ;; Active items — check overdue, append age quietly
+                 (t
+                  (let ((ts (org-get-at-bol 'ts-date)))
+                    (when ts
+                      (let ((overdue-days (- (org-today) ts)))
+                        (when (> overdue-days 0)
+                          (goto-char end)
+                          (insert (propertize
+                                   (format "  ⏰%dd" overdue-days)
+                                   'face '(:foreground "#ff6b6b")))))))))))
+            (forward-line 1))))))
+
+  ;; Add AFTER org-modern-agenda (depth 90 ensures it runs last)
+  (add-hook 'org-agenda-finalize-hook #'kazi/zen-agenda-finalize 90)
 #+end_src
 
 ** 6d. Focused buffer — centered, highlighted cursor line
@@ -964,13 +1050,21 @@ Uses first char of each word, then second char, etc."
     (define-key org-agenda-mode-map (kbd "M-j") #'org-agenda-clock-goto)
 )
 
-  ;; Header hint — shows available keys right in the buffer (like magit)
-  (add-hook 'org-agenda-mode-hook
-            (lambda ()
-              (setq-local header-line-format
-                          (propertize
-                           "  ? help  > next  < prev  D day  W week  K capture  T today  gc calendar"
-                           'face 'font-lock-comment-face))))
+  ;; Zen header — clean date + time, no toolbar noise
+  (defun kazi/zen-header-line ()
+    "Show formatted date and current time in header."
+    (setq-local header-line-format
+                (list
+                 (propertize
+                  (concat "  " (format-time-string "%a %d %b") " ")
+                  'face '(:foreground "#7aa2f7" :weight bold))
+                 (propertize
+                  (make-string 40 ?─)
+                  'face '(:foreground "#3b3f52"))
+                 (propertize
+                  (concat " " (format-time-string "%H:%M"))
+                  'face '(:foreground "#565f89")))))
+  (add-hook 'org-agenda-mode-hook #'kazi/zen-header-line)
 #+end_src
 
 * 12. Weekly Review Helper
@@ -1083,9 +1177,15 @@ Then once a day, process inbox and schedule.
 
 * Enhancements (TODO)
 
-** TODO Better dashboard view for =C-c a=
-   The main entry point should feel like a proper dashboard — summary counts,
-   today's focus, quick stats, not just a raw agenda block.
+** DOING Better dashboard view for =C-c a=
+   Current layout: *zen* (flat, minimal, time-aware). See =kazi/agenda-layout=.
+
+** TODO Alternative dashboard layouts
+   Build and allow switching between named layouts:
+   - *dense* — compact kanban-style columns (DOING | TODO | WAIT) side by side
+   - *planner* — week-at-a-glance with time blocks, more calendar-like
+   - *review* — stats-heavy, done counts, streaks, progress bars
+   Add transient option to switch: =L= in menu to pick layout.
 
 ** TODO Better UI for file-specific views (Life, Projects, Inbox)
    Each file view deserves its own visual treatment — progress indicators,
