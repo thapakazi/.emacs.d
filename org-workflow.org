@@ -186,6 +186,12 @@ Available: \"zen\" — flat, minimal, time-aware daily view.")
                             :deadline today :scheduled today :order 3)
                            (:name none
                             :anything t :order 10)))))
+            ;; Unscheduled DOING — active work without dates should still show
+            (alltodo "" ((org-agenda-overriding-header "")
+                         (org-agenda-prefix-format "     ")
+                         (org-super-agenda-groups
+                          '((:name none :todo "DOING" :order 1)
+                            (:discard (:anything t))))))
             ;; Habits
             (agenda "" ((org-agenda-span 'day)
                         (org-agenda-start-day "today")
@@ -495,9 +501,75 @@ Available: \"zen\" — flat, minimal, time-aware daily view.")
                (and (listp cmd) (eq (car cmd) 'org-agenda-run-series)
                     (string= (nth 1 cmd) "Today"))))))
 
+  (defun kazi/zen--backlog-counts ()
+    "Count unscheduled TODO items per agenda file.
+Returns alist of (label . count), excluding DONE/SKIP/habits."
+    (let ((files '(("inbox"    . "~/org/agendas/inbox.org")
+                   ("life"     . "~/org/agendas/life.org")
+                   ("projects" . "~/org/agendas/projects.org")
+                   ("work"     . "~/org/agendas/work.org")))
+          result)
+      (dolist (pair files)
+        (let* ((label (car pair))
+               (file (expand-file-name (cdr pair)))
+               (buf (find-file-noselect file))
+               (count 0))
+          (when buf
+            (with-current-buffer buf
+              (org-with-wide-buffer
+               (goto-char (point-min))
+               (while (re-search-forward org-heading-regexp nil t)
+                 (let ((el (org-element-at-point)))
+                   (when (and (member (org-element-property :todo-keyword el)
+                                      '("TODO" "WAIT"))
+                              (not (org-element-property :scheduled el))
+                              (not (org-element-property :deadline el))
+                              (not (org-is-habit-p)))
+                     (cl-incf count)))))))
+          (when (> count 0)
+            (push (cons label count) result))))
+      (nreverse result)))
+
+  (defun kazi/zen--insert-backlog-summary ()
+    "Insert backlog summary lines before the habits section."
+    (let ((counts (kazi/zen--backlog-counts)))
+      (when counts
+        ;; Find the habits header to insert before it
+        (goto-char (point-min))
+        (let ((insert-pos
+               (if (re-search-forward "· habits ·" nil t)
+                   (line-beginning-position)
+                 ;; fallback: before the done separator
+                 (goto-char (point-min))
+                 (if (re-search-forward "┄┄┄┄" nil t)
+                     (line-beginning-position)
+                   (point-max)))))
+          (goto-char insert-pos)
+          (insert (propertize "\n  · backlog ·" 'face '(:foreground "#565f89")) "\n")
+          (let ((view-keys '(("inbox" . "i") ("life" . "L")
+                              ("projects" . "P") ("work" . "W")))
+                (km (make-sparse-keymap)))
+            (define-key km (kbd "RET")
+              (lambda () (interactive)
+                (let ((key (get-text-property (point) 'kazi-view-key)))
+                  (when key (kazi/agenda-goto-view key)))))
+            (define-key km (kbd "<return>") (lookup-key km (kbd "RET")))
+            (dolist (pair counts)
+              (let* ((label (car pair))
+                     (count (cdr pair))
+                     (key (cdr (assoc label view-keys)))
+                     (line (format "     %-14s %d %s"
+                                   label count
+                                   (if (= count 1) "item" "items"))))
+                (insert (propertize line
+                                   'face '(:foreground "#565f89")
+                                   'keymap km
+                                   'kazi-view-key key)
+                        "\n")))))))))
+
   (defun kazi/zen-agenda-finalize ()
     "Post-process agenda buffer for Zen layout visual polish.
-Removes date headers, applies overlays, adds overdue/schedule indicators."
+Removes date headers, applies overlays, adds backlog summary."
     (when (kazi/zen--is-today-view-p)
       (let ((inhibit-read-only t))
         (save-excursion
@@ -538,7 +610,9 @@ Removes date headers, applies overlays, adds overdue/schedule indicators."
                           (insert (propertize
                                    (format "  ⏰%dd" overdue-days)
                                    'face '(:foreground "#ff6b6b")))))))))))
-            (forward-line 1))))))
+            (forward-line 1))
+          ;; Insert backlog summary
+          (kazi/zen--insert-backlog-summary)))))
 
   ;; Add AFTER org-modern-agenda (depth 90 ensures it runs last)
   (add-hook 'org-agenda-finalize-hook #'kazi/zen-agenda-finalize 90)
