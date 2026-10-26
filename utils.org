@@ -239,7 +239,10 @@ https://github.com/noctuid/general.el
       "s" 'save-buffer
       "z" 'zoom-window-zoom
       "," 'consult-recent-file
-      "/" 'consult-ripgrep
+      "/" (lambda ()
+            (interactive)
+            (let ((consult-ripgrep-args (concat consult-ripgrep-args " --hidden")))
+              (consult-ripgrep)))
       "b b" 'consult-buffer
       "p p" 'consult-projectile-switch-project
       "p f" 'consult-projectile-find-file
